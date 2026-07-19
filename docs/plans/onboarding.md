@@ -1,10 +1,10 @@
 ---
 title: Fab7 Onboarding Implementation Plan
 type: plan
-status: draft
-implementation_authorized: false
+status: in_progress
+implementation_authorized: true
 owner: engineering
-last_updated: 2026-07-19
+last_updated: 2026-07-20
 authority_for:
   - onboarding implementation sequence
   - onboarding work-package gates
@@ -16,9 +16,10 @@ depends_on:
 
 # Fab7 onboarding implementation plan
 
-This plan delivers only the Fab7-owned onboarding path. It is a draft planning
-artifact, not authorization to implement and not evidence that any target
-command exists. The extension registry and Denim are explicitly deferred.
+This plan delivers only the Fab7-owned onboarding path. Implementation was
+authorized on 2026-07-19; work-package exit gates still require current
+evidence before any target command is reported as complete. The extension
+registry and Denim are explicitly deferred.
 
 ## Outcome
 
@@ -48,9 +49,12 @@ journey with fresh evidence.
 - Project layout: `project.json`, `.gitignore`, `records/`, and ignored
   `bin/fab7` beneath `<repo>/.fab7/`.
 
-The exact release tag convention, asset names, source archive URL, and checksum
-publication URL remain the WP0 entry gate. No network installer work begins
-with placeholder or moving-branch URLs.
+The release contract is fixed as tag `v<VERSION>`, source archive
+`https://github.com/fab7hq/fab7/archive/refs/tags/v<VERSION>.tar.gz`, and
+checksum asset
+`https://github.com/fab7hq/fab7/releases/download/v<VERSION>/fab7-<VERSION>.source.sha256`.
+The `v0.1.0` tag and checksum asset close publication identity. Default-network
+acceptance remains a WP4 gate.
 
 ## Deferred repositories
 
@@ -97,6 +101,25 @@ transactions, and command dispatch. `hosts.py` contains literal Claude Code and
 Codex command functions; it is not an adapter hierarchy. Split a module only if
 focused tests demonstrate a second current responsibility.
 
+## Current implementation evidence
+
+The following evidence applies to the source tree and generated executable
+identified here. Any package, launcher, plugin, or builder change requires a
+fresh artifact identity and host observation.
+
+| Area | Current result | Remaining gate |
+|---|---|---|
+| WP0 release artifact | Implemented; duplicate builds match, the archive executes outside the checkout, the manifest validates digest `sha256:1f3d4bcb6de5424472ae4b3ce8bbcaf65fc54c718bf89e016b8add16f575a394`, and tag `v0.1.0` has a matching source checksum asset. | Prove the default download path. |
+| WP1 global install | Local-source install and same-version rerun passed in disposable macOS Bash and Zsh homes; failure and profile rollback tests pass; final `~/.fab7/` contains only `bin/` and `runtime/`. | Run the published archive path on macOS and Linux and complete the remaining failure matrix. |
+| WP2 project install | New init, proof-command dispatch, digest rejection, binary repair, committed-project clone repair, and action-style repair passed. | Complete the remaining symlink, permission, unsupported-pin, and interrupted-mutation matrix on the release candidate. |
+| WP3 host plugins | Claude Code 2.1.214 and Codex CLI 0.144.5 accepted the bundled marketplaces; `fab7@fab7` was installed, discovered, enabled, and idempotent in isolated host homes. | Invoke `/fab7:init` and `$fab7:init` from fresh authenticated host sessions against the exact released artifact. |
+| WP4 closure | `28` deterministic tests, build determinism, strict Claude validation, Codex plugin validation, shell syntax, project proof execution, and clone/action repair passed on 2026-07-19. | Linux, published-release bootstrap, both host-native invocations, and final release evidence are not run. |
+
+The disposable evidence root is `../sandbox/onboarding-v4/`. Its release
+manifest records source digest
+`sha256:1e364b9c5d3895bffa5de33e9cf3c1b168a94369a98fa1f6dba3892418c1d005`.
+Sandbox state is evidence input, not a shipped artifact or repository authority.
+
 ## Work packages
 
 ### WP0 — Freeze release identity and deterministic executable
@@ -106,8 +129,8 @@ stable behavior and a closed release manifest.
 
 Tasks:
 
-- O001: record the release tag convention, immutable source archive URL,
-  checksum URL, and asset naming beneath `https://github.com/fab7hq/fab7`;
+- O001: use tag `v<VERSION>`, the GitHub tag archive URL, and release checksum
+  asset `fab7-<VERSION>.source.sha256` beneath `fab7hq/fab7`;
 - O002: add failing tests that build twice from identical inputs and require
   identical bytes, version output, help output, and exit status;
 - O003: add `scripts/zipapp_main.py`, copied to the archive root as
@@ -277,8 +300,8 @@ gate pass.
 
 ## Stop rules
 
-- Stop implementation before WP1 if the immutable release URLs or checksum
-  publication contract remain unresolved.
+- Stop published-release acceptance while the exact tag or checksum asset is
+  absent or mutable.
 - Stop a mutation before selection when validation is incomplete or ambiguous.
 - Preserve the previous global version, project pin, and host state on failure.
 - Do not call the phase complete while either supported host journey or any

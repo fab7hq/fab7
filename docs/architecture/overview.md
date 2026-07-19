@@ -12,9 +12,11 @@ authority_for:
 
 # Fab7 architecture
 
-The implemented Fab7 proof core is one Python package and one optional GitHub
-Action. It has no service, database, daemon, host adapter, plugin, registry, or
-runtime dependency.
+The Fab7 proof core is one dependency-free Python package and one optional
+GitHub Action. The repository now also contains a thin onboarding layer: a
+deterministic release builder, filesystem installer, and two release-bundled
+host plugins. There is still no service, database, daemon, provider adapter, or
+extension registry.
 
 ## Complete flow
 
@@ -45,6 +47,8 @@ fab7 ci-check
 | `gate.py` | append-only and latest-claim freshness decision |
 | `git.py` | bounded Git subprocess calls |
 | `errors.py` | stable failure and result envelopes |
+| `install.py` | closed release and project manifests, global selection, project pinning, repair, and dispatch |
+| `hosts.py` | literal bounded Claude Code and Codex plugin registration commands |
 
 Dependencies point inward to these literal functions. There is no interface
 hierarchy because no second implementation exists.
@@ -53,6 +57,7 @@ hierarchy because no second implementation exists.
 
 ```text
 fab7 init
+fab7 install claude|codex
 fab7 claim --work-item ID --summary TEXT
 fab7 verify --work-item ID --claim RECORD_ID -- COMMAND [ARGS...]
 fab7 ci-check [--work-item ID] [--base REF] [--head REF]
@@ -60,12 +65,13 @@ fab7 audit [--work-item ID]
 fab7 doctor
 ```
 
-The GitHub Action installs the same package and invokes `fab7 ci-check`; it has
-no independent policy or provider behavior.
+The GitHub Action builds the selected action revision, validates it against the
+tracked project pin, repairs the ignored local executable, and invokes
+`fab7 ci-check`; it has no independent policy or provider behavior.
 
-## Accepted onboarding boundary — not implemented
+## Onboarding boundary — partially implemented
 
-The next accepted architecture adds a thin Fab7 installation plane without
+The implemented local-source path adds a thin Fab7 installation plane without
 changing the dependency direction of the proof core:
 
 ```text
@@ -99,9 +105,10 @@ from [`fab7hq/denim`](https://github.com/fab7hq/denim), and let Denim call Fab7
 only through public commands and structured output. Neither external repository
 is part of the active onboarding plan.
 
-[`distribution.md`](distribution.md) owns the accepted bootstrap, repository,
-layout, host, future registry, user-journey, and acceptance contracts. Its
-implementation status is `not_started`; the commands above are target public
-surfaces, not current CLI claims.
+[`distribution.md`](distribution.md) owns the bootstrap, repository, layout,
+host, future registry, user-journey, and acceptance contracts. Its
+implementation status remains `in_progress` until the versioned network
+bootstrap, Linux matrix, and both host-native init invocations have current
+evidence.
 
 See [`ledger.md`](ledger.md) for the persisted record and gate contract.

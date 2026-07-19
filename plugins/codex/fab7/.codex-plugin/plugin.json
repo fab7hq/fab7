@@ -1,0 +1,21 @@
+{
+  "name": "fab7",
+  "version": "0.1.0",
+  "description": "Initialize and use a project-pinned Fab7 proof gate.",
+  "author": {
+    "name": "Fab7"
+  },
+  "homepage": "https://github.com/fab7hq/fab7",
+  "repository": "https://github.com/fab7hq/fab7",
+  "license": "MIT",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Fab7",
+    "shortDescription": "Initialize a project-pinned Fab7 proof gate.",
+    "longDescription": "Use the installed Fab7 CLI to initialize the current Git repository with a verified, project-pinned executable.",
+    "developerName": "Fab7",
+    "category": "Productivity",
+    "capabilities": ["Execute local Fab7 commands"],
+    "defaultPrompt": "Initialize Fab7 in this repository."
+  }
+}

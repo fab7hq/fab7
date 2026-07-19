@@ -11,7 +11,9 @@ from typing import Any
 from . import __version__, git
 from .errors import Fab7Error
 from .gate import audit, check, doctor
-from .ledger import append, create_claim, derive_work_item, init, verify
+from .hosts import install_host
+from .install import dispatch_project, init_project
+from .ledger import append, create_claim, derive_work_item, verify
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -21,6 +23,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     initialize = commands.add_parser("init", help="create .fab7/records")
     initialize.add_argument("--json", action="store_true")
+
+    host_install = commands.add_parser("install", help="register the Fab7 plugin with an agentic CLI")
+    host_install.add_argument("host", choices=("claude", "codex"))
+    host_install.add_argument("--json", action="store_true")
 
     claim = commands.add_parser("claim", help="record a completion claim")
     claim.add_argument("--work-item")
@@ -53,12 +59,21 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
-    args = parser.parse_args(argv)
+    direct_invocation = argv is None
+    raw_argv = sys.argv[1:] if argv is None else argv
+    args = parser.parse_args(raw_argv)
     try:
+        if args.command == "install":
+            data = install_host(args.host)
+            return _finish(args, data, f"Fab7 plugin for {args.host}: {data['status']}")
         root = git.repo_root()
+        if direct_invocation:
+            dispatched = dispatch_project(root, args.command, raw_argv, Path(sys.argv[0]))
+            if dispatched is not None:
+                return dispatched
         if args.command == "init":
-            path = init(root)
-            return _finish(args, {"ok": True, "records": str(path)}, f"Initialized Fab7 at {path}")
+            data = init_project(root)
+            return _finish(args, data, f"Fab7 project: {data['status']}")
         if args.command == "claim":
             work_item = derive_work_item(root, args.work_item)
             record = create_claim(root, work_item, args.summary, args.actor)
@@ -128,6 +143,9 @@ def _finish(args: argparse.Namespace, data: dict[str, Any], message: str) -> int
         print(json.dumps(data, sort_keys=True, indent=2))
     else:
         print(message)
+        next_action = data.get("next_action") or data.get("activation")
+        if isinstance(next_action, str):
+            print(next_action)
     return 0
 
 

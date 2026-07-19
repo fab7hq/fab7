@@ -1,0 +1,11 @@
+---
+name: init
+description: Initialize or repair the current Git repository's project-pinned Fab7 installation. Use when the user invokes $fab7:init or asks to initialize Fab7 in the current repository.
+---
+
+# Initialize Fab7
+
+Run `fab7 init --json` exactly once from the current Git repository. Do not
+reimplement installation, edit `.fab7/` directly, or fall back to another
+binary. Report the command's structured result and its next action. If the
+command fails, preserve the exact Fab7 error code.

@@ -4,12 +4,16 @@ import json
 import sys
 from pathlib import Path
 
+from conftest import git
+
 from fab7.cli import main
 
 
-def test_cli_complete_path(repo: Path, capsys) -> None:
+def test_cli_complete_path(repo: Path, fab7_home: Path, capsys) -> None:
     assert main(["init", "--json"]) == 0
     assert json.loads(capsys.readouterr().out)["ok"]
+    git(repo, "add", ".fab7/project.json", ".fab7/.gitignore")
+    git(repo, "commit", "-qm", "initialize fab7")
 
     assert main(["claim", "--work-item", "work-1", "--summary", "Done", "--json"]) == 0
     claim = json.loads(capsys.readouterr().out)["record"]
@@ -34,9 +38,11 @@ def test_cli_returns_failure_for_missing_setup(repo: Path, capsys) -> None:
     assert data["errors"][0]["code"] == "FAB7_NOT_INITIALIZED"
 
 
-def test_plain_verify_replays_command_output(repo: Path, capsys) -> None:
+def test_plain_verify_replays_command_output(repo: Path, fab7_home: Path, capsys) -> None:
     main(["init"])
     capsys.readouterr()
+    git(repo, "add", ".fab7/project.json", ".fab7/.gitignore")
+    git(repo, "commit", "-qm", "initialize fab7")
     main(["claim", "--work-item", "work-1", "--summary", "Done", "--json"])
     claim = json.loads(capsys.readouterr().out)["record"]
 

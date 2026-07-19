@@ -30,7 +30,7 @@ The repository contains one complete path:
 The runtime uses only the Python standard library. A focused regression suite
 protects the ledger, gate, command execution, action, and full CLI path.
 
-## Fab7 onboarding — accepted, not started
+## Fab7 onboarding — in progress
 
 The next accepted outcome is a Fab7-only path from a fresh user account to a
 project-pinned installation in Claude Code or Codex:
@@ -73,6 +73,15 @@ invoke a proof command
 The detailed component, trust, state, and host contracts live in
 [`../architecture/distribution.md`](../architecture/distribution.md).
 
+### Current implementation
+
+The repository now contains the deterministic release builder, local-source
+bootstrap, global and project manifest validation, pinned executable repair and
+dispatch, action integration, release-bundled Claude Code and Codex plugins,
+and native idempotent host registration. These are implemented contracts, not
+phase closure: the exact evidence and residual gates are recorded in the
+[`active plan`](../plans/onboarding.md#current-implementation-evidence).
+
 ### Exit gate
 
 The phase remains incomplete until fresh disposable user state proves:
@@ -89,9 +98,9 @@ The phase remains incomplete until fresh disposable user state proves:
 - documentation records exact versions, checks, failures, not-run gates, and
   remaining platform limits.
 
-Implementation remains unauthorized. The draft finite plan is
-[`../plans/onboarding.md`](../plans/onboarding.md); its next gate is approval of
-the exact immutable Fab7 release and checksum publication contract.
+Implementation was authorized on 2026-07-19. The active finite plan is
+[`../plans/onboarding.md`](../plans/onboarding.md); completion still requires
+its exact deterministic and live-host exit gates.
 
 ## `ext-registry` and Denim — deferred
 

@@ -2,9 +2,9 @@
 title: Fab7 Onboarding and Extension Distribution
 type: architecture
 status: accepted
-implementation_status: not_started
+implementation_status: in_progress
 owner: architecture
-last_updated: 2026-07-19
+last_updated: 2026-07-20
 authority_for:
   - repository ownership
   - user-global and project-local filesystem layouts
@@ -18,8 +18,9 @@ authority_for:
 
 This document defines the target boundary for installing Fab7 at user and
 project scope, registering it with supported agentic CLIs, and later adding
-extension discovery and installation. It is not an implementation claim: the
-current repository still contains only the lean proof gate described in
+extension discovery and installation. Fab7 onboarding implementation is in
+progress; only behavior protected by current tests and validation is an
+implementation claim. The proof-core boundary remains in
 [`overview.md`](overview.md).
 
 The delivery boundary is intentionally split:
@@ -221,8 +222,10 @@ The repository-owned `install.sh` performs one bounded transaction:
 
 1. require macOS or Linux, Bash or Zsh startup configuration, Git, and Python
    3.11 or newer;
-2. resolve one immutable release from `https://github.com/fab7hq/fab7`;
-3. fetch its source archive and published checksum;
+2. resolve tag `v<VERSION>` from `https://github.com/fab7hq/fab7`;
+3. fetch `https://github.com/fab7hq/fab7/archive/refs/tags/v<VERSION>.tar.gz`
+   and checksum asset
+   `https://github.com/fab7hq/fab7/releases/download/v<VERSION>/fab7-<VERSION>.source.sha256`;
 4. verify the source before building;
 5. stage only the Fab7 package, a source-owned `__main__.py`, and reviewed host
    plugin sources in an operating-system temporary directory;
@@ -256,6 +259,31 @@ output, uses native configuration commands, verifies discovery, and returns
 
 The host plugin is thin: `/fab7:init` in Claude Code and `$fab7:init` in Codex
 invoke the deterministic `fab7 init` command and render its structured result.
+
+## Implemented onboarding subset
+
+The current repository implements the local-source form of this architecture:
+
+- `scripts/build_zipapp.py` produces a deterministic executable and complete
+  Claude Code and Codex marketplace roots;
+- `install.sh --source <reviewed-checkout>` validates prerequisites, builds
+  before mutation, installs an immutable version, atomically selects it, and
+  updates one shell PATH block after success;
+- `fab7 init` creates or validates `project.json`, preserves records, copies and
+  verifies the ignored local executable, and repairs it to the existing pin;
+- proof commands invoked through the global selector validate and dispatch to
+  the project executable;
+- `fab7 install claude|codex` validates the bundled root, uses the native host
+  CLI, verifies discovery, is idempotent, and reports the activation boundary;
+  and
+- the composite action builds its selected revision and requires the consumer
+  project pin to match before running `ci-check`.
+
+The `v0.1.0` tag and source checksum asset establish the default network
+installer path. Network bootstrap, Linux bootstrap, and actual host-session
+invocation of `/fab7:init` and `$fab7:init` against that exact release are not
+yet evidence-backed. [`../plans/onboarding.md`](../plans/onboarding.md) owns
+the exact current evidence and remaining gates.
 
 ## Future `ext-registry` and Denim
 

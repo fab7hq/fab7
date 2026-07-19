@@ -1,19 +1,19 @@
 schema_version: 1
-updated_at: "2026-07-19"
+updated_at: "2026-07-20"
 
 current_phase:
   id: fab7-onboarding
   name: Fab7 global, host, and project onboarding
-  status: planning
+  status: implementing
   active_plan: docs/plans/onboarding.md
-  implementation_authorized: false
+  implementation_authorized: true
   repository: https://github.com/fab7hq/fab7
   shipped_products:
     - fab7
   next_gate: >-
-    Accept the exact immutable Fab7 release tag, asset naming, source archive,
-    and checksum publication contract. Implementation remains unauthorized
-    until then.
+    Prove the v0.1.0 default network bootstrap on macOS and Linux, then observe
+    /fab7:init and $fab7:init in fresh host sessions for the exact released
+    artifact.
 
 future_phases:
   - id: ext-registry
@@ -39,12 +39,6 @@ completed_phases:
     completed_at: "2026-07-19"
 
 open_decisions:
-  - id: fab7-release-source
-    question: >-
-      What immutable Fab7 tag convention, release asset names, source archive
-      URL, and checksum publication URL does onboarding use?
-    owner: product-and-engineering
-    gate: onboarding-implementation
   - id: ext-registry-contract
     question: >-
       What closed catalog.yaml schema, parser boundary, immutable refresh URL,

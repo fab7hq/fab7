@@ -164,6 +164,21 @@ adding active documentation categories or stale references.
 - Run `git diff --check` before handoff.
 - Add no dependency, process, service, or abstraction without an accepted need.
 
+## Disposable Integration Sandbox
+
+Agents have full permission to create, modify, execute, and delete content
+inside `../sandbox/` for Fab7, supported agentic CLI, and Denim integration
+tests. Treat that directory as disposable test state, including host homes,
+repositories, installations, plugins, and generated artifacts.
+
+Resolve the path before destructive commands and keep every target beneath the
+resolved `../sandbox/` directory. Prefer a task-specific child directory so
+concurrent or retained tests remain distinguishable. This grant does not extend
+to the real user home, sibling repositories, credentials, or external services;
+redirect `HOME`, Fab7 state, and host configuration into the sandbox whenever a
+test mutates them. Do not retain secrets or claim host behavior that was not
+observed there.
+
 Use Context7 for current documentation about a library, framework, SDK, API,
 CLI, or cloud service: resolve its library ID first, then query the full,
 concept-focused question. It is unnecessary for repository-local refactoring,

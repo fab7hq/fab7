@@ -9,7 +9,7 @@ last_updated: 2026-07-19
 # Fab7 documentation
 
 The active documentation separates the lean Fab7 product now present in the
-repository, the accepted Fab7 onboarding plan, and the deferred extension
+repository, the active Fab7 onboarding plan, and the deferred extension
 registry and Denim boundary.
 
 ## Product
@@ -35,6 +35,10 @@ registry and Denim boundary.
 
 [`status.yaml`](status.yaml) points to this exact authority set. Repository
 engineering guidance lives in root [`AGENTS.md`](../AGENTS.md).
+
+New-user operating steps live in root [`RUNBOOK.md`](../RUNBOOK.md). The
+runbook follows the authorities above; it does not redefine product,
+architecture, plan, or status facts.
 
 Product documents own outcomes. Architecture documents own system shape and
 contracts. Plans own finite implementation sequence and gates. Do not repeat

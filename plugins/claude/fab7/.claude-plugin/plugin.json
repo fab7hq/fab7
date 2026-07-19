@@ -1,0 +1,14 @@
+{
+  "name": "fab7",
+  "displayName": "Fab7",
+  "version": "0.1.0",
+  "description": "Initialize and use a project-pinned Fab7 proof gate.",
+  "author": {
+    "name": "Fab7",
+    "url": "https://github.com/fab7hq/fab7"
+  },
+  "homepage": "https://github.com/fab7hq/fab7",
+  "repository": "https://github.com/fab7hq/fab7",
+  "license": "MIT",
+  "commands": "./commands/"
+}

@@ -70,8 +70,8 @@ the first extension. Denim will communicate with Fab7 through its public binary
 and structured output, not imports or shared state.
 
 Neither layer expands proof authority, loads extensions into core, or makes
-host output accepted evidence. Onboarding is accepted but not yet implemented;
-the registry and Denim are deferred. See
+host output accepted evidence. Onboarding implementation is in progress; the
+registry and Denim are deferred. See
 [`../architecture/distribution.md`](../architecture/distribution.md) for their
 target boundaries and [`roadmap.md`](roadmap.md) for their delivery gates.
 
