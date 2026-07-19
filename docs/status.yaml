@@ -1,0 +1,54 @@
+schema_version: 1
+updated_at: "2026-07-19"
+
+current_phase:
+  id: fab7-onboarding
+  name: Fab7 global, host, and project onboarding
+  status: planning
+  active_plan: docs/plans/onboarding.md
+  implementation_authorized: false
+  repository: https://github.com/fab7hq/fab7
+  shipped_products:
+    - fab7
+  next_gate: >-
+    Accept the exact immutable Fab7 release tag, asset naming, source archive,
+    and checksum publication contract. Implementation remains unauthorized
+    until then.
+
+future_phases:
+  - id: ext-registry
+    name: Fab7 extension registry
+    status: deferred
+    repository: https://github.com/fab7hq/ext-registry
+    catalog: catalog.yaml
+  - id: denim
+    name: Denim first extension
+    status: deferred
+    repository: https://github.com/fab7hq/denim
+
+authoritative:
+  product_vision: docs/product/vision.md
+  product_state: docs/product/roadmap.md
+  architecture_overview: docs/architecture/overview.md
+  ledger_architecture: docs/architecture/ledger.md
+  distribution_architecture: docs/architecture/distribution.md
+
+completed_phases:
+  - id: lean-baseline
+    name: Fab7 claim and executed-evidence gate
+    completed_at: "2026-07-19"
+
+open_decisions:
+  - id: fab7-release-source
+    question: >-
+      What immutable Fab7 tag convention, release asset names, source archive
+      URL, and checksum publication URL does onboarding use?
+    owner: product-and-engineering
+    gate: onboarding-implementation
+  - id: ext-registry-contract
+    question: >-
+      What closed catalog.yaml schema, parser boundary, immutable refresh URL,
+      and release contract will the deferred extension phase use?
+    owner: product-and-engineering
+    gate: extension-registry-planning
+historical_context: []

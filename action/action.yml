@@ -1,0 +1,21 @@
+name: Fab7 Merge Readiness
+description: Run the host-neutral Fab7 merge-readiness check.
+inputs:
+  working-directory:
+    description: Directory where fab7 ci-check should run.
+    required: false
+    default: "."
+  args:
+    description: Extra arguments passed to fab7 ci-check.
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Install Fab7 CLI
+      shell: bash
+      run: python3 -m pip install "${{ github.action_path }}/.."
+    - name: Run Fab7 ci-check
+      shell: bash
+      working-directory: ${{ inputs.working-directory }}
+      run: fab7 ci-check ${{ inputs.args }}
