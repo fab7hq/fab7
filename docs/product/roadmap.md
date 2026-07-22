@@ -47,9 +47,9 @@ evidence limits—unretained exact transcripts and incomplete independent Linux
 and Codex observations—remain in the
 [`onboarding plan`](../plans/onboarding.md#closure).
 
-## Fab7 extension distribution — implementation complete, release pending
+## Fab7 extension distribution — released and complete
 
-The `0.2.0` release candidate adds one lean extension path without loading
+Release `v0.2.0` adds one lean extension path without loading
 extensions into the proof core:
 
 - refresh and list the closed `fab7hq/ext-registry` catalog while preserving a
@@ -77,27 +77,26 @@ fixture. Its only runtime behavior is `muslin start`, which calls the public
 Its reproducible `0.1.0` ZIP has SHA-256
 `4b105587a409d275fdf2a1712db6706a093ec0ad6fcfa42d6c7c022fcd93f9a1`.
 
-On 2026-07-22 the source lane passed in a fresh isolated macOS home with Claude
-Code `2.1.217` and Codex CLI `0.144.6`: both hosts discovered Muslin,
-`muslin start` observed Fab7 `0.2.0`, diagnosis passed, partial uninstall
-preserved the other host, and final uninstall removed only Muslin state.
+On 2026-07-22 both the source lane and the immutable network release passed in
+fresh isolated macOS homes with Claude Code `2.1.217` and Codex CLI `0.144.6`.
+Both hosts discovered Muslin, `muslin start` observed Fab7 `0.2.0`, diagnosis
+passed, partial uninstall preserved the other host, and final uninstall removed
+only Muslin state.
 
-### Release boundary
+### Closure
 
-Fab7 is not closed merely because source implementation passed. The remaining
-human-controlled sequence is:
+The owner authorized publication, and the release sequence completed in
+dependency order:
 
-1. publish Fab7 `v0.2.0` and its checksum asset;
-2. publish Muslin `v0.1.0` and its exact ZIP;
-3. publish `ext-registry` with one Muslin entry and its prepared CI pinned to
+1. Fab7 `v0.2.0` and its source checksum asset;
+2. Muslin `v0.1.0` and its exact deterministic ZIP;
+3. `ext-registry` `v0.1.0` with one digest-pinned Muslin entry and CI against
    released Fab7 `v0.2.0`; and
-4. observe a fresh network catalog refresh, registry-name install, invocation,
-   diagnosis, partial uninstall, and final removal.
+4. the fresh network lifecycle described above.
 
 The [`extension closure plan`](../plans/ext-registry.md) owns exact proof and
-stop rules. [`status.yaml`](../status.yaml) remains `ready_for_release` until
-the network observation passes or the owner explicitly accepts a recorded
-limit.
+residual limits. [`status.yaml`](../status.yaml) records Fab7 closure as
+completed.
 
 ## Denim — deferred
 

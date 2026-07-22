@@ -2,7 +2,7 @@
 title: Fab7 Onboarding and Extension Distribution
 type: architecture
 status: accepted
-implementation_status: release_candidate
+implementation_status: implemented
 owner: architecture
 last_updated: 2026-07-22
 authority_for:
@@ -22,16 +22,16 @@ local source tree. Extensions remain external programs and call Fab7 only
 through its public binary.
 
 The onboarding path is released and owner-accepted at `v0.1.0`. Extension
-distribution is implemented in the `0.2.0` release candidate. Publication and
-the final network-registry observation remain separate release gates.
+distribution is released at `v0.2.0`; its immutable network-registry lifecycle
+was observed before closure.
 
 ## Repository ownership
 
 | Repository | Current state | Owns |
 |---|---|---|
-| [`fab7hq/fab7`](https://github.com/fab7hq/fab7) | `0.2.0` release candidate | proof core, installer, CLI, host plugins, catalog validator, and extension installer |
-| [`fab7hq/ext-registry`](https://github.com/fab7hq/ext-registry) | local release candidate; remote empty | one reviewed `catalog.yaml` and CI pinned to released Fab7; no extension source or artifacts |
-| [`fab7hq/muslin`](https://github.com/fab7hq/muslin) | local `0.1.0` fixture; remote empty | deterministic closure fixture, package artifact, host plugins, and tests |
+| [`fab7hq/fab7`](https://github.com/fab7hq/fab7) | released `v0.2.0` | proof core, installer, CLI, host plugins, catalog validator, and extension installer |
+| [`fab7hq/ext-registry`](https://github.com/fab7hq/ext-registry) | released `v0.1.0` | one reviewed `catalog.yaml` and CI pinned to released Fab7; no extension source or artifacts |
+| [`fab7hq/muslin`](https://github.com/fab7hq/muslin) | released `v0.1.0` fixture | deterministic closure fixture, package artifact, host plugins, and tests |
 | [`fab7hq/denim`](https://github.com/fab7hq/denim) | deferred | first product extension when separately authorized |
 
 Muslin is proof infrastructure, not the first product extension. The registry
@@ -192,7 +192,7 @@ package remain while another host is active. Removing the final host deletes
 the selector and all snapshots for that extension. It never removes unrelated
 Fab7 releases, extensions, host state, or project data.
 
-## Implemented evidence and remaining release gates
+## Implemented and released evidence
 
 The deterministic suite covers catalog closure and last-known-good refresh,
 source and package bounds, archive traversal, digest and compatibility checks,
@@ -207,13 +207,13 @@ diagnosis, partial host uninstall, and bounded final removal. Muslin's two
 independent ZIP builds matched SHA-256
 `4b105587a409d275fdf2a1712db6706a093ec0ad6fcfa42d6c7c022fcd93f9a1`.
 
-The following remain release operations, not implementation claims:
-
-1. publish Fab7 `v0.2.0` and its checksum asset;
-2. publish Muslin `v0.1.0` with the validated ZIP;
-3. publish the registry catalog with its prepared CI pinned to Fab7 `v0.2.0`;
-   and
-4. observe catalog refresh plus `fab7 ext install muslin` from the network.
+The owner authorized release on 2026-07-22. Fab7 `v0.2.0`, Muslin `v0.1.0`,
+and ext-registry `v0.1.0` were published in dependency order. Their hosted CI
+passed. A second fresh isolated macOS home then installed Fab7 from the exact
+tag, refreshed the network catalog, installed Muslin by registry name into both
+hosts, verified its receipt and public-binary invocation, preserved the Codex
+integration during Claude uninstall, and removed only Muslin state after final
+uninstall.
 
 No authenticated model invocation of the host-native commands was performed;
 the host CLIs' plugin discovery was observed directly. Linux extension
