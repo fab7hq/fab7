@@ -119,6 +119,7 @@ by calling Fab7 only through its public binary; Denim remains deferred.
 catalog, package, host, lifecycle, and release-evidence contracts. Extension
 distribution is released. Managed Fab7 and extension marketplace upgrades use
 the exact family boundaries defined there; unrelated same-name marketplaces
-still fail closed.
+still fail closed. Release `v0.2.1` is the first released implementation of
+that migration contract.
 
 See [`ledger.md`](ledger.md) for the persisted record and gate contract.

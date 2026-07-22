@@ -11,7 +11,8 @@ reach the deterministic Fab7 CLI.
 The repository implements the lean proof gate, released onboarding, and the
 `0.2.0` extension-distribution path: catalog refresh, registry or explicit-local
 installation, immutable snapshots, native Claude/Codex activation, diagnosis,
-and bounded uninstall. Muslin is the closure fixture;
+and bounded uninstall. Release `0.2.1` adds safe managed-marketplace migration
+when Fab7 or an extension changes version. Muslin is the closure fixture;
 [`fab7hq/denim`](https://github.com/fab7hq/denim) remains deferred. See
 [`docs/architecture/distribution.md`](docs/architecture/distribution.md); the
 onboarding closure record is in

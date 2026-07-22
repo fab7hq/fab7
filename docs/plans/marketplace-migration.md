@@ -1,7 +1,7 @@
 ---
 title: Managed Marketplace Migration
 type: plan
-status: release_authorized
+status: completed
 implementation_authorized: true
 publication_authorized: true
 owner: product-and-engineering
@@ -18,8 +18,8 @@ depends_on:
 Fab7 `v0.2.0` rejected a legitimate host re-registration when the same
 marketplace name still pointed to an older Fab7 release. The literal path
 comparison could not distinguish a prior managed version from an unrelated
-name collision. The `v0.2.1` maintenance candidate corrects that boundary for
-Fab7 and installed extensions.
+name collision. Release `v0.2.1` corrects that boundary for Fab7 and installed
+extensions.
 
 ## Contract
 
@@ -59,9 +59,23 @@ a command does not migrate a second active host implicitly.
 - The release build is deterministic, shell syntax passes, and documentation
   status, links, and diff hygiene remain release gates.
 
-## Release gate
+## Release closure
 
-Commit and hosted CI do not publish an immutable release. The owner authorized
-publication on 2026-07-22. Remaining gates are Fab7 `v0.2.1`, its source
-checksum asset, and one fresh network upgrade observation. The README requires
-the user to choose an explicit immutable release tag.
+The owner authorized publication on 2026-07-22. Tag and release `v0.2.1` point
+to commit `2f6d588f721a16fbce2dfe60a19ffb7137e36401`; hosted CI passed on that
+exact commit. The release publishes checksum asset
+`fab7-0.2.1.source.sha256`, and an independent download verified the tag
+archive against SHA-256
+`ba8f46b8147f9ad8b4459aa3709b71bb7b31ab9917ea56f4ce2e414048564ef8`.
+
+A fresh isolated macOS home installed released `v0.2.0`, registered both native
+hosts, then installed `v0.2.1` through the tagged one-line command. Codex and
+Claude each reported `migrated`, exposed enabled plugin version `0.2.1`, and
+reported `already_installed` on repetition. With the released `v0.2.1` binary,
+Codex also migrated Muslin from registry release `0.1.0` to a reviewed local
+`0.1.1` snapshot; `ext doctor` passed with two valid snapshots, the native host
+reported plugin `0.1.1`, and `muslin start` observed Fab7 `0.2.1`.
+
+The README keeps the one-line command explicit: the user chooses a published
+immutable tag and substitutes it for `vX.Y.Z`. No independent Linux release
+migration was observed.

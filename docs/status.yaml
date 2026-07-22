@@ -4,32 +4,34 @@ updated_at: "2026-07-22"
 current_phase:
   id: marketplace-migration
   name: Managed host marketplace migration
-  status: ready_for_release
+  status: completed
   active_plan: docs/plans/marketplace-migration.md
   implementation_authorized: true
   implementation: complete
-  publication: owner_authorized_in_progress
-  external_ci: passed_candidate
-  external_ci_run: https://github.com/fab7hq/fab7/actions/runs/29920721829
-  release_candidate: v0.2.1
+  publication: complete
+  external_ci: passed
+  external_ci_run: https://github.com/fab7hq/fab7/actions/runs/29922785389
+  release: v0.2.1
+  release_url: https://github.com/fab7hq/fab7/releases/tag/v0.2.1
   repositories:
     fab7: https://github.com/fab7hq/fab7
   evidence:
     deterministic_suite: passed_84
     release_build: deterministic
+    source_checksum: passed
     fab7_migration:
       released_0.1.0_to_candidate_0.2.1: passed
       released_0.2.0_to_candidate_0.2.1: passed
+      released_0.2.0_to_released_0.2.1: passed
       repeated_install_after_migration: already_installed
     extension_migration:
       claude_muslin_0.1.0_to_0.1.1: passed
       codex_muslin_0.1.0_to_0.1.1: passed
+      released_fab7_codex_registry_0.1.0_to_local_0.1.1: passed
     hosts:
       claude_code: 2.1.217
       codex_cli: 0.144.6
-  next_gate: >-
-    Publish Fab7 v0.2.1 with its source checksum, then repeat the managed
-    upgrade from the immutable network release.
+  next_gate: none
 
 future_phases:
   - id: denim
@@ -73,6 +75,16 @@ completed_phases:
     residual_limits:
       - Authenticated model invocation of host-native extension commands was not run.
       - Linux extension installation was not independently observed.
+  - id: marketplace-migration
+    name: Managed Fab7 and extension marketplace version migration
+    completed_at: "2026-07-22"
+    release: v0.2.1
+    decision: owner_authorized_and_released
+    evidence: agent_observed
+    release_url: https://github.com/fab7hq/fab7/releases/tag/v0.2.1
+    external_ci_run: https://github.com/fab7hq/fab7/actions/runs/29922785389
+    residual_limits:
+      - Linux release migration was not independently observed.
 
 resolved_decisions:
   - id: ext-registry-refresh
