@@ -1,8 +1,9 @@
 ---
 title: Managed Marketplace Migration
 type: plan
-status: implementation_complete
+status: release_authorized
 implementation_authorized: true
+publication_authorized: true
 owner: product-and-engineering
 last_updated: 2026-07-22
 authority_for:
@@ -60,7 +61,7 @@ a command does not migrate a second active host implicitly.
 
 ## Release gate
 
-Commit and hosted CI do not publish an immutable release. Publication requires
-explicit owner authorization, followed by Fab7 `v0.2.1`, its source checksum
-asset, and one fresh network upgrade observation. The README remains pinned to
-the released `v0.2.0` until that gate passes.
+Commit and hosted CI do not publish an immutable release. The owner authorized
+publication on 2026-07-22. Remaining gates are Fab7 `v0.2.1`, its source
+checksum asset, and one fresh network upgrade observation. The README requires
+the user to choose an explicit immutable release tag.

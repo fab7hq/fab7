@@ -8,8 +8,9 @@ current_phase:
   active_plan: docs/plans/marketplace-migration.md
   implementation_authorized: true
   implementation: complete
-  publication: awaiting_owner_authorization
-  external_ci: not_run
+  publication: owner_authorized_in_progress
+  external_ci: passed_candidate
+  external_ci_run: https://github.com/fab7hq/fab7/actions/runs/29920721829
   release_candidate: v0.2.1
   repositories:
     fab7: https://github.com/fab7hq/fab7
@@ -27,8 +28,8 @@ current_phase:
       claude_code: 2.1.217
       codex_cli: 0.144.6
   next_gate: >-
-    Obtain explicit owner authorization, publish Fab7 v0.2.1 with its source
-    checksum, and repeat the managed upgrade from the immutable network release.
+    Publish Fab7 v0.2.1 with its source checksum, then repeat the managed
+    upgrade from the immutable network release.
 
 future_phases:
   - id: denim

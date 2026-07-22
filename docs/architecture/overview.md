@@ -117,7 +117,8 @@ by calling Fab7 only through its public binary; Denim remains deferred.
 
 [`distribution.md`](distribution.md) owns the bootstrap, repository, layout,
 catalog, package, host, lifecycle, and release-evidence contracts. Extension
-implementation is complete locally; publication and a fresh network registry
-install remain release gates.
+distribution is released. Managed Fab7 and extension marketplace upgrades use
+the exact family boundaries defined there; unrelated same-name marketplaces
+still fail closed.
 
 See [`ledger.md`](ledger.md) for the persisted record and gate contract.
