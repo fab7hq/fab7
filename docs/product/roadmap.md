@@ -112,9 +112,9 @@ The [`marketplace migration plan`](../plans/marketplace-migration.md) owns the
 completed release and network proof. [`status.yaml`](../status.yaml) records
 the maintenance phase as completed.
 
-## Extension developer onboarding — implementation complete, release pending
+## Extension developer onboarding — released and complete
 
-The `v0.2.2` source candidate adds `fab7 ext create` plus the thin
+Release `v0.2.2` adds `fab7 ext create` plus the thin
 `/fab7:ext-create` and `$fab7:ext-create` host skills. From any existing
 non-symlink folder, the explicit user invocation:
 
@@ -131,28 +131,27 @@ non-symlink folder, the explicit user invocation:
 - obtains human approval before running generated code or delegating to
   `fab7 ext install --local` and `fab7 ext doctor`.
 
-The candidate also replaces the duplicated Claude and Codex copies of `init`,
+The release also replaces the duplicated Claude and Codex copies of `init`,
 `ext-list`, `ext-install`, and `ext-create` with canonical action sources and
 focused Claude/Codex build adapters. The same assembler powers Fab7's release
 plugin roots and schema-2 extension packages. The creator adds no second
 validator or plugin builder. Registry publication, language selection, Git
 hosting, CI generation, unsupported-host adapters, and extension release
-automation remain excluded.
+automation remain excluded. Muslin `v0.1.1` and ext-registry `v0.1.1` were
+released after Fab7, and a fresh network installation passed in both supported
+hosts.
 
-Muslin `0.1.1` is the schema-2 compatibility candidate: its worktree is rebuilt
-from the generic `fab7 ext create` output and contains only the manifest,
-canonical skill, executable, and generated test. External verification calls
-`fab7 ext build --host claude --host codex` twice to prove deterministic target
-package output. The
-released registry fixture remains Muslin `0.1.0` until a separate publication
-decision.
+Muslin `v0.1.1` is the released schema-2 compatibility fixture. Its worktree was
+rebuilt from generic `fab7 ext create` output and contains only the manifest,
+canonical skill, executable, and generated test. Two
+`fab7 ext build --host claude --host codex` runs proved deterministic target
+package output before publication.
 
-Implementation and an isolated installed-path journey are complete. Release
-authorization, hosted CI for the candidate, immutable release installation, and
-authenticated `/fab7:ext-create` and `$fab7:ext-create` model invocations remain
-open. The
-[`extension creator plan`](../plans/ext-create.md) owns the exact proof and
-release gate.
+Hosted CI, authenticated `/fab7:ext-create` and `$fab7:ext-create` model
+invocations, immutable Fab7 installation, network registry refresh, and Muslin
+installation passed. The
+[`extension creator plan`](../plans/ext-create.md) owns the exact closure proof
+and residual limit.
 
 ## Denim — deferred
 

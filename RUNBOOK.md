@@ -10,11 +10,12 @@ This runbook takes a new user through the smallest complete Fab7 path:
 Fab7 currently supports macOS or Linux, Bash or Zsh, Git, and Python 3.11 or
 newer. Windows, other shells, and Denim are outside this path. Release `v0.2.0`
 adds registry and explicit-local extension distribution; release `v0.2.1`
-adds safe managed-marketplace migration across versions.
+adds safe managed-marketplace migration across versions; and release `v0.2.2`
+adds generic extension creation and target-specific builds.
 
 ## Current release status
 
-`v0.2.1` is the current Fab7 release. Its installer verifies the matching
+`v0.2.2` is the current Fab7 release. Its installer verifies the matching
 GitHub tag archive against the release checksum asset before building. Release
 `v0.1.0` established the onboarding path, which the owner accepted on
 2026-07-20 after source and network verification; exact platform and host
@@ -23,9 +24,9 @@ transcripts were not retained.
 The released `v0.2.1` artifact migrated existing `v0.2.0` registrations in
 fresh isolated Codex and Claude homes; repeated registration was idempotent.
 
-The `v0.2.2` source candidate adds generic `fab7 ext create` plus shared
-`ext-create` skills for Claude and Codex; it is not a published release and
-requires the reviewed-source installation path below.
+The released `v0.2.2` artifact adds generic `fab7 ext create` plus shared
+`ext-create` skills for Claude and Codex. Its immutable network installation,
+registry refresh, and Muslin `v0.1.1` installation passed in both hosts.
 
 The exact implementation evidence and closure limits live in
 [`docs/plans/onboarding.md`](docs/plans/onboarding.md#current-implementation-evidence).
@@ -51,12 +52,12 @@ codex --version
 
 ## 2. Install Fab7 for the user
 
-### Immutable `v0.2.1` release
+### Immutable `v0.2.2` release
 
 Installation is one command:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/fab7hq/fab7/v0.2.1/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/fab7hq/fab7/v0.2.2/install.sh | bash
 ```
 
 The installer fetches the matching GitHub tag archive and release checksum,
@@ -238,7 +239,7 @@ the ignored executable. It does not silently change a project's Fab7 version.
 | `FAB7_GLOBAL_NOT_INSTALLED` | Run the installation step before `fab7 init` or host registration. |
 | `FAB7_HOST_MISSING` | Install the selected host CLI and confirm `claude` or `codex` is on `PATH`. |
 | `FAB7_HOST_MARKETPLACE_CONFLICT` | The same name points outside the exact managed Fab7 family or its surviving artifacts are invalid. Inspect `claude plugin marketplace list --json` or `codex plugin marketplace list --json`; do not overwrite it blindly. |
-| Fab7 points to an older managed runtime | Install `v0.2.1` or newer, then rerun `fab7 install HOST`; a validated same-family registration reports `migrated`. If the conflict remains, inspect it as an unrelated or invalid marketplace. |
+| Fab7 points to an older managed runtime | Install `v0.2.2` or newer, then rerun `fab7 install HOST`; a validated same-family registration reports `migrated`. If the conflict remains, inspect it as an unrelated or invalid marketplace. |
 | Plugin installed but command is absent | In Claude Code run `/reload-plugins`. For Codex, exit and start a new CLI session. |
 | `FAB7_PROJECT_NOT_INITIALIZED` | Run `fab7 init --json` inside the Git repository. |
 | `FAB7_PROJECT_EXECUTABLE_INVALID` | Run `fab7 init --json` to repair the ignored executable from the pinned global release. |
@@ -283,7 +284,7 @@ fab7 ext uninstall muslin --host codex --json
 The registry contains only release URLs and digests. Local paths are explicit,
 never enter the shared catalog, and produce immutable development snapshots.
 
-## Create an extension from the source candidate
+## Create an extension
 
 After installing this reviewed checkout, create source directly in an existing
 non-symlink directory:

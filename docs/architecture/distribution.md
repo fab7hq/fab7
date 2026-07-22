@@ -24,8 +24,8 @@ remain external programs and call Fab7 only through its public binary.
 The onboarding path is released and owner-accepted at `v0.1.0`. Extension
 distribution is released at `v0.2.0`; its immutable network-registry lifecycle
 was observed before closure. Release `v0.2.1` adds ownership-aware marketplace
-migration. The `v0.2.2` source candidate adds `fab7 ext create` and shared
-Claude/Codex creator skills; it is not yet released.
+migration. Release `v0.2.2` adds `fab7 ext create` and shared Claude/Codex
+creator skills.
 
 ## Contents
 
@@ -41,9 +41,9 @@ Claude/Codex creator skills; it is not yet released.
 
 | Repository | Current state | Owns |
 |---|---|---|
-| [`fab7hq/fab7`](https://github.com/fab7hq/fab7) | released `v0.2.1`; `v0.2.2` source candidate | proof core, installer, CLI, host plugins, generic extension creator, catalog validator, and extension installer |
-| [`fab7hq/ext-registry`](https://github.com/fab7hq/ext-registry) | released `v0.1.0` | one reviewed `catalog.yaml` and CI pinned to released Fab7; no extension source or artifacts |
-| [`fab7hq/muslin`](https://github.com/fab7hq/muslin) | released `v0.1.0`; schema-2 `v0.1.1` source candidate | deterministic closure fixture, canonical skill, package artifact, and tests |
+| [`fab7hq/fab7`](https://github.com/fab7hq/fab7) | released `v0.2.2` | proof core, installer, CLI, host plugins, generic extension creator, catalog validator, and extension installer |
+| [`fab7hq/ext-registry`](https://github.com/fab7hq/ext-registry) | released `v0.1.1` | one reviewed `catalog.yaml` and CI pinned to released Fab7; no extension source or artifacts |
+| [`fab7hq/muslin`](https://github.com/fab7hq/muslin) | released `v0.1.1` | deterministic closure fixture, canonical skill, package artifact, and tests |
 | [`fab7hq/denim`](https://github.com/fab7hq/denim) | deferred | first product extension when separately authorized |
 
 Muslin is proof infrastructure, not the first product extension. The registry
@@ -126,11 +126,10 @@ Project proof commands still validate `.fab7/project.json` and dispatch to the
 pinned `.fab7/bin/fab7`. Extension commands do not dispatch into a project and
 do not alter proof records.
 
-The released host surfaces are `/fab7:init`, `/fab7:ext-list`, and
-`/fab7:ext-install` in Claude Code and the corresponding `$fab7:*` skills in
-Codex. The `v0.2.2` source candidate adds `/fab7:ext-create` and
-`$fab7:ext-create`. Claude requires `/reload-plugins`; Codex loads new skills in
-a new session. Host files delegate runtime state changes to the CLI.
+The released host surfaces are `/fab7:init`, `/fab7:ext-list`,
+`/fab7:ext-install`, and `/fab7:ext-create` in Claude Code and the corresponding
+`$fab7:*` skills in Codex. Claude requires `/reload-plugins`; Codex loads new
+skills in a new session. Host files delegate runtime state changes to the CLI.
 
 ## Host plugin source and build
 
@@ -315,16 +314,16 @@ No authenticated model invocation of the host-native commands was performed;
 the host CLIs' plugin discovery was observed directly. Linux extension
 installation was not independently observed.
 
-For the `v0.2.2` source candidate, focused tests and a fresh isolated macOS home
-proved generic host-neutral creation, collision rejection, deterministic
-target-specific package
-output, release inclusion of template assets, and shared skill discovery in
-Claude Code `2.1.217` and Codex CLI `0.145.0`. Muslin `0.1.1` was subsequently
-cleared and recreated from `fab7 ext create` alone. Its generated test and two
-identical Claude-and-Codex builds passed; the exact source was installed into
-both hosts in a fresh home, passed diagnosis, and executed against Fab7
-`0.2.2`. The isolated host homes were not authenticated, so a model did not
-invoke either creator skill.
+For release `v0.2.2`, focused tests and a fresh isolated macOS home proved
+generic host-neutral creation, collision rejection, deterministic
+target-specific package output, release inclusion of template assets, and
+shared skill discovery in Claude Code `2.1.217` and Codex CLI `0.145.0`.
+Authenticated sessions in both hosts invoked the creator and a generated
+extension's start skill. Muslin `v0.1.1` was cleared and recreated from
+`fab7 ext create` alone, then released with a deterministic Claude-and-Codex
+package. A final fresh home installed Fab7 from the immutable `v0.2.2` tag,
+refreshed ext-registry `v0.1.1`, installed Muslin by registry name into both
+hosts, passed diagnosis, and ran it against Fab7 `0.2.2`.
 
 ## Exclusions
 

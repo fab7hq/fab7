@@ -77,10 +77,8 @@ catalog or become mutable runtime links. Extensions communicate with Fab7
 through its public binary and structured output, not imports or shared state.
 
 Neither layer expands proof authority, loads extensions into core, or makes
-host output accepted evidence. Onboarding and extension distribution are
-released; the extension creator is implemented in the `v0.2.2` source
-candidate and awaits release authorization and authenticated Claude and Codex
-observations; Denim remains deferred. See
+host output accepted evidence. Onboarding, extension distribution, and the
+extension creator are released through `v0.2.2`; Denim remains deferred. See
 [`../architecture/distribution.md`](../architecture/distribution.md) for the
 contracts and [`roadmap.md`](roadmap.md) for the release gate.
 

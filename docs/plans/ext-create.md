@@ -1,9 +1,9 @@
 ---
 title: Fab7 Extension Creator
 type: plan
-status: implementation-complete
+status: completed
 implementation_authorized: true
-publication_authorized: false
+publication_authorized: true
 owner: product-and-engineering
 last_updated: 2026-07-23
 target_release: v0.2.2
@@ -46,7 +46,7 @@ This increment does not add language or framework selection, registry
 submission, publication, Git hosting, CI generation, dependency solving,
 mutable source links, or an extension runtime. It does not add Cursor or an
 adapter for another unsupported host, generate a custom build script inside an
-extension, begin Denim, or publish the Muslin schema-2 candidate.
+extension, or begin Denim.
 
 ## Implemented path
 
@@ -117,15 +117,22 @@ were then removed. Hosted CI also passed for candidate commit
 `153540e103a42f3fc8a47c65be5e6b8c9a6864fb` in
 [run 29949097707](https://github.com/fab7hq/fab7/actions/runs/29949097707).
 
-## Release gate
+## Closure
 
-Implementation, hosted CI, and authenticated host observations are complete.
-The owner authorized publication of target release `v0.2.2` on 2026-07-23.
-The remaining gates are:
+The owner authorized publication on 2026-07-23, and the dependency-ordered
+release completed:
 
-1. tag and publish the exact release with its source-archive checksum asset;
-2. install the immutable release in a fresh home; and
-3. publish and register Muslin `0.1.1` in dependency order.
+1. [Fab7 `v0.2.2`](https://github.com/fab7hq/fab7/releases/tag/v0.2.2) with its
+   source-archive checksum asset;
+2. [Muslin `v0.1.1`](https://github.com/fab7hq/muslin/releases/tag/v0.1.1) with
+   deterministic package digest
+   `f578596486444f776f39bf9616ca549d22df62328c72fd394a8aec852e3f0285`;
+3. [ext-registry `v0.1.1`](https://github.com/fab7hq/ext-registry/releases/tag/v0.1.1)
+   with the digest-pinned Muslin entry and passing hosted CI; and
+4. a fresh network installation from the immutable Fab7 installer, followed by
+   registry refresh, Muslin installation into Claude and Codex, healthy
+   diagnosis, native plugin discovery, and `muslin start` observing Fab7
+   `0.2.2`.
 
-Do not describe the feature as released until the immutable tag, checksum, and
-fresh network installation pass.
+The extension creator increment is released and complete. Linux installation
+was not independently observed; this does not widen the macOS evidence.

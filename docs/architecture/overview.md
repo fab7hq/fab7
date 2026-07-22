@@ -153,7 +153,7 @@ catalog, package, host, lifecycle, and release-evidence contracts. Extension
 distribution is released. Managed Fab7 and extension marketplace upgrades use
 the exact family boundaries defined there; unrelated same-name marketplaces
 still fail closed. Release `v0.2.1` is the first released implementation of
-that migration contract. The `v0.2.2` source candidate adds extension authoring
-without changing those runtime contracts.
+that migration contract. Release `v0.2.2` adds extension authoring without
+changing those runtime contracts.
 
 See [`ledger.md`](ledger.md) for the persisted record and gate contract.

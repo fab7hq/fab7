@@ -4,19 +4,22 @@ updated_at: "2026-07-23"
 current_phase:
   id: extension-creator
   name: Generic Fab7 extension creator
-  status: release_ready
+  status: completed
   active_plan: docs/plans/ext-create.md
   implementation_authorized: true
   implementation: complete
   publication_authorized: true
-  publication: authorized
+  publication: released
   external_ci: passed
   external_ci_run: https://github.com/fab7hq/fab7/actions/runs/29949097707
   candidate_commit: 153540e103a42f3fc8a47c65be5e6b8c9a6864fb
+  release_commit: 74bae262b2474c3e762f02ed9a02232ce6e12b86
   target_release: v0.2.2
+  release_url: https://github.com/fab7hq/fab7/releases/tag/v0.2.2
   repositories:
     fab7: https://github.com/fab7hq/fab7
     muslin: https://github.com/fab7hq/muslin
+    ext_registry: https://github.com/fab7hq/ext-registry
   evidence:
     focused_tests: passed_18
     deterministic_suite: passed_96
@@ -49,10 +52,12 @@ current_phase:
     installed_wheel_template_package: passed
     authenticated_claude_skill_invocation: passed_ext_create_and_start
     authenticated_codex_skill_invocation: passed_ext_create_and_start
+    network_registry_install: passed_catalog_0.1.1
+    network_muslin_install: passed_0.1.1_claude_and_codex
     hosts:
       claude_code: 2.1.217
       codex_cli: 0.145.0
-  next_gate: immutable_release_publication
+  next_gate: none
 
 future_phases:
   - id: denim
@@ -107,6 +112,21 @@ completed_phases:
     external_ci_run: https://github.com/fab7hq/fab7/actions/runs/29922785389
     residual_limits:
       - Linux release migration was not independently observed.
+  - id: extension-creator
+    name: Generic Fab7 extension creator
+    completed_at: "2026-07-23"
+    release: v0.2.2
+    decision: owner_authorized_and_released
+    evidence: agent_observed
+    releases:
+      fab7: https://github.com/fab7hq/fab7/releases/tag/v0.2.2
+      muslin: https://github.com/fab7hq/muslin/releases/tag/v0.1.1
+      ext_registry: https://github.com/fab7hq/ext-registry/releases/tag/v0.1.1
+    external_ci_runs:
+      fab7: https://github.com/fab7hq/fab7/actions/runs/29949854363
+      ext_registry: https://github.com/fab7hq/ext-registry/actions/runs/29950026742
+    residual_limits:
+      - Linux release installation was not independently observed.
 
 resolved_decisions:
   - id: host-plugin-source

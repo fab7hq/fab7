@@ -12,9 +12,9 @@ The repository implements the lean proof gate, released onboarding, and the
 `0.2.0` extension-distribution path: catalog refresh, registry or explicit-local
 installation, immutable snapshots, native Claude/Codex activation, diagnosis,
 and bounded uninstall. Release `0.2.1` adds safe managed-marketplace migration
-when Fab7 or an extension changes version. The `0.2.2` source candidate adds
-generic `fab7 ext create` source scaffolding plus shared `/fab7:ext-create` and
-`$fab7:ext-create` host skills; it is not yet released. Muslin is the closure fixture;
+when Fab7 or an extension changes version. Release `0.2.2` adds generic
+`fab7 ext create` source scaffolding plus shared `/fab7:ext-create` and
+`$fab7:ext-create` host skills. Muslin is the closure fixture;
 [`fab7hq/denim`](https://github.com/fab7hq/denim) remains deferred. See
 [`docs/architecture/distribution.md`](docs/architecture/distribution.md); the
 onboarding closure record is in
@@ -63,7 +63,7 @@ global and project layouts, first proof, clone repair, and troubleshooting.
 
 ## Create a local extension
 
-The `0.2.2` source candidate adds one generic source scaffold. Run it directly:
+Release `0.2.2` includes one generic source scaffold. Run it directly:
 
 ```bash
 fab7 ext create . --name my-extension --publisher my-org
