@@ -24,14 +24,13 @@ Local paths never enter the shared registry and never become runtime links.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/fab7hq/fab7/v0.2.0/install.sh | bash
-exec "$SHELL" -l
-fab7 --version
-fab7 install claude  # or: fab7 install codex
 ```
 
 The installer verifies the immutable `v0.2.0` source archive against its
 release checksum before building. Contributors can instead use a reviewed
-checkout: `bash install.sh --source .`.
+checkout: `bash install.sh --source .`. Open a new login shell before running
+`fab7`; verification and host registration are covered in
+[`RUNBOOK.md`](RUNBOOK.md).
 
 The registry extension path is:
 

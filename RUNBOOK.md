@@ -46,20 +46,22 @@ codex --version
 
 ## 2. Install Fab7 for the user
 
-### Reviewed source checkout
+### Immutable `v0.2.0` release
 
-Clone or open a checkout you trust, then install from it:
+Installation is one command:
 
 ```bash
-git clone https://github.com/fab7hq/fab7.git
-cd fab7
-bash install.sh --source .
-exec "$SHELL" -l
+curl -fsSL https://raw.githubusercontent.com/fab7hq/fab7/v0.2.0/install.sh | bash
 ```
 
-Verify the selected global executable:
+The installer fetches the matching GitHub tag archive and release checksum,
+verifies the source, builds the executable, and changes the shell startup file
+only after installation succeeds.
+
+Then open a new login shell and verify the selected global executable:
 
 ```bash
+exec "$SHELL" -l
 command -v fab7
 fab7 --version
 ```
@@ -67,23 +69,18 @@ fab7 --version
 The command path should resolve to `~/.fab7/bin/fab7`. Re-running the same
 version is idempotent.
 
-### Immutable `v0.2.0` release
+### Reviewed source checkout
 
-Download the installer from the exact tag, review it, and run it with the exact
-version:
+Contributors can instead clone or open a checkout they trust and install from
+that source:
 
 ```bash
-curl -fsSLo /tmp/fab7-install-v0.2.0.sh \
-  https://raw.githubusercontent.com/fab7hq/fab7/v0.2.0/install.sh
-less /tmp/fab7-install-v0.2.0.sh
-bash /tmp/fab7-install-v0.2.0.sh --version 0.2.0
+git clone https://github.com/fab7hq/fab7.git
+cd fab7
+bash install.sh --source .
 exec "$SHELL" -l
 fab7 --version
 ```
-
-The installer fetches the matching GitHub tag archive and release checksum,
-verifies the source, builds the executable, and changes the shell startup file
-only after installation succeeds.
 
 ## 3. Register one agentic CLI
 
