@@ -8,21 +8,21 @@ This runbook takes a new user through the smallest complete Fab7 path:
 4. record and verify one completion claim.
 
 Fab7 currently supports macOS or Linux, Bash or Zsh, Git, and Python 3.11 or
-newer. Windows, other shells, extension discovery, `ext-registry`, and Denim are
-not part of this onboarding path.
+newer. Windows, other shells, and Denim are outside this path. Release `v0.2.0`
+adds registry and explicit-local extension distribution.
 
 ## Current release status
 
-`v0.1.0` is the first tagged Fab7 release. Its installer verifies the matching
-GitHub tag archive against the release checksum asset before building. Network
-installation and Linux acceptance remain release gates until they have fresh
-operator evidence.
+`v0.2.0` is the current Fab7 release. Its installer verifies the matching
+GitHub tag archive against the release checksum asset before building. Release
+`v0.1.0` established the onboarding path, which the owner accepted on
+2026-07-20 after source and network verification; exact platform and host
+transcripts were not retained.
 
-Local-source plugin registration has been accepted by both host CLIs. Fresh
-authenticated invocation of `/fab7:init` and `$fab7:init` remains an open
-gate for the exact released artifact.
+Local-source plugin registration has been accepted by both host CLIs. Exact
+released-artifact host transcripts were not retained with the closure record.
 
-The exact implementation evidence and remaining release gates live in
+The exact implementation evidence and closure limits live in
 [`docs/plans/onboarding.md`](docs/plans/onboarding.md#current-implementation-evidence).
 
 ## 1. Check prerequisites
@@ -46,7 +46,7 @@ codex --version
 
 ## 2. Install Fab7 for the user
 
-### Available now: reviewed source checkout
+### Reviewed source checkout
 
 Clone or open a checkout you trust, then install from it:
 
@@ -64,19 +64,19 @@ command -v fab7
 fab7 --version
 ```
 
-The command path should resolve to `~/.fab7/bin/fab7`, and the current source
-reports version `0.1.0`. Re-running the same install is idempotent.
+The command path should resolve to `~/.fab7/bin/fab7`. Re-running the same
+version is idempotent.
 
-### Immutable `v0.1.0` release
+### Immutable `v0.2.0` release
 
 Download the installer from the exact tag, review it, and run it with the exact
 version:
 
 ```bash
-curl -fsSLo /tmp/fab7-install-v0.1.0.sh \
-  https://raw.githubusercontent.com/fab7hq/fab7/v0.1.0/install.sh
-less /tmp/fab7-install-v0.1.0.sh
-bash /tmp/fab7-install-v0.1.0.sh --version 0.1.0
+curl -fsSLo /tmp/fab7-install-v0.2.0.sh \
+  https://raw.githubusercontent.com/fab7hq/fab7/v0.2.0/install.sh
+less /tmp/fab7-install-v0.2.0.sh
+bash /tmp/fab7-install-v0.2.0.sh --version 0.2.0
 exec "$SHELL" -l
 fab7 --version
 ```
@@ -165,7 +165,7 @@ The resulting ownership boundary is:
 ├── bin/
 │   └── fab7                    # selected executable
 └── runtime/
-    └── 0.1.0/
+    └── <installed-version>/
         ├── manifest.json
         ├── bin/fab7
         └── hosts/
@@ -244,6 +244,40 @@ the ignored executable. It does not silently change a project's Fab7 version.
 Use `--json` when capturing an error for support; Fab7 preserves stable error
 codes in the structured response. Do not place credentials, host transcripts,
 or unrelated tool output under `~/.fab7/` or `.fab7/`.
+
+## Extension distribution
+
+Refresh and list the reviewed registry:
+
+```bash
+fab7 ext refresh --json
+fab7 ext list --json
+fab7 ext install muslin --host claude --json
+# or: --host codex
+fab7 ext doctor --json
+muslin start --json
+```
+
+For local extension development, inspect the source manifest before granting
+its bounded build, then replace the name-based install with:
+
+```bash
+fab7 ext install --local /path/to/muslin --host claude --json
+# or: --host codex
+fab7 ext doctor --json
+muslin start --json
+```
+
+Install into the second host by repeating the same source command with the
+other host. Uninstall removes only the named integration until the final host:
+
+```bash
+fab7 ext uninstall muslin --host claude --json
+fab7 ext uninstall muslin --host codex --json
+```
+
+The registry contains only release URLs and digests. Local paths are explicit,
+never enter the shared catalog, and produce immutable development snapshots.
 
 ## Reference
 

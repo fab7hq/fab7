@@ -1,8 +1,8 @@
 {
   "name": "fab7",
   "displayName": "Fab7",
-  "version": "0.1.0",
-  "description": "Initialize and use a project-pinned Fab7 proof gate.",
+  "version": "0.2.0",
+  "description": "Initialize Fab7 and manage verified extensions.",
   "author": {
     "name": "Fab7",
     "url": "https://github.com/fab7hq/fab7"

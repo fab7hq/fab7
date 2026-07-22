@@ -3,7 +3,7 @@ title: Fab7 Product Vision
 type: product
 status: accepted
 owner: product
-last_updated: 2026-07-19
+last_updated: 2026-07-22
 authority_for:
   - Fab7 positioning
   - Fab7 product boundaries
@@ -51,8 +51,7 @@ Fab7 is not a planning framework, agent orchestrator, methodology, dashboard,
 policy language, extension runtime, or autonomous release operator. Its proof
 core remains host-neutral and provider-neutral.
 
-The accepted next product layer is a thin Fab7 onboarding path around that
-core:
+The accepted distribution layer is a thin path around that core:
 
 - a repository-owned script installs Fab7 beneath `~/.fab7/`;
 - `fab7 install claude|codex` registers a bundled Fab7 plugin through the
@@ -60,20 +59,22 @@ core:
 - the Fab7 init skill creates a second, version-pinned installation beneath the
   current repository's `.fab7/` directory and later project work selects that
   local binary;
-- the onboarding phase stops after Fab7 works globally, through the host plugin,
-  and through the project-pinned local binary.
+- Fab7 installs external registry releases or explicitly approved local source
+  through one verified immutable package path and native host plugins.
 
-Extension distribution follows later. The separate
-[`fab7hq/ext-registry`](https://github.com/fab7hq/ext-registry) repository will
-own `catalog.yaml`; [`fab7hq/denim`](https://github.com/fab7hq/denim) will own
-the first extension. Denim will communicate with Fab7 through its public binary
-and structured output, not imports or shared state.
+The separate [`fab7hq/ext-registry`](https://github.com/fab7hq/ext-registry)
+owns `catalog.yaml`; [`fab7hq/muslin`](https://github.com/fab7hq/muslin) is the
+minimal distribution fixture; and [`fab7hq/denim`](https://github.com/fab7hq/denim)
+remains the first product extension. Local source paths never enter the shared
+catalog or become mutable runtime links. Extensions communicate with Fab7
+through its public binary and structured output, not imports or shared state.
 
 Neither layer expands proof authority, loads extensions into core, or makes
-host output accepted evidence. Onboarding implementation is in progress; the
-registry and Denim are deferred. See
-[`../architecture/distribution.md`](../architecture/distribution.md) for their
-target boundaries and [`roadmap.md`](roadmap.md) for their delivery gates.
+host output accepted evidence. Onboarding is owner-accepted; extension
+implementation is complete locally and awaits publication plus network proof;
+Denim remains deferred. See
+[`../architecture/distribution.md`](../architecture/distribution.md) for the
+contracts and [`roadmap.md`](roadmap.md) for the release gate.
 
 See [`../architecture/overview.md`](../architecture/overview.md) for the
 implemented executable boundary.

@@ -1,7 +1,7 @@
 ---
 title: Fab7 Onboarding Implementation Plan
 type: plan
-status: in_progress
+status: completed
 implementation_authorized: true
 owner: engineering
 last_updated: 2026-07-20
@@ -16,10 +16,20 @@ depends_on:
 
 # Fab7 onboarding implementation plan
 
-This plan delivers only the Fab7-owned onboarding path. Implementation was
-authorized on 2026-07-19; work-package exit gates still require current
-evidence before any target command is reported as complete. The extension
-registry and Denim are explicitly deferred.
+This plan delivered only the Fab7-owned onboarding path. Implementation was
+authorized on 2026-07-19. The extension registry and Denim were explicitly
+outside its implementation scope.
+
+## Closure
+
+On 2026-07-20 the owner reported the source installation, network
+installation, Claude `/fab7:init`, and project claim/verify journey as verified,
+then directed work to begin on `ext-registry`. Onboarding is therefore closed
+by explicit owner acceptance at release `v0.1.0`.
+
+The operator report is not a retained host transcript. Exact platform details,
+Linux, and Codex were not independently reproduced by the agent; those limits
+remain recorded rather than being converted into passing evidence.
 
 ## Outcome
 
@@ -109,11 +119,11 @@ fresh artifact identity and host observation.
 
 | Area | Current result | Remaining gate |
 |---|---|---|
-| WP0 release artifact | Implemented; duplicate builds match, the archive executes outside the checkout, the manifest validates digest `sha256:1f3d4bcb6de5424472ae4b3ce8bbcaf65fc54c718bf89e016b8add16f575a394`, and tag `v0.1.0` has a matching source checksum asset. | Prove the default download path. |
-| WP1 global install | Local-source install and same-version rerun passed in disposable macOS Bash and Zsh homes; failure and profile rollback tests pass; final `~/.fab7/` contains only `bin/` and `runtime/`. | Run the published archive path on macOS and Linux and complete the remaining failure matrix. |
+| WP0 release artifact | Implemented; duplicate builds match, the archive executes outside the checkout, the manifest validates digest `sha256:1f3d4bcb6de5424472ae4b3ce8bbcaf65fc54c718bf89e016b8add16f575a394`, tag `v0.1.0` has source-archive digest `sha256:a9aff511f4c63a74dd469d796de365c9aef7a5a9c850f7432d38d65a35ea4f65`, and hosted CI run `29697911483` passed. | Retain the exact network-install environment and output with the release evidence. |
+| WP1 global install | Local-source install and same-version rerun passed in disposable macOS Bash and Zsh homes; the operator reported a successful `v0.1.0` network install on 2026-07-20; failure and profile rollback tests pass. | Retain the reported network evidence, run Linux Bash and Zsh, and complete the remaining failure matrix. |
 | WP2 project install | New init, proof-command dispatch, digest rejection, binary repair, committed-project clone repair, and action-style repair passed. | Complete the remaining symlink, permission, unsupported-pin, and interrupted-mutation matrix on the release candidate. |
-| WP3 host plugins | Claude Code 2.1.214 and Codex CLI 0.144.5 accepted the bundled marketplaces; `fab7@fab7` was installed, discovered, enabled, and idempotent in isolated host homes. | Invoke `/fab7:init` and `$fab7:init` from fresh authenticated host sessions against the exact released artifact. |
-| WP4 closure | `28` deterministic tests, build determinism, strict Claude validation, Codex plugin validation, shell syntax, project proof execution, and clone/action repair passed on 2026-07-19. | Linux, published-release bootstrap, both host-native invocations, and final release evidence are not run. |
+| WP3 host plugins | Claude Code 2.1.214 and Codex CLI 0.144.5 accepted the bundled marketplaces; `fab7@fab7` was installed, discovered, enabled, and idempotent in isolated host homes; the operator reported `/fab7:init` plus claim/verify success after source installation on 2026-07-20. | Retain the Claude observation against the released artifact and invoke `$fab7:init` from a fresh Codex session. |
+| WP4 closure | `28` deterministic tests, build determinism, strict Claude validation, Codex plugin validation, shell syntax, project proof execution, clone/action repair, release URL/checksum verification, and hosted CI passed; source/network journeys are operator-reported. | Retained network and Claude evidence, Linux, Codex host invocation, remaining failure cases, and final release evidence are open. |
 
 The disposable evidence root is `../sandbox/onboarding-v4/`. Its release
 manifest records source digest

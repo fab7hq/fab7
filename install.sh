@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-fab7_default_version="0.1.0"
+fab7_default_version="0.2.0"
 fab7_version=""
 fab7_source=""
 fab7_home_path="$HOME/.fab7"

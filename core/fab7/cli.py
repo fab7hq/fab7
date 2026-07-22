@@ -10,6 +10,14 @@ from typing import Any
 
 from . import __version__, git
 from .errors import Fab7Error
+from .extensions import (
+    catalog_listing,
+    extension_doctor,
+    install_local_extension,
+    install_registry_extension,
+    refresh_catalog,
+    uninstall_extension,
+)
 from .gate import audit, check, doctor
 from .hosts import install_host
 from .install import dispatch_project, init_project
@@ -27,6 +35,27 @@ def build_parser() -> argparse.ArgumentParser:
     host_install = commands.add_parser("install", help="register the Fab7 plugin with an agentic CLI")
     host_install.add_argument("host", choices=("claude", "codex"))
     host_install.add_argument("--json", action="store_true")
+
+    extension = commands.add_parser("ext", help="inspect and manage Fab7 extensions")
+    extension_commands = extension.add_subparsers(dest="extension_command", required=True)
+    extension_list = extension_commands.add_parser("list", help="validate and list available extensions")
+    extension_list.add_argument("--catalog", type=Path)
+    extension_list.add_argument("--refresh", action="store_true")
+    extension_list.add_argument("--json", action="store_true")
+    extension_refresh = extension_commands.add_parser("refresh", help="refresh the reviewed extension catalog")
+    extension_refresh.add_argument("--json", action="store_true")
+    extension_install = extension_commands.add_parser("install", help="install a registry or local extension")
+    extension_install.add_argument("name", nargs="?")
+    extension_install.add_argument("--local", type=Path)
+    extension_install.add_argument("--catalog", type=Path)
+    extension_install.add_argument("--host", required=True, choices=("claude", "codex"))
+    extension_install.add_argument("--json", action="store_true")
+    extension_doctor_parser = extension_commands.add_parser("doctor", help="validate extension state")
+    extension_doctor_parser.add_argument("--json", action="store_true")
+    extension_uninstall = extension_commands.add_parser("uninstall", help="uninstall one extension")
+    extension_uninstall.add_argument("name")
+    extension_uninstall.add_argument("--host", required=True, choices=("claude", "codex"))
+    extension_uninstall.add_argument("--json", action="store_true")
 
     claim = commands.add_parser("claim", help="record a completion claim")
     claim.add_argument("--work-item")
@@ -66,6 +95,45 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "install":
             data = install_host(args.host)
             return _finish(args, data, f"Fab7 plugin for {args.host}: {data['status']}")
+        if args.command == "ext" and args.extension_command == "list":
+            if args.refresh:
+                if args.catalog is not None:
+                    raise Fab7Error(
+                        "FAB7_CATALOG_SOURCE_INVALID",
+                        "--refresh cannot be combined with --catalog",
+                    )
+                refresh_catalog()
+            data = catalog_listing(args.catalog, include_installed=True)
+            return _finish_extension_list(args, data)
+        if args.command == "ext" and args.extension_command == "refresh":
+            data = refresh_catalog()
+            return _finish(args, data, f"Fab7 extension catalog: {data['status']}")
+        if args.command == "ext" and args.extension_command == "install":
+            if (args.name is None) == (args.local is None):
+                raise Fab7Error(
+                    "FAB7_EXTENSION_SOURCE_REQUIRED",
+                    "Choose exactly one registry name or --local PATH",
+                )
+            if args.local is not None:
+                if args.catalog is not None:
+                    raise Fab7Error(
+                        "FAB7_EXTENSION_SOURCE_INVALID",
+                        "--catalog cannot be combined with --local",
+                    )
+                data = install_local_extension(args.local, args.host)
+            else:
+                data = install_registry_extension(
+                    args.name,
+                    args.host,
+                    catalog_path=args.catalog,
+                )
+            return _finish(args, data, f"Fab7 extension {data['name']}: {data['status']}")
+        if args.command == "ext" and args.extension_command == "doctor":
+            data = extension_doctor()
+            return _finish_result(args, data, "Fab7 extension doctor")
+        if args.command == "ext" and args.extension_command == "uninstall":
+            data = uninstall_extension(args.name, args.host)
+            return _finish(args, data, f"Fab7 extension {data['name']}: {data['status']}")
         root = git.repo_root()
         if direct_invocation:
             dispatched = dispatch_project(root, args.command, raw_argv, Path(sys.argv[0]))
@@ -157,6 +225,21 @@ def _finish_result(args: argparse.Namespace, data: dict[str, Any], label: str) -
         for error in data.get("errors", []):
             print(f"ERROR {error['code']}: {error['message']}")
     return 0 if data["ok"] else 1
+
+
+def _finish_extension_list(args: argparse.Namespace, data: dict[str, Any]) -> int:
+    if args.json:
+        print(json.dumps(data, sort_keys=True, indent=2))
+    else:
+        print(f"Fab7 extensions: {data['count']}")
+        for extension in data["extensions"]:
+            print(f"{extension['name']} {extension['version']} {extension['repository']}")
+        for installed in data.get("installed", []):
+            print(
+                f"installed {installed['name']} {installed['version']} "
+                f"{installed['origin']} {installed['install_id']}"
+            )
+    return 0
 
 
 def _replay(content: bytes, stream: Any) -> None:

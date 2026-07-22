@@ -14,7 +14,6 @@ from .install import selected_release
 
 
 HOSTS = {"claude", "codex"}
-PLUGIN_ID = "fab7@fab7"
 MAX_OUTPUT = 64 * 1024
 
 
@@ -29,21 +28,34 @@ Runner = Callable[[list[str]], CommandResult]
 
 
 def install_host(host: str, *, host_root: Path | None = None, runner: Runner | None = None) -> dict[str, Any]:
-    if host not in HOSTS:
-        raise Fab7Error("FAB7_HOST_UNSUPPORTED", "Supported hosts are claude and codex")
     if host_root is None:
         release, _ = selected_release()
         host_root = release / "hosts" / host
+    return install_plugin(host, "fab7", host_root=host_root, runner=runner)
+
+
+def install_plugin(
+    host: str,
+    name: str,
+    *,
+    host_root: Path,
+    runner: Runner | None = None,
+) -> dict[str, Any]:
+    if host not in HOSTS:
+        raise Fab7Error("FAB7_HOST_UNSUPPORTED", "Supported hosts are claude and codex")
+    if not _canonical_name(name):
+        raise Fab7Error("FAB7_HOST_ARTIFACT_INVALID", "Plugin name is invalid")
     if host_root.is_symlink():
         raise Fab7Error("FAB7_HOST_ARTIFACT_INVALID", "Bundled host root must not be a symlink")
     host_root = host_root.resolve()
-    _validate_host_root(host, host_root)
+    _validate_host_root(host, name, host_root)
     run = runner or _run_command
+    plugin_id = f"{name}@{name}"
 
     if host == "claude":
         _require_success(run(["claude", "plugin", "validate", "--strict", str(host_root)]), "validation")
     marketplaces = _json_result(run([host, "plugin", "marketplace", "list", "--json"]), "marketplace list")
-    configured = _find_marketplace(marketplaces, "fab7")
+    configured = _find_marketplace(marketplaces, name)
     marketplace_added = False
     plugin_added = False
     if configured is not None:
@@ -51,7 +63,7 @@ def install_host(host: str, *, host_root: Path | None = None, runner: Runner | N
         if configured_root is None or configured_root.resolve() != host_root:
             raise Fab7Error(
                 "FAB7_HOST_MARKETPLACE_CONFLICT",
-                "A different marketplace already owns the fab7 name",
+                f"A different marketplace already owns the {name} name",
                 {"host": host},
             )
     else:
@@ -64,30 +76,79 @@ def install_host(host: str, *, host_root: Path | None = None, runner: Runner | N
 
     try:
         plugins = _json_result(run([host, "plugin", "list", "--json"]), "plugin list")
-        if _plugin_installed(plugins):
-            return _result(host, "already_installed", host_root)
+        if _plugin_installed(plugins, plugin_id):
+            return _result(host, name, "already_installed", host_root)
         if host == "claude":
-            command = ["claude", "plugin", "install", PLUGIN_ID, "--scope", "user"]
+            command = ["claude", "plugin", "install", plugin_id, "--scope", "user"]
         else:
-            command = ["codex", "plugin", "add", PLUGIN_ID, "--json"]
+            command = ["codex", "plugin", "add", plugin_id, "--json"]
         _require_success(run(command), "plugin install")
         plugin_added = True
         installed = _json_result(run([host, "plugin", "list", "--json"]), "plugin verification")
-        if not _plugin_installed(installed):
-            raise Fab7Error("FAB7_HOST_INSTALL_FAILED", "Host did not report the Fab7 plugin as installed")
+        if not _plugin_installed(installed, plugin_id):
+            raise Fab7Error("FAB7_HOST_INSTALL_FAILED", f"Host did not report {name} as installed")
     except Fab7Error:
         if plugin_added:
             if host == "claude":
-                _best_effort(run, ["claude", "plugin", "uninstall", PLUGIN_ID, "--scope", "user"])
+                _best_effort(run, ["claude", "plugin", "uninstall", plugin_id, "--scope", "user"])
             else:
-                _best_effort(run, ["codex", "plugin", "remove", PLUGIN_ID, "--json"])
+                _best_effort(run, ["codex", "plugin", "remove", plugin_id, "--json"])
         if marketplace_added:
             if host == "claude":
-                _best_effort(run, ["claude", "plugin", "marketplace", "remove", "fab7", "--scope", "user"])
+                _best_effort(run, ["claude", "plugin", "marketplace", "remove", name, "--scope", "user"])
             else:
-                _best_effort(run, ["codex", "plugin", "marketplace", "remove", "fab7", "--json"])
+                _best_effort(run, ["codex", "plugin", "marketplace", "remove", name, "--json"])
         raise
-    return _result(host, "installed", host_root)
+    return _result(host, name, "installed", host_root)
+
+
+def uninstall_plugin(
+    host: str,
+    name: str,
+    *,
+    host_root: Path,
+    runner: Runner | None = None,
+) -> dict[str, Any]:
+    if host not in HOSTS:
+        raise Fab7Error("FAB7_HOST_UNSUPPORTED", "Supported hosts are claude and codex")
+    if not _canonical_name(name):
+        raise Fab7Error("FAB7_HOST_ARTIFACT_INVALID", "Plugin name is invalid")
+    if host_root.is_symlink():
+        raise Fab7Error("FAB7_HOST_ARTIFACT_INVALID", "Bundled host root must not be a symlink")
+    host_root = host_root.resolve()
+    run = runner or _run_command
+    plugin_id = f"{name}@{name}"
+    marketplaces = _json_result(run([host, "plugin", "marketplace", "list", "--json"]), "marketplace list")
+    configured = _find_marketplace(marketplaces, name)
+    if configured is not None:
+        configured_root = _marketplace_root(configured)
+        if configured_root is None or configured_root.resolve() != host_root:
+            raise Fab7Error(
+                "FAB7_HOST_MARKETPLACE_CONFLICT",
+                f"A different marketplace owns the {name} name",
+                {"host": host},
+            )
+    plugins = _json_result(run([host, "plugin", "list", "--json"]), "plugin list")
+    installed = _plugin_installed(plugins, plugin_id)
+    if installed and configured is None:
+        raise Fab7Error(
+            "FAB7_HOST_MARKETPLACE_CONFLICT",
+            f"Installed {name} plugin has no matching managed marketplace",
+            {"host": host},
+        )
+    if installed:
+        if host == "claude":
+            command = ["claude", "plugin", "uninstall", plugin_id, "--scope", "user"]
+        else:
+            command = ["codex", "plugin", "remove", plugin_id, "--json"]
+        _require_success(run(command), "plugin uninstall")
+    if configured is not None:
+        if host == "claude":
+            command = ["claude", "plugin", "marketplace", "remove", name, "--scope", "user"]
+        else:
+            command = ["codex", "plugin", "marketplace", "remove", name, "--json"]
+        _require_success(run(command), "marketplace remove")
+    return _result(host, name, "uninstalled", host_root)
 
 
 def _run_command(command: list[str]) -> CommandResult:
@@ -107,24 +168,33 @@ def _run_command(command: list[str]) -> CommandResult:
     return CommandResult(process.returncode, process.stdout[-MAX_OUTPUT:], process.stderr[-MAX_OUTPUT:])
 
 
-def _validate_host_root(host: str, root: Path) -> None:
+def _validate_host_root(host: str, name: str, root: Path) -> None:
     if root.is_symlink() or not root.is_dir():
         raise Fab7Error("FAB7_HOST_ARTIFACT_INVALID", "Bundled host root is missing or symlinked")
     if host == "claude":
         marketplace_path = root / ".claude-plugin" / "marketplace.json"
-        manifest_path = root / "plugins" / "fab7" / ".claude-plugin" / "plugin.json"
-        component = root / "plugins" / "fab7" / "commands" / "init.md"
+        manifest_path = root / "plugins" / name / ".claude-plugin" / "plugin.json"
     else:
         marketplace_path = root / ".agents" / "plugins" / "marketplace.json"
-        manifest_path = root / "plugins" / "fab7" / ".codex-plugin" / "plugin.json"
-        component = root / "plugins" / "fab7" / "skills" / "init" / "SKILL.md"
-    for path in (marketplace_path, manifest_path, component):
+        manifest_path = root / "plugins" / name / ".codex-plugin" / "plugin.json"
+    for path in (marketplace_path, manifest_path):
         if path.is_symlink() or not path.is_file():
             raise Fab7Error("FAB7_HOST_ARTIFACT_INVALID", f"Bundled host artifact is missing: {path.name}")
     marketplace = _read_json(marketplace_path)
     manifest = _read_json(manifest_path)
-    if marketplace.get("name") != "fab7" or manifest.get("name") != "fab7":
+    if marketplace.get("name") != name or manifest.get("name") != name:
         raise Fab7Error("FAB7_HOST_ARTIFACT_INVALID", "Bundled host identity is invalid")
+    plugins = marketplace.get("plugins")
+    if not isinstance(plugins, list) or len(plugins) != 1 or not isinstance(plugins[0], dict):
+        raise Fab7Error("FAB7_HOST_ARTIFACT_INVALID", "Bundled marketplace plugins are invalid")
+    entry = plugins[0]
+    expected_source: str | dict[str, str]
+    if host == "claude":
+        expected_source = f"./plugins/{name}"
+    else:
+        expected_source = {"source": "local", "path": f"./plugins/{name}"}
+    if entry.get("name") != name or entry.get("source") != expected_source:
+        raise Fab7Error("FAB7_HOST_ARTIFACT_INVALID", "Bundled marketplace source is invalid")
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -190,7 +260,7 @@ def _marketplace_root(entry: dict[str, Any]) -> Path | None:
     return None
 
 
-def _plugin_installed(value: Any) -> bool:
+def _plugin_installed(value: Any, plugin_id: str) -> bool:
     entries = value.get("installed", []) if isinstance(value, dict) else value
     if not isinstance(entries, list):
         raise Fab7Error("FAB7_HOST_RESPONSE_INVALID", "Host plugin list has an invalid shape")
@@ -198,18 +268,24 @@ def _plugin_installed(value: Any) -> bool:
         if not isinstance(entry, dict):
             continue
         identity = entry.get("pluginId") or entry.get("id")
-        if identity == PLUGIN_ID and entry.get("installed", True) is not False:
+        if identity == plugin_id and entry.get("installed", True) is not False:
             return True
     return False
 
 
-def _result(host: str, status: str, root: Path) -> dict[str, Any]:
+def _result(host: str, name: str, status: str, root: Path) -> dict[str, Any]:
     activation = "Run /reload-plugins in Claude Code." if host == "claude" else "Start a new Codex session."
     return {
         "ok": True,
         "host": host,
-        "plugin": PLUGIN_ID,
+        "plugin": f"{name}@{name}",
         "marketplace": str(root),
         "status": status,
         "activation": activation,
     }
+
+
+def _canonical_name(name: str) -> bool:
+    return bool(name) and len(name) <= 63 and all(
+        character.islower() or character.isdigit() or character == "-" for character in name
+    ) and name[0].isalnum() and name[-1].isalnum()

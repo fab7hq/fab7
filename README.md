@@ -8,31 +8,47 @@ The proof core does not plan work, orchestrate agents, or define a methodology.
 The surrounding onboarding layer packages only the thin host skills needed to
 reach the deterministic Fab7 CLI.
 
-The repository implements the lean proof gate plus the local-source onboarding
-spine: a deterministic release builder, `install.sh`, explicit
-`fab7 install claude|codex` registration, and a version-pinned project
-installation beneath `.fab7/`. Network-release and Linux acceptance remain
-open. Extension distribution through
-[`fab7hq/ext-registry`](https://github.com/fab7hq/ext-registry) and the first
-extension, [`fab7hq/denim`](https://github.com/fab7hq/denim), are deferred.
-See [`docs/architecture/distribution.md`](docs/architecture/distribution.md);
-the remaining delivery gates are in
-[`docs/plans/onboarding.md`](docs/plans/onboarding.md).
+The repository implements the lean proof gate, released onboarding, and the
+`0.2.0` extension-distribution path: catalog refresh, registry or explicit-local
+installation, immutable snapshots, native Claude/Codex activation, diagnosis,
+and bounded uninstall. Muslin is the closure fixture;
+[`fab7hq/denim`](https://github.com/fab7hq/denim) remains deferred. See
+[`docs/architecture/distribution.md`](docs/architecture/distribution.md); the
+onboarding closure record is in
+[`docs/plans/onboarding.md`](docs/plans/onboarding.md), and registry work is
+tracked in [`docs/plans/ext-registry.md`](docs/plans/ext-registry.md).
+
+Local paths never enter the shared registry and never become runtime links.
 
 ## Install
 
 ```bash
-curl -fsSLo /tmp/fab7-install-v0.1.0.sh \
-  https://raw.githubusercontent.com/fab7hq/fab7/v0.1.0/install.sh
-bash /tmp/fab7-install-v0.1.0.sh --version 0.1.0
+curl -fsSL https://raw.githubusercontent.com/fab7hq/fab7/v0.2.0/install.sh | bash
 exec "$SHELL" -l
 fab7 --version
 fab7 install claude  # or: fab7 install codex
 ```
 
-The installer verifies the immutable `v0.1.0` source archive against its
-release checksum before building. Contributors can instead use the reviewed
-checkout path: `bash install.sh --source .`.
+The installer verifies the immutable `v0.2.0` source archive against its
+release checksum before building. Contributors can instead use a reviewed
+checkout: `bash install.sh --source .`.
+
+The registry extension path is:
+
+```bash
+fab7 ext refresh
+fab7 ext list
+fab7 ext install muslin --host claude  # or: codex
+fab7 ext doctor
+muslin start --json
+fab7 ext uninstall muslin --host claude
+```
+
+For explicit local extension development, replace the install command with:
+
+```bash
+fab7 ext install --local ../muslin --host claude  # or: codex
+```
 
 See [`RUNBOOK.md`](RUNBOOK.md) for the complete new-user journey, expected
 global and project layouts, first proof, clone repair, and troubleshooting.

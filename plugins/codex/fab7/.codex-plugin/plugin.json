@@ -1,7 +1,7 @@
 {
   "name": "fab7",
-  "version": "0.1.0",
-  "description": "Initialize and use a project-pinned Fab7 proof gate.",
+  "version": "0.2.0",
+  "description": "Initialize Fab7 and manage verified extensions.",
   "author": {
     "name": "Fab7"
   },
@@ -11,11 +11,11 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Fab7",
-    "shortDescription": "Initialize a project-pinned Fab7 proof gate.",
-    "longDescription": "Use the installed Fab7 CLI to initialize the current Git repository with a verified, project-pinned executable.",
+    "shortDescription": "Initialize Fab7 and manage extensions.",
+    "longDescription": "Use the installed Fab7 CLI to initialize a project, list reviewed extensions, and install registry or explicitly approved local extension packages.",
     "developerName": "Fab7",
     "category": "Productivity",
-    "capabilities": ["Execute local Fab7 commands"],
+    "capabilities": ["Execute local Fab7 commands", "Manage verified Fab7 extensions"],
     "defaultPrompt": "Initialize Fab7 in this repository."
   }
 }

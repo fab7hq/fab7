@@ -3,7 +3,7 @@ title: Fab7 Architecture
 type: architecture
 status: implemented
 owner: architecture
-last_updated: 2026-07-19
+last_updated: 2026-07-22
 authority_for:
   - runtime boundary
   - component responsibilities
@@ -13,10 +13,10 @@ authority_for:
 # Fab7 architecture
 
 The Fab7 proof core is one dependency-free Python package and one optional
-GitHub Action. The repository now also contains a thin onboarding layer: a
-deterministic release builder, filesystem installer, and two release-bundled
-host plugins. There is still no service, database, daemon, provider adapter, or
-extension registry.
+GitHub Action. A thin distribution layer owns deterministic releases, global
+and project installation, two host integrations, and external extension
+distribution. There is still no service, database, daemon, provider adapter,
+or extension runtime in core.
 
 ## Complete flow
 
@@ -49,6 +49,8 @@ fab7 ci-check
 | `errors.py` | stable failure and result envelopes |
 | `install.py` | closed release and project manifests, global selection, project pinning, repair, and dispatch |
 | `hosts.py` | literal bounded Claude Code and Codex plugin registration commands |
+| `extensions.py` | catalog refresh/list plus immutable install, diagnosis, host lifecycle, and uninstall |
+| `extension_package.py` | closed local-source, ZIP package, file, identity, compatibility, and receipt validation |
 
 Dependencies point inward to these literal functions. There is no interface
 hierarchy because no second implementation exists.
@@ -58,6 +60,12 @@ hierarchy because no second implementation exists.
 ```text
 fab7 init
 fab7 install claude|codex
+fab7 ext refresh
+fab7 ext list [--refresh] [--catalog PATH]
+fab7 ext install NAME --host HOST [--catalog PATH]
+fab7 ext install --local PATH --host HOST
+fab7 ext doctor
+fab7 ext uninstall NAME --host HOST
 fab7 claim --work-item ID --summary TEXT
 fab7 verify --work-item ID --claim RECORD_ID -- COMMAND [ARGS...]
 fab7 ci-check [--work-item ID] [--base REF] [--head REF]
@@ -69,7 +77,7 @@ The GitHub Action builds the selected action revision, validates it against the
 tracked project pin, repairs the ignored local executable, and invokes
 `fab7 ci-check`; it has no independent policy or provider behavior.
 
-## Onboarding boundary — partially implemented
+## Onboarding boundary — implemented and owner-accepted
 
 The implemented local-source path adds a thin Fab7 installation plane without
 changing the dependency direction of the proof core:
@@ -99,16 +107,17 @@ accept agent prose as state. The user-global installation owns bootstrap and
 host registration; the project-local installation owns the selected Fab7
 executable for that repository. Only `.fab7/records/` remains proof history.
 
-The separate future extension plane will read `catalog.yaml` from
-[`fab7hq/ext-registry`](https://github.com/fab7hq/ext-registry), install Denim
-from [`fab7hq/denim`](https://github.com/fab7hq/denim), and let Denim call Fab7
-only through public commands and structured output. Neither external repository
-is part of the active onboarding plan.
+The extension plane refreshes a closed catalog from
+[`fab7hq/ext-registry`](https://github.com/fab7hq/ext-registry) and accepts
+either a registry name or an explicitly approved local source path. Both
+converge on one verified immutable installed-package layout and native host
+integration. Local development installs are digest-bound snapshots, not live
+links. [`fab7hq/muslin`](https://github.com/fab7hq/muslin) proves the boundary
+by calling Fab7 only through its public binary; Denim remains deferred.
 
 [`distribution.md`](distribution.md) owns the bootstrap, repository, layout,
-host, future registry, user-journey, and acceptance contracts. Its
-implementation status remains `in_progress` until the versioned network
-bootstrap, Linux matrix, and both host-native init invocations have current
-evidence.
+catalog, package, host, lifecycle, and release-evidence contracts. Extension
+implementation is complete locally; publication and a fresh network registry
+install remain release gates.
 
 See [`ledger.md`](ledger.md) for the persisted record and gate contract.

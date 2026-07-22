@@ -1,28 +1,39 @@
 schema_version: 1
-updated_at: "2026-07-20"
+updated_at: "2026-07-22"
 
 current_phase:
-  id: fab7-onboarding
-  name: Fab7 global, host, and project onboarding
-  status: implementing
-  active_plan: docs/plans/onboarding.md
+  id: fab7-extension-release
+  name: Fab7 extension distribution release
+  status: ready_for_release
+  active_plan: docs/plans/ext-registry.md
   implementation_authorized: true
-  repository: https://github.com/fab7hq/fab7
-  shipped_products:
-    - fab7
+  implementation: complete
+  publication: authorized_in_progress
+  external_ci: prepared_not_run
+  release_candidate: v0.2.0
+  repositories:
+    fab7: https://github.com/fab7hq/fab7
+    ext_registry: https://github.com/fab7hq/ext-registry
+    fixture: https://github.com/fab7hq/muslin
+  supported_sources:
+    - registry-release
+    - explicit-local-source
+  local_evidence:
+    deterministic_suite: passed_75
+    host_lifecycle: passed
+    hosts:
+      claude_code: 2.1.217
+      codex_cli: 0.144.6
+    fixture_version: 0.1.0
+    fixture_sha256: 4b105587a409d275fdf2a1712db6706a093ec0ad6fcfa42d6c7c022fcd93f9a1
   next_gate: >-
-    Prove the v0.1.0 default network bootstrap on macOS and Linux, then observe
-    /fab7:init and $fab7:init in fresh host sessions for the exact released
-    artifact.
+    Publish Fab7 v0.2.0, Muslin v0.1.0, and ext-registry in dependency order,
+    then run the fresh network registry-install observation before marking
+    Fab7 closed.
 
 future_phases:
-  - id: ext-registry
-    name: Fab7 extension registry
-    status: deferred
-    repository: https://github.com/fab7hq/ext-registry
-    catalog: catalog.yaml
   - id: denim
-    name: Denim first extension
+    name: Denim first product extension
     status: deferred
     repository: https://github.com/fab7hq/denim
 
@@ -32,17 +43,46 @@ authoritative:
   architecture_overview: docs/architecture/overview.md
   ledger_architecture: docs/architecture/ledger.md
   distribution_architecture: docs/architecture/distribution.md
+  onboarding_plan: docs/plans/onboarding.md
+  extension_distribution_plan: docs/plans/ext-registry.md
 
 completed_phases:
   - id: lean-baseline
     name: Fab7 claim and executed-evidence gate
     completed_at: "2026-07-19"
+  - id: fab7-onboarding
+    name: Fab7 global, host, and project onboarding
+    completed_at: "2026-07-20"
+    release: v0.1.0
+    decision: owner_accepted
+    evidence: operator_reported
+    residual_limits:
+      - Exact platform and host transcripts were not retained in the repository.
+      - Linux and Codex observations were not independently reproduced by the agent.
+  - id: extension-distribution-implementation
+    name: Registry and local-source extension distribution implementation
+    completed_at: "2026-07-22"
+    release_candidate: v0.2.0
+    decision: implementation_complete
+    evidence: agent_observed
+    residual_limits:
+      - Published network registry installation awaits the release gate.
+      - Authenticated model invocation of host-native extension commands was not run.
+      - Linux extension installation was not independently observed.
 
-open_decisions:
-  - id: ext-registry-contract
-    question: >-
-      What closed catalog.yaml schema, parser boundary, immutable refresh URL,
-      and release contract will the deferred extension phase use?
-    owner: product-and-engineering
-    gate: extension-registry-planning
+resolved_decisions:
+  - id: ext-registry-refresh
+    resolution: >-
+      Fetch only the fab7hq/ext-registry GitHub contents response for main,
+      retain its Git blob SHA and content digest, reject rollback or conflicting
+      same-version bytes, and replace the last-known-good pair only after full
+      validation.
+  - id: extension-package-contract
+    resolution: >-
+      Registry ZIPs and explicit local builds converge on one closed package,
+      immutable installation receipt, executable selector, host integration,
+      diagnosis, and uninstall path. Local source uses a manifest-fixed bounded
+      non-shell build and a dev-source-digest install identity.
+
+open_decisions: []
 historical_context: []

@@ -3,7 +3,7 @@ title: Fab7 Product Roadmap
 type: product
 status: accepted
 owner: product
-last_updated: 2026-07-19
+last_updated: 2026-07-22
 authority_for:
   - completed product capability
   - current exclusions
@@ -13,132 +13,105 @@ authority_for:
 
 # Fab7 product roadmap
 
-## Lean baseline — complete
+## Lean proof baseline — complete
 
-The repository contains one complete path:
+Fab7 has one dependency-free proof path: initialize `.fab7/records/`, append a
+closed claim or executed-evidence record, bind evidence to the tested Git
+commit and output digest, and fail readiness when the latest claim lacks fresh
+passing evidence. `audit`, `doctor`, the CLI, and the small composite action use
+the same deterministic contract.
 
-- initialize `.fab7/records/`;
-- append one of two closed record types: `claim` or `evidence`;
-- execute verification commands directly without a shell;
-- bind evidence to the tested Git commit and an output digest;
-- require fresh passing evidence for the latest claim;
-- reject malformed records, history rewrites, and post-verification code
-  changes;
-- inspect one work item with `audit` and validate setup with `doctor`; and
-- run the same gate through the small GitHub composite action.
+Fab7 still does not model plans, approval, arbitrary events, methodology, or
+agent prose as proof.
 
-The runtime uses only the Python standard library. A focused regression suite
-protects the ledger, gate, command execution, action, and full CLI path.
+## Fab7 onboarding — released and owner-accepted
 
-## Fab7 onboarding — in progress
-
-The next accepted outcome is a Fab7-only path from a fresh user account to a
-project-pinned installation in Claude Code or Codex:
+Release `v0.1.0` established the user and project path:
 
 ```text
-run the Fab7 bootstrap script
-    -> build and install Fab7 beneath ~/.fab7/
-    -> reload the shell so ~/.fab7/bin is on PATH
+install.sh
+    -> verified immutable Fab7 beneath ~/.fab7/
+    -> ~/.fab7/bin on the user's PATH
 
 fab7 install claude|codex
-    -> register the bundled Fab7 plugin through the host's native CLI
+    -> release-bundled Fab7 plugin through the native host CLI
 
-invoke /fab7:init or $fab7:init
-    -> invoke the user-global Fab7 binary
-    -> create a pinned project-local Fab7 installation beneath .fab7/
-    -> initialize or preserve .fab7/records/
-
-invoke a proof command
-    -> validate the project contract and executable digest
-    -> execute the project-pinned Fab7 binary
+/fab7:init or $fab7:init
+    -> tracked .fab7/project.json and .fab7/.gitignore
+    -> ignored, digest-verified .fab7/bin/fab7
+    -> preserved .fab7/records/
 ```
 
-### Accepted scope
+The owner accepted source and network onboarding on 2026-07-20. Historical
+evidence limits—unretained exact transcripts and incomplete independent Linux
+and Codex observations—remain in the
+[`onboarding plan`](../plans/onboarding.md#closure).
 
-- [`fab7hq/fab7`](https://github.com/fab7hq/fab7) owns `install.sh`, release
-  artifacts, the CLI, bundled Fab7 host plugins, and onboarding contracts;
-- `install.sh` fetches one immutable Fab7 release, verifies it, builds it in an
-  operating-system temporary directory, installs it beneath `~/.fab7/`,
-  atomically exposes `~/.fab7/bin/fab7`, and idempotently adds that bin
-  directory to the detected shell's startup `PATH`;
-- `fab7 install claude` and `fab7 install codex` install the bundled Fab7 host
-  plugin through each host's supported marketplace and plugin commands;
-- `fab7 init` uses the verified user-global installation to create a second,
-  version-pinned project installation at `.fab7/bin/fab7`, keeps generated
-  executable files ignored, and preserves `.fab7/project.json`,
-  `.fab7/.gitignore`, and `.fab7/records/` as repository-owned state; and
-- proof commands fail closed when the tracked pin, local executable, digest,
-  permissions, or path boundary is missing or invalid.
+## Fab7 extension distribution — implementation complete, release pending
 
-The detailed component, trust, state, and host contracts live in
-[`../architecture/distribution.md`](../architecture/distribution.md).
+The `0.2.0` release candidate adds one lean extension path without loading
+extensions into the proof core:
 
-### Current implementation
+- refresh and list the closed `fab7hq/ext-registry` catalog while preserving a
+  validated last-known-good copy and its Git blob/content identity;
+- install an exact reviewed registry release or one explicitly approved local
+  source tree through the same closed package validator;
+- keep all extension bytes in immutable user-global snapshots beneath
+  `~/.fab7/extensions/` and expose only a stable executable selector;
+- activate complete package-bundled Claude Code and Codex plugins through their
+  native CLIs;
+- report registry or local origin, selected version, install identity, and
+  active hosts;
+- diagnose the catalog plus selected and inactive installed snapshots; and
+- uninstall one host at a time, deleting the extension only after its final
+  integration is removed.
 
-The repository now contains the deterministic release builder, local-source
-bootstrap, global and project manifest validation, pinned executable repair and
-dispatch, action integration, release-bundled Claude Code and Codex plugins,
-and native idempotent host registration. These are implemented contracts, not
-phase closure: the exact evidence and residual gates are recorded in the
-[`active plan`](../plans/onboarding.md#current-implementation-evidence).
+The thin host surfaces are `/fab7:ext-list`, `/fab7:ext-install`,
+`$fab7:ext-list`, and `$fab7:ext-install`. Local source execution remains an
+explicit human grant; the skill resolves and displays the source before asking
+Fab7 to run the manifest-fixed bounded build.
 
-### Exit gate
+[`fab7hq/muslin`](https://github.com/fab7hq/muslin) is the minimal closure
+fixture. Its only runtime behavior is `muslin start`, which calls the public
+`fab7 --version` binary. It is not a product workflow and adds no shared state.
+Its reproducible `0.1.0` ZIP has SHA-256
+`4b105587a409d275fdf2a1712db6706a093ec0ad6fcfa42d6c7c022fcd93f9a1`.
 
-The phase remains incomplete until fresh disposable user state proves:
+On 2026-07-22 the source lane passed in a fresh isolated macOS home with Claude
+Code `2.1.217` and Codex CLI `0.144.6`: both hosts discovered Muslin,
+`muslin start` observed Fab7 `0.2.0`, diagnosis passed, partial uninstall
+preserved the other host, and final uninstall removed only Muslin state.
 
-- repeatable install and shell activation on supported macOS and Linux Bash and
-  Zsh environments;
-- native Fab7 plugin installation and discovery in Claude Code and Codex;
-- `/fab7:init` and `$fab7:init` atomically create the project-local executable,
-  select it for proof commands, reject mismatched or symlinked local state, and
-  leave only the project manifest, ignore rules, and proof records eligible for
-  Git;
-- reinstallation and project repair are idempotent, while failure preserves the
-  previous installation, records, shell profile, and unrelated host state; and
-- documentation records exact versions, checks, failures, not-run gates, and
-  remaining platform limits.
+### Release boundary
 
-Implementation was authorized on 2026-07-19. The active finite plan is
-[`../plans/onboarding.md`](../plans/onboarding.md); completion still requires
-its exact deterministic and live-host exit gates.
+Fab7 is not closed merely because source implementation passed. The remaining
+human-controlled sequence is:
 
-## `ext-registry` and Denim — deferred
+1. publish Fab7 `v0.2.0` and its checksum asset;
+2. publish Muslin `v0.1.0` and its exact ZIP;
+3. publish `ext-registry` with one Muslin entry and its prepared CI pinned to
+   released Fab7 `v0.2.0`; and
+4. observe a fresh network catalog refresh, registry-name install, invocation,
+   diagnosis, partial uninstall, and final removal.
 
-Extension discovery and the first extension are separate follow-on products:
+The [`extension closure plan`](../plans/ext-registry.md) owns exact proof and
+stop rules. [`status.yaml`](../status.yaml) remains `ready_for_release` until
+the network observation passes or the owner explicitly accepts a recorded
+limit.
 
-- [`fab7hq/ext-registry`](https://github.com/fab7hq/ext-registry) will own one
-  reviewed, versioned `catalog.yaml` and no extension runtime artifacts;
-- [`fab7hq/denim`](https://github.com/fab7hq/denim) will own the first extension
-  runtime, manifest, host plugins, release artifacts, checksums, and tests;
-- `fab7 ext list`, `install`, `doctor`, and `uninstall` will provide the
-  deterministic binary path behind the future host skills; and
-- Denim will call Fab7 only through its public binary and structured output.
+## Denim — deferred
 
-Neither repository is implemented by the active onboarding plan. Before this
-phase starts, product and engineering must accept the `catalog.yaml` schema and
-parser boundary, immutable registry refresh URL, extension release contract,
-and current Claude Code and Codex activation behavior.
-
-Its eventual complete journey is:
-
-```text
-/fab7:ext-list or $fab7:ext-list
-    -> validate ~/.fab7/catalog.yaml from fab7hq/ext-registry
-
-/fab7:ext-install denim or $fab7:ext-install denim
-    -> install a verified prebuilt release from fab7hq/denim
-    -> register the release-bundled host plugin
-
-/denim:start or $denim:start
-    -> execute the installed Denim binary
-    -> reach project-pinned Fab7 only through the stable fab7 command
-```
+[`fab7hq/denim`](https://github.com/fab7hq/denim) remains the first product
+extension, but it is not part of Fab7 closure. Denim will own its product
+runtime, manifest, host plugins, artifacts, checksums, and tests and will call
+Fab7 only through public commands. Its requirements and implementation need a
+separate authorization.
 
 ## Still excluded
 
-There is no generic record framework, configurable policy engine, fabric
-registry, planning or orchestration layer, provider registry, service,
-performance suite, or comparative agent evaluation. Distribution also excludes
-third-party submission, ratings, ranking, catalog federation, dependency
-solving, background updates, arbitrary install hooks, cross-extension imports,
-private registries, and unsupported-host compatibility shims.
+There is no generic record framework, extension runtime in core, methodology,
+planning or orchestration layer, configurable policy engine, provider registry,
+service, daemon, dashboard, third-party submission workflow, catalog
+federation, dependency solver, background updater, install hook, private
+registry, cross-extension import contract, mutable source link, or
+unsupported-host compatibility shim.

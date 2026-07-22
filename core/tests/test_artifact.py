@@ -7,6 +7,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from fab7 import __version__
+
 
 ROOT = Path(__file__).resolve().parents[2]
 BUILDER = ROOT / "scripts" / "build_zipapp.py"
@@ -56,7 +58,7 @@ def test_release_tree_is_deterministic_and_executable(tmp_path: Path) -> None:
         check=False,
     )
     assert result.returncode == 0, result.stderr
-    assert result.stdout.strip() == "0.1.0"
+    assert result.stdout.strip() == __version__
 
     manifest = json.loads((first / "manifest.json").read_text())
     assert set(manifest) == {
@@ -65,6 +67,10 @@ def test_release_tree_is_deterministic_and_executable(tmp_path: Path) -> None:
     assert manifest["executable_sha256"] == "sha256:" + hashlib.sha256(executable.read_bytes()).hexdigest()
     assert (first / "hosts/claude/.claude-plugin/marketplace.json").is_file()
     assert (first / "hosts/codex/.agents/plugins/marketplace.json").is_file()
+    assert (first / "hosts/claude/plugins/fab7/commands/ext-list.md").is_file()
+    assert (first / "hosts/claude/plugins/fab7/commands/ext-install.md").is_file()
+    assert (first / "hosts/codex/plugins/fab7/skills/ext-list/SKILL.md").is_file()
+    assert (first / "hosts/codex/plugins/fab7/skills/ext-install/SKILL.md").is_file()
 
 
 def test_builder_check_mode_is_clean() -> None:

@@ -8,6 +8,7 @@ from pathlib import Path
 
 import pytest
 
+from fab7 import __version__
 from fab7.errors import Fab7Error
 from fab7.install import init_project, validate_project
 
@@ -41,14 +42,14 @@ def _run_installer(test_home: Path, source: Path = ROOT) -> subprocess.Completed
     )
 
 
-def _copy_build_source(target: Path, version: str = "0.1.0") -> Path:
+def _copy_build_source(target: Path, version: str = __version__) -> Path:
     (target / "core").mkdir(parents=True)
     shutil.copytree(ROOT / "core/fab7", target / "core/fab7")
     shutil.copytree(ROOT / "scripts", target / "scripts")
     shutil.copytree(ROOT / "plugins", target / "plugins")
-    if version != "0.1.0":
+    if version != __version__:
         init = target / "core/fab7/__init__.py"
-        init.write_text(init.read_text().replace('"0.1.0"', f'"{version}"'))
+        init.write_text(init.read_text().replace(f'"{__version__}"', f'"{version}"'))
         for manifest in (
             target / "plugins/claude/fab7/.claude-plugin/plugin.json",
             target / "plugins/codex/fab7/.codex-plugin/plugin.json",
@@ -83,7 +84,7 @@ def test_installer_is_idempotent_and_updates_path_after_success(tmp_path: Path) 
         check=False,
     )
     assert version.returncode == 0
-    assert version.stdout.strip() == "0.1.0"
+    assert version.stdout.strip() == __version__
 
 
 def test_failed_build_does_not_mutate_install_or_profile(tmp_path: Path) -> None:
@@ -129,13 +130,13 @@ def test_profile_failure_restores_selection_and_removes_new_release(tmp_path: Pa
     profile = test_home / ".zshrc"
     profile.write_text(profile.read_text().replace("# <<< fab7 <<<", "# malformed fab7 end"))
     malformed = profile.read_text()
-    next_source = _copy_build_source(tmp_path / "next-source", "0.1.1")
+    next_source = _copy_build_source(tmp_path / "next-source", "0.2.1")
 
     failed = _run_installer(test_home, next_source)
     assert failed.returncode != 0
     assert os.readlink(selector) == prior_target
     assert profile.read_text() == malformed
-    assert not (test_home / ".fab7/runtime/0.1.1").exists()
+    assert not (test_home / ".fab7/runtime/0.2.1").exists()
 
 
 def test_project_init_creates_pin_and_repairs_binary(repo: Path, fab7_home: Path) -> None:
