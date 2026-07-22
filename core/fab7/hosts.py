@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .errors import Fab7Error
-from .install import selected_release
+from .install import fab7_home, selected_release
 
 
 HOSTS = {"claude", "codex"}
@@ -60,29 +60,30 @@ def install_plugin(
     plugin_added = False
     if configured is not None:
         configured_root = _marketplace_root(configured)
-        if configured_root is None or configured_root.resolve() != host_root:
+        if configured_root is None:
             raise Fab7Error(
                 "FAB7_HOST_MARKETPLACE_CONFLICT",
                 f"A different marketplace already owns the {name} name",
                 {"host": host},
             )
+        configured_root = configured_root.resolve()
+        if configured_root != host_root:
+            if not _same_managed_marketplace_family(host, name, configured_root, host_root):
+                raise Fab7Error(
+                    "FAB7_HOST_MARKETPLACE_CONFLICT",
+                    f"A different marketplace already owns the {name} name",
+                    {"host": host},
+                )
+            return _migrate_plugin(host, name, configured_root, host_root, run)
     else:
-        if host == "claude":
-            command = ["claude", "plugin", "marketplace", "add", str(host_root), "--scope", "user"]
-        else:
-            command = ["codex", "plugin", "marketplace", "add", str(host_root), "--json"]
-        _require_success(run(command), "marketplace add")
+        _add_marketplace(run, host, host_root)
         marketplace_added = True
 
     try:
         plugins = _json_result(run([host, "plugin", "list", "--json"]), "plugin list")
         if _plugin_installed(plugins, plugin_id):
             return _result(host, name, "already_installed", host_root)
-        if host == "claude":
-            command = ["claude", "plugin", "install", plugin_id, "--scope", "user"]
-        else:
-            command = ["codex", "plugin", "add", plugin_id, "--json"]
-        _require_success(run(command), "plugin install")
+        _add_plugin(run, host, plugin_id)
         plugin_added = True
         installed = _json_result(run([host, "plugin", "list", "--json"]), "plugin verification")
         if not _plugin_installed(installed, plugin_id):
@@ -100,6 +101,84 @@ def install_plugin(
                 _best_effort(run, ["codex", "plugin", "marketplace", "remove", name, "--json"])
         raise
     return _result(host, name, "installed", host_root)
+
+
+def _migrate_plugin(
+    host: str,
+    name: str,
+    previous_root: Path,
+    host_root: Path,
+    run: Runner,
+) -> dict[str, Any]:
+    plugin_id = f"{name}@{name}"
+    plugins = _json_result(run([host, "plugin", "list", "--json"]), "plugin list")
+    previous_plugin_installed = _plugin_installed(plugins, plugin_id)
+    previous_plugin_removed = False
+    previous_marketplace_removed = False
+    new_marketplace_added = False
+    new_plugin_added = False
+    try:
+        if previous_plugin_installed:
+            _remove_plugin(run, host, plugin_id)
+            previous_plugin_removed = True
+        _remove_marketplace(run, host, name)
+        previous_marketplace_removed = True
+        _add_marketplace(run, host, host_root)
+        new_marketplace_added = True
+        _add_plugin(run, host, plugin_id)
+        new_plugin_added = True
+        installed = _json_result(run([host, "plugin", "list", "--json"]), "plugin verification")
+        if not _plugin_installed(installed, plugin_id):
+            raise Fab7Error("FAB7_HOST_INSTALL_FAILED", f"Host did not report {name} as installed")
+    except Fab7Error as exc:
+        failures: list[str] = []
+        for needed, operation in (
+            (new_plugin_added, lambda: _remove_plugin(run, host, plugin_id)),
+            (new_marketplace_added, lambda: _remove_marketplace(run, host, name)),
+            (previous_marketplace_removed, lambda: _add_marketplace(run, host, previous_root)),
+            (previous_plugin_removed, lambda: _add_plugin(run, host, plugin_id)),
+        ):
+            if not needed:
+                continue
+            try:
+                operation()
+            except Fab7Error as rollback_exc:
+                failures.append(rollback_exc.code)
+        changed = any(
+            (
+                previous_plugin_removed,
+                previous_marketplace_removed,
+                new_marketplace_added,
+                new_plugin_added,
+            )
+        )
+        if changed and not failures:
+            try:
+                restored_marketplaces = _json_result(
+                    run([host, "plugin", "marketplace", "list", "--json"]),
+                    "marketplace rollback verification",
+                )
+                restored = _find_marketplace(restored_marketplaces, name)
+                restored_root = _marketplace_root(restored) if restored is not None else None
+                if restored_root is None or restored_root.resolve() != previous_root:
+                    failures.append("FAB7_HOST_MARKETPLACE_CONFLICT")
+                if previous_plugin_installed:
+                    restored_plugins = _json_result(
+                        run([host, "plugin", "list", "--json"]),
+                        "plugin rollback verification",
+                    )
+                    if not _plugin_installed(restored_plugins, plugin_id):
+                        failures.append("FAB7_HOST_INSTALL_FAILED")
+            except Fab7Error as rollback_exc:
+                failures.append(rollback_exc.code)
+        if failures:
+            raise Fab7Error(
+                "FAB7_HOST_ROLLBACK_FAILED",
+                "Host marketplace migration failed and rollback did not complete",
+                {"host": host, "failures": failures},
+            ) from exc
+        raise
+    return _result(host, name, "migrated", host_root)
 
 
 def uninstall_plugin(
@@ -231,6 +310,78 @@ def _best_effort(run: Runner, command: list[str]) -> None:
         run(command)
     except (Fab7Error, OSError):
         pass
+
+
+def _add_marketplace(run: Runner, host: str, root: Path) -> None:
+    if host == "claude":
+        command = ["claude", "plugin", "marketplace", "add", str(root), "--scope", "user"]
+    else:
+        command = ["codex", "plugin", "marketplace", "add", str(root), "--json"]
+    _require_success(run(command), "marketplace add")
+
+
+def _remove_marketplace(run: Runner, host: str, name: str) -> None:
+    if host == "claude":
+        command = ["claude", "plugin", "marketplace", "remove", name, "--scope", "user"]
+    else:
+        command = ["codex", "plugin", "marketplace", "remove", name, "--json"]
+    _require_success(run(command), "marketplace remove")
+
+
+def _add_plugin(run: Runner, host: str, plugin_id: str) -> None:
+    if host == "claude":
+        command = ["claude", "plugin", "install", plugin_id, "--scope", "user"]
+    else:
+        command = ["codex", "plugin", "add", plugin_id, "--json"]
+    _require_success(run(command), "plugin install")
+
+
+def _remove_plugin(run: Runner, host: str, plugin_id: str) -> None:
+    if host == "claude":
+        command = ["claude", "plugin", "uninstall", plugin_id, "--scope", "user"]
+    else:
+        command = ["codex", "plugin", "remove", plugin_id, "--json"]
+    _require_success(run(command), "plugin uninstall")
+
+
+def _same_managed_marketplace_family(
+    host: str,
+    name: str,
+    previous_root: Path,
+    host_root: Path,
+) -> bool:
+    previous_family = _managed_marketplace_family(host, name, previous_root)
+    current_family = _managed_marketplace_family(host, name, host_root)
+    if previous_family is None or current_family is None or previous_family != current_family:
+        return False
+    if previous_root.exists():
+        try:
+            _validate_host_root(host, name, previous_root)
+        except Fab7Error:
+            return False
+    return True
+
+
+def _managed_marketplace_family(host: str, name: str, root: Path) -> Path | None:
+    home = fab7_home()
+    root = root.resolve()
+    try:
+        relative = root.relative_to(home)
+    except ValueError:
+        return None
+    parts = relative.parts
+    if name == "fab7":
+        if len(parts) != 4 or parts[0] != "runtime" or parts[2:] != ("hosts", host):
+            return None
+        return home / "runtime"
+    if (
+        len(parts) != 5
+        or parts[0] != "extensions"
+        or parts[1] != name
+        or parts[3:] != ("hosts", host)
+    ):
+        return None
+    return home / "extensions" / name
 
 
 def _find_marketplace(value: Any, name: str) -> dict[str, Any] | None:

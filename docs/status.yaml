@@ -2,38 +2,28 @@ schema_version: 1
 updated_at: "2026-07-22"
 
 current_phase:
-  id: fab7-extension-release
-  name: Fab7 extension distribution release
-  status: completed
-  active_plan: docs/plans/ext-registry.md
+  id: marketplace-migration
+  name: Managed host marketplace migration
+  status: ready_for_release
+  active_plan: docs/plans/marketplace-migration.md
   implementation_authorized: true
   implementation: complete
-  publication: complete
-  external_ci: passed
-  release: v0.2.0
+  publication: awaiting_owner_authorization
+  external_ci: not_run
+  release_candidate: v0.2.1
   repositories:
     fab7: https://github.com/fab7hq/fab7
-    ext_registry: https://github.com/fab7hq/ext-registry
-    fixture: https://github.com/fab7hq/muslin
-  supported_sources:
-    - registry-release
-    - explicit-local-source
   evidence:
-    deterministic_suite: passed_75
-    local_host_lifecycle: passed
-    network_host_lifecycle: passed
+    deterministic_suite: passed_84
+    release_build: deterministic
+    fab7_migration: passed_from_0.1.0_to_0.2.1
+    extension_migration: passed_from_muslin_0.1.0_to_0.1.1
     hosts:
       claude_code: 2.1.217
       codex_cli: 0.144.6
-    fixture_version: 0.1.0
-    fixture_sha256: 4b105587a409d275fdf2a1712db6706a093ec0ad6fcfa42d6c7c022fcd93f9a1
-    registry_blob_sha: 0c43de37b2ea4a6c73d665d9b904105a3332aef8
-    registry_content_sha256: 27d3986ab65ac92c1d85022af51cbbe62b063745eae63e4d282c28c0827e429b
-    ci_runs:
-      fab7: https://github.com/fab7hq/fab7/actions/runs/29914449524
-      muslin: https://github.com/fab7hq/muslin/actions/runs/29914582862
-      ext_registry: https://github.com/fab7hq/ext-registry/actions/runs/29914650345
-  next_gate: none
+  next_gate: >-
+    Obtain explicit owner authorization, publish Fab7 v0.2.1 with its source
+    checksum, and repeat the managed upgrade from the immutable network release.
 
 future_phases:
   - id: denim
@@ -49,6 +39,7 @@ authoritative:
   distribution_architecture: docs/architecture/distribution.md
   onboarding_plan: docs/plans/onboarding.md
   extension_distribution_plan: docs/plans/ext-registry.md
+  marketplace_migration_plan: docs/plans/marketplace-migration.md
 
 completed_phases:
   - id: lean-baseline

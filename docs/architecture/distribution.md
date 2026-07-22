@@ -23,13 +23,14 @@ through its public binary.
 
 The onboarding path is released and owner-accepted at `v0.1.0`. Extension
 distribution is released at `v0.2.0`; its immutable network-registry lifecycle
-was observed before closure.
+was observed before closure. The implemented `v0.2.1` maintenance candidate
+adds ownership-aware marketplace migration.
 
 ## Repository ownership
 
 | Repository | Current state | Owns |
 |---|---|---|
-| [`fab7hq/fab7`](https://github.com/fab7hq/fab7) | released `v0.2.0` | proof core, installer, CLI, host plugins, catalog validator, and extension installer |
+| [`fab7hq/fab7`](https://github.com/fab7hq/fab7) | released `v0.2.0`; `v0.2.1` maintenance candidate | proof core, installer, CLI, host plugins, catalog validator, and extension installer |
 | [`fab7hq/ext-registry`](https://github.com/fab7hq/ext-registry) | released `v0.1.0` | one reviewed `catalog.yaml` and CI pinned to released Fab7; no extension source or artifacts |
 | [`fab7hq/muslin`](https://github.com/fab7hq/muslin) | released `v0.1.0` fixture | deterministic closure fixture, package artifact, host plugins, and tests |
 | [`fab7hq/denim`](https://github.com/fab7hq/denim) | deferred | first product extension when separately authorized |
@@ -127,8 +128,13 @@ block to the chosen shell profile. `--source PATH` is the reviewed-checkout
 lane used for development and release validation.
 
 `fab7 install claude|codex` validates the release-bundled marketplace root,
-uses literal bounded native host commands, rejects marketplace name conflicts,
-verifies plugin discovery, and reports the required reload or restart action.
+uses literal bounded native host commands, verifies plugin discovery, and
+reports the required reload or restart action. If the same name points to an
+older root in the exact selected `FAB7_HOME/runtime` family, Fab7 validates the
+surviving old artifacts, replaces the registration through the host CLI, and
+reports `migrated`. Another home, invalid old root, or unrelated source remains
+a marketplace conflict. A failed replacement restores and verifies the prior
+registration or reports an explicit rollback failure.
 
 ## Catalog contract and refresh
 
@@ -186,6 +192,10 @@ another host is active, Fab7 rejects implicit migration; the user must
 explicitly uninstall those host integrations before selecting changed bytes.
 Only the selected snapshot may claim active integrations, and `ext doctor`
 validates selected and inactive snapshots.
+
+The host registration layer applies the same ownership rule to an extension:
+only roots beneath the exact `FAB7_HOME/extensions/<name>` family may replace
+one another. It never treats a matching marketplace name alone as ownership.
 
 Uninstall first removes only the named host integration. The executable and
 package remain while another host is active. Removing the final host deletes

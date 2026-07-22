@@ -26,13 +26,13 @@ from fab7.extensions import (
 )
 
 
-def _identity() -> dict[str, object]:
+def _identity(version: str = "0.1.0") -> dict[str, object]:
     major, minor, _patch = (int(part) for part in __version__.split("."))
     return {
         "name": "muslin",
         "publisher": "fab7hq",
         "repository": "https://github.com/fab7hq/muslin",
-        "version": "0.1.0",
+        "version": version,
         "fab7_min": __version__,
         "fab7_max_exclusive": f"{major}.{minor + 1}.0",
         "executable": "muslin",
@@ -50,8 +50,8 @@ def _digest(path: Path) -> str:
     return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def _make_package(root: Path) -> Path:
-    identity = _identity()
+def _make_package(root: Path, version: str = "0.1.0") -> Path:
+    identity = _identity(version)
     executable = root / "bin/muslin"
     executable.parent.mkdir(parents=True)
     executable.write_text(
@@ -68,7 +68,7 @@ def _make_package(root: Path) -> Path:
     )
     _write_json(
         root / "hosts/claude/plugins/muslin/.claude-plugin/plugin.json",
-        {"name": "muslin", "version": "0.1.0", "commands": "./commands/"},
+        {"name": "muslin", "version": version, "commands": "./commands/"},
     )
     command = root / "hosts/claude/plugins/muslin/commands/start.md"
     command.parent.mkdir(parents=True)
@@ -80,7 +80,7 @@ def _make_package(root: Path) -> Path:
     )
     _write_json(
         root / "hosts/codex/plugins/muslin/.codex-plugin/plugin.json",
-        {"name": "muslin", "version": "0.1.0", "skills": "./skills/"},
+        {"name": "muslin", "version": version, "skills": "./skills/"},
     )
     skill = root / "hosts/codex/plugins/muslin/skills/start/SKILL.md"
     skill.parent.mkdir(parents=True)
@@ -236,6 +236,63 @@ def test_registry_install_verifies_artifact_and_uses_same_layout(tmp_path: Path)
             fetcher=lambda _url, _limit: archive + b"corrupt",
             plugin_installer=plugin,
         )
+
+
+def test_registry_version_upgrade_migrates_host_and_retains_previous_snapshot(
+    tmp_path: Path,
+) -> None:
+    home = tmp_path / ".fab7"
+    plugins = ManagedPluginRecorder()
+    installations: list[Path] = []
+    statuses: list[str] = []
+
+    for version in ("0.1.0", "0.2.0"):
+        package = _make_package(tmp_path / f"package-{version}", version)
+        archive = _archive(package, tmp_path / f"muslin-{version}.zip")
+        entry = {
+            **_identity(version),
+            "artifact": {
+                "url": (
+                    "https://github.com/fab7hq/muslin/releases/download/"
+                    f"v{version}/muslin-{version}.zip"
+                ),
+                "sha256": "sha256:" + hashlib.sha256(archive).hexdigest(),
+            },
+        }
+        catalog = tmp_path / f"catalog-{version}.yaml"
+        _write_json(
+            catalog,
+            {
+                "schema": 1,
+                "registry": "fab7hq/ext-registry",
+                "catalog_version": version,
+                "extensions": [entry],
+            },
+        )
+
+        result = install_registry_extension(
+            "muslin",
+            "codex",
+            catalog_path=catalog,
+            home=home,
+            fetcher=lambda _url, _limit, data=archive: data,
+            plugin_installer=plugins.install,
+            plugin_uninstaller=plugins.uninstall,
+        )
+        assert result["install_id"] == version
+        statuses.append(result["status"])
+        installations.append(home / "extensions/muslin" / version)
+
+    assert statuses == ["installed", "migrated"]
+    assert (home / "bin/muslin").resolve().parent.parent == installations[1]
+    assert json.loads((installations[0] / "manifest.json").read_text())["integrations"] == []
+    assert json.loads((installations[1] / "manifest.json").read_text())["integrations"] == ["codex"]
+    assert plugins.events == [
+        ("install", "codex", installations[0] / "hosts/codex"),
+        ("uninstall", "codex", installations[0] / "hosts/codex"),
+        ("install", "codex", installations[1] / "hosts/codex"),
+    ]
+    assert extension_doctor(home=home)["snapshot_count"] == 2
 
 
 def test_host_failure_preserves_previous_selection(tmp_path: Path) -> None:

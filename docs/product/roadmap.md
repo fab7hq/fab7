@@ -98,6 +98,19 @@ The [`extension closure plan`](../plans/ext-registry.md) owns exact proof and
 residual limits. [`status.yaml`](../status.yaml) records Fab7 closure as
 completed.
 
+### Marketplace migration maintenance — implementation complete
+
+The `v0.2.1` maintenance candidate fixes the upgrade collision exposed after
+`v0.2.0`: installing Fab7 or an extension at a different version now migrates
+an older marketplace only when both roots are provably in the same managed
+Fab7 family. The operation removes and recreates the native host registration,
+verifies the new plugin, and rolls back to the prior plugin on failure.
+Unrelated same-name marketplaces still fail closed, and one host command still
+cannot migrate another active extension host implicitly.
+
+The [`marketplace migration plan`](../plans/marketplace-migration.md) owns the
+completed proof and the remaining explicit `v0.2.1` publication gate.
+
 ## Denim — deferred
 
 [`fab7hq/denim`](https://github.com/fab7hq/denim) remains the first product

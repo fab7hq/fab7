@@ -571,9 +571,13 @@ def _install_prepared_locked(
     return {
         "ok": True,
         "status": (
-            "installed"
-            if installed_new
-            else ("already_installed" if already_integrated else "integrated")
+            "migrated"
+            if migrating
+            else (
+                "installed"
+                if installed_new
+                else ("already_installed" if already_integrated else "integrated")
+            )
         ),
         "name": name,
         "version": package["version"],

@@ -130,13 +130,15 @@ def test_profile_failure_restores_selection_and_removes_new_release(tmp_path: Pa
     profile = test_home / ".zshrc"
     profile.write_text(profile.read_text().replace("# <<< fab7 <<<", "# malformed fab7 end"))
     malformed = profile.read_text()
-    next_source = _copy_build_source(tmp_path / "next-source", "0.2.1")
+    major, minor, patch = (int(part) for part in __version__.split("."))
+    next_version = f"{major}.{minor}.{patch + 1}"
+    next_source = _copy_build_source(tmp_path / "next-source", next_version)
 
     failed = _run_installer(test_home, next_source)
     assert failed.returncode != 0
     assert os.readlink(selector) == prior_target
     assert profile.read_text() == malformed
-    assert not (test_home / ".fab7/runtime/0.2.1").exists()
+    assert not (test_home / ".fab7/runtime" / next_version).exists()
 
 
 def test_project_init_creates_pin_and_repairs_binary(repo: Path, fab7_home: Path) -> None:

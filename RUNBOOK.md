@@ -120,9 +120,10 @@ session start:
 codex
 ```
 
-The structured install result must report `installed` or
-`already_installed`. If it reports an error, stop before project initialization
-and use the troubleshooting table below.
+The structured install result must report `installed`, `already_installed`, or
+`migrated`. A migration means Fab7 replaced a validated older marketplace from
+the same managed home. If it reports an error, stop before project
+initialization and use the troubleshooting table below.
 
 ## 4. Initialize a project
 
@@ -231,7 +232,8 @@ the ignored executable. It does not silently change a project's Fab7 version.
 | `fab7: command not found` | Run `exec "$SHELL" -l`, then confirm `~/.fab7/bin` is on `PATH`. |
 | `FAB7_GLOBAL_NOT_INSTALLED` | Run the installation step before `fab7 init` or host registration. |
 | `FAB7_HOST_MISSING` | Install the selected host CLI and confirm `claude` or `codex` is on `PATH`. |
-| `FAB7_HOST_MARKETPLACE_CONFLICT` | A different source already owns the `fab7` marketplace name. Inspect `claude plugin marketplace list --json` or `codex plugin marketplace list --json`; do not overwrite it blindly. |
+| `FAB7_HOST_MARKETPLACE_CONFLICT` | The same name points outside the exact managed Fab7 family or its surviving artifacts are invalid. Inspect `claude plugin marketplace list --json` or `codex plugin marketplace list --json`; do not overwrite it blindly. |
+| Fab7 `v0.2.0` points to an older managed runtime | Before `v0.2.1` is released, remove only `fab7@fab7`, remove the `fab7` marketplace through that host CLI, and rerun `fab7 install HOST`. Release `v0.2.1` performs this migration automatically. |
 | Plugin installed but command is absent | In Claude Code run `/reload-plugins`. For Codex, exit and start a new CLI session. |
 | `FAB7_PROJECT_NOT_INITIALIZED` | Run `fab7 init --json` inside the Git repository. |
 | `FAB7_PROJECT_EXECUTABLE_INVALID` | Run `fab7 init --json` to repair the ignored executable from the pinned global release. |

@@ -244,7 +244,7 @@ Tasks:
 - O033: implement literal bounded subprocess functions for Claude Code and
   Codex marketplace add, plugin add or install, discovery, and removal;
 - O034: add `fab7 install {claude,codex}` with structured output and stable
-  `installed`, `already_installed`, and `failed` results;
+  `installed`, `already_installed`, `migrated`, and failed results;
 - O035: fail before mutation when the host is missing, unsupported, or the
   bundled artifact is invalid; and
 - O036: report the host's required reload or new-session action without
