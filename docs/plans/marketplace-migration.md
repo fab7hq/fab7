@@ -47,13 +47,14 @@ a command does not migrate a second active host implicitly.
 - Focused tests cover Claude and Codex Fab7 release migration, extension
   snapshot migration, unrelated and invalid collisions, new-plugin failure
   rollback, and registry version `0.1.0` to `0.2.0` lifecycle migration.
-- A fresh isolated macOS home registered released Fab7 `0.1.0`, installed the
-  `0.2.1` source candidate, and observed `status: migrated` plus enabled
-  `fab7@fab7` version `0.2.1` in Claude Code `2.1.217` and Codex CLI `0.144.6`.
-- The same home migrated a real Codex Muslin marketplace from local version
-  `0.1.0` to `0.1.1`. Codex reported the new root and plugin version, `ext
-  doctor` reported two valid snapshots with only the new one integrated, and
-  `muslin start` observed Fab7 `0.2.1`.
+- Fresh isolated macOS homes registered released Fab7 `0.1.0` and `0.2.0`,
+  installed the `0.2.1` source candidate, and observed `status: migrated` plus
+  enabled `fab7@fab7` version `0.2.1` in Claude Code `2.1.217` and Codex CLI
+  `0.144.6`. Repeating each install returned `already_installed`.
+- The same boundary migrated real Claude and Codex Muslin marketplaces from
+  local version `0.1.0` to `0.1.1`. Both hosts reported the new root and plugin
+  version, `ext doctor` reported two valid snapshots with only the new one
+  integrated, and `muslin start` observed Fab7 `0.2.1`.
 - The release build is deterministic, shell syntax passes, and documentation
   status, links, and diff hygiene remain release gates.
 

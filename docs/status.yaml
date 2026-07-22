@@ -16,8 +16,13 @@ current_phase:
   evidence:
     deterministic_suite: passed_84
     release_build: deterministic
-    fab7_migration: passed_from_0.1.0_to_0.2.1
-    extension_migration: passed_from_muslin_0.1.0_to_0.1.1
+    fab7_migration:
+      released_0.1.0_to_candidate_0.2.1: passed
+      released_0.2.0_to_candidate_0.2.1: passed
+      repeated_install_after_migration: already_installed
+    extension_migration:
+      claude_muslin_0.1.0_to_0.1.1: passed
+      codex_muslin_0.1.0_to_0.1.1: passed
     hosts:
       claude_code: 2.1.217
       codex_cli: 0.144.6
