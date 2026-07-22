@@ -12,11 +12,12 @@ import shutil
 import stat
 import subprocess
 import sys
+import tempfile
 import time
 import zipfile
 from io import BytesIO
 from pathlib import Path, PurePosixPath
-from typing import Any
+from typing import Any, Iterable
 
 from . import __version__
 from .errors import Fab7Error
@@ -33,9 +34,13 @@ IDENTITY_FIELDS = {
     "capabilities",
     "hosts",
 }
+SOURCE_IDENTITY_FIELDS = IDENTITY_FIELDS - {"hosts"}
 PACKAGE_FIELDS = {"schema", *IDENTITY_FIELDS, "files"}
-SOURCE_FIELDS = {"schema", *IDENTITY_FIELDS, "build"}
-BUILD_FIELDS = {"command", "files"}
+LEGACY_SOURCE_FIELDS = {"schema", *IDENTITY_FIELDS, "build"}
+ADAPTER_SOURCE_FIELDS = {"schema", *SOURCE_IDENTITY_FIELDS, "build"}
+LEGACY_BUILD_FIELDS = {"command", "files"}
+ADAPTER_BUILD_FIELDS = {"entrypoint", "files", "skills"}
+SKILL_SOURCE_FIELDS = {"name", "source"}
 FILE_FIELDS = {"path", "mode", "sha256"}
 RECEIPT_FIELDS = {
     "schema", "install_id", "origin", "integrations", *IDENTITY_FIELDS, "files"
@@ -53,9 +58,9 @@ MAX_BUILD_OUTPUT = 64 * 1024
 MAX_BUILD_SECONDS = 300
 
 
-def identity_from(value: dict[str, Any], code: str) -> dict[str, Any]:
-    identity = {field: value.get(field) for field in IDENTITY_FIELDS}
-    if any(field not in value for field in IDENTITY_FIELDS):
+def source_identity_from(value: dict[str, Any], code: str) -> dict[str, Any]:
+    identity = {field: value.get(field) for field in SOURCE_IDENTITY_FIELDS}
+    if any(field not in value for field in SOURCE_IDENTITY_FIELDS):
         _fail(code, "Extension identity fields are invalid")
     for field in ("name", "publisher", "executable"):
         item = identity[field]
@@ -73,18 +78,30 @@ def identity_from(value: dict[str, Any], code: str) -> dict[str, Any]:
     expected_repository = f"https://github.com/{identity['publisher']}/{identity['name']}"
     if repository != expected_repository:
         _fail(code, "Extension repository identity is invalid")
-    for field in ("capabilities", "hosts"):
-        items = identity[field]
-        if (
-            not isinstance(items, list)
-            or not all(isinstance(item, str) and NAME_RE.fullmatch(item) for item in items)
-            or items != sorted(items)
-            or len(items) != len(set(items))
-        ):
-            _fail(code, f"Extension {field} must have unique canonical ordering")
-    if not identity["hosts"] or not set(identity["hosts"]).issubset(SUPPORTED_HOSTS):
-        _fail(code, "Extension hosts are invalid")
+    capabilities = identity["capabilities"]
+    if (
+        not isinstance(capabilities, list)
+        or not all(isinstance(item, str) and NAME_RE.fullmatch(item) for item in capabilities)
+        or capabilities != sorted(capabilities)
+        or len(capabilities) != len(set(capabilities))
+    ):
+        _fail(code, "Extension capabilities must have unique canonical ordering")
     return identity
+
+
+def identity_from(value: dict[str, Any], code: str) -> dict[str, Any]:
+    identity = source_identity_from(value, code)
+    hosts = value.get("hosts")
+    if (
+        not isinstance(hosts, list)
+        or not hosts
+        or not all(isinstance(item, str) and NAME_RE.fullmatch(item) for item in hosts)
+        or hosts != sorted(hosts)
+        or len(hosts) != len(set(hosts))
+        or not set(hosts).issubset(SUPPORTED_HOSTS)
+    ):
+        _fail(code, "Extension hosts are invalid")
+    return {**identity, "hosts": hosts}
 
 
 def require_compatible(identity: dict[str, Any]) -> None:
@@ -118,27 +135,72 @@ def validate_package(root: Path, expected: dict[str, Any] | None = None) -> dict
     return {**identity, "files": files}
 
 
-def build_local_package(source: Path, temporary: Path) -> tuple[Path, str, dict[str, Any]]:
+def build_local_package(
+    source: Path,
+    temporary: Path,
+    hosts: Iterable[str] | None = None,
+) -> tuple[Path, str, dict[str, Any]]:
     if source.is_symlink() or not source.is_dir():
         _fail("FAB7_EXTENSION_SOURCE_INVALID", "Local extension source is missing or symlinked")
     source = source.resolve()
     manifest = _read_json(source / "fab7-extension.json", "FAB7_EXTENSION_SOURCE_INVALID")
-    if set(manifest) != SOURCE_FIELDS or manifest.get("schema") != 1:
+    schema = manifest.get("schema")
+    expected_fields = LEGACY_SOURCE_FIELDS if schema == 1 else ADAPTER_SOURCE_FIELDS
+    if schema not in {1, 2} or set(manifest) != expected_fields:
         _fail("FAB7_EXTENSION_SOURCE_INVALID", "Local extension source manifest fields are invalid")
-    identity = identity_from(manifest, "FAB7_EXTENSION_SOURCE_INVALID")
+    if schema == 1:
+        identity = identity_from(manifest, "FAB7_EXTENSION_SOURCE_INVALID")
+        if hosts is not None and _build_targets(hosts) != identity["hosts"]:
+            _fail(
+                "FAB7_EXTENSION_TARGET_INVALID",
+                "Legacy extension build targets must match its declared hosts",
+            )
+    else:
+        selected_hosts = _build_targets(SUPPORTED_HOSTS if hosts is None else hosts)
+        identity = identity_from(
+            {**manifest, "hosts": selected_hosts},
+            "FAB7_EXTENSION_SOURCE_INVALID",
+        )
     require_compatible(identity)
     build = manifest.get("build")
-    if not isinstance(build, dict) or set(build) != BUILD_FIELDS:
+    if not isinstance(build, dict):
         _fail("FAB7_EXTENSION_SOURCE_INVALID", "Local extension build fields are invalid")
-    command = build.get("command")
+    command: list[str] | None = None
+    entrypoint: str | None = None
+    skills: list[dict[str, str]] = []
+    if schema == 1:
+        if set(build) != LEGACY_BUILD_FIELDS:
+            _fail("FAB7_EXTENSION_SOURCE_INVALID", "Local extension build fields are invalid")
+        command = build.get("command")
+        if (
+            not isinstance(command, list)
+            or not command
+            or not all(isinstance(item, str) and item and "\x00" not in item for item in command)
+            or sum(item.count("{output}") for item in command) != 1
+        ):
+            _fail("FAB7_EXTENSION_SOURCE_INVALID", "Local extension build command is invalid")
+    else:
+        if set(build) != ADAPTER_BUILD_FIELDS:
+            _fail("FAB7_EXTENSION_SOURCE_INVALID", "Local extension build fields are invalid")
+        entrypoint = build.get("entrypoint")
+        raw_skills = build.get("skills")
+        _relative_parts(entrypoint, "FAB7_EXTENSION_SOURCE_INVALID")
+        if not isinstance(raw_skills, list) or not raw_skills:
+            _fail("FAB7_EXTENSION_SOURCE_INVALID", "Local extension build skills are invalid")
+        for row in raw_skills:
+            if not isinstance(row, dict) or set(row) != SKILL_SOURCE_FIELDS:
+                _fail("FAB7_EXTENSION_SOURCE_INVALID", "Local extension build skills are invalid")
+            name = row.get("name")
+            relative = row.get("source")
+            if not isinstance(name, str) or not NAME_RE.fullmatch(name):
+                _fail("FAB7_EXTENSION_SOURCE_INVALID", "Local extension skill name is invalid")
+            _relative_parts(relative, "FAB7_EXTENSION_SOURCE_INVALID")
+            skills.append({"name": name, "source": relative})
+        names = [row["name"] for row in skills]
+        if names != sorted(names) or len(names) != len(set(names)):
+            _fail("FAB7_EXTENSION_SOURCE_INVALID", "Local extension skills must be canonical")
+
     files = build.get("files")
-    if (
-        not isinstance(command, list)
-        or not command
-        or not all(isinstance(item, str) and item and "\x00" not in item for item in command)
-        or sum(item.count("{output}") for item in command) != 1
-    ):
-        _fail("FAB7_EXTENSION_SOURCE_INVALID", "Local extension build command is invalid")
     if (
         not isinstance(files, list)
         or not files
@@ -148,6 +210,10 @@ def build_local_package(source: Path, temporary: Path) -> tuple[Path, str, dict[
         or "fab7-extension.json" not in files
     ):
         _fail("FAB7_EXTENSION_SOURCE_INVALID", "Local extension build files are invalid")
+    if schema == 2 and (
+        entrypoint not in files or any(row["source"] not in files for row in skills)
+    ):
+        _fail("FAB7_EXTENSION_SOURCE_INVALID", "Local extension adapter inputs are undeclared")
 
     staged = temporary / "source"
     staged.mkdir(parents=True)
@@ -174,19 +240,111 @@ def build_local_package(source: Path, temporary: Path) -> tuple[Path, str, dict[
         digest.update(b"\0")
 
     output = temporary / "package"
-    argv = [
-        item.replace("{python}", sys.executable).replace("{output}", str(output))
-        for item in command
-    ]
-    returncode, stdout, stderr = _run_build(argv, staged)
-    if returncode != 0:
-        detail = (stderr or stdout).strip()
-        _fail(
-            "FAB7_EXTENSION_BUILD_FAILED",
-            "Local extension build failed" + (f": {detail}" if detail else ""),
-        )
+    if schema == 1:
+        assert command is not None
+        argv = [
+            item.replace("{python}", sys.executable).replace("{output}", str(output))
+            for item in command
+        ]
+        returncode, stdout, stderr = _run_build(argv, staged)
+        if returncode != 0:
+            detail = (stderr or stdout).strip()
+            _fail(
+                "FAB7_EXTENSION_BUILD_FAILED",
+                "Local extension build failed" + (f": {detail}" if detail else ""),
+            )
+    else:
+        from .plugin.build import build_extension_package
+
+        assert entrypoint is not None
+        build_extension_package(staged, output, identity, entrypoint, skills)
     package = validate_package(output, identity)
     return output, "sha256:" + digest.hexdigest(), package
+
+
+def build_extension_archive(
+    source: Path,
+    output: Path | None = None,
+    *,
+    hosts: Iterable[str],
+) -> dict[str, Any]:
+    if output is not None and (output.expanduser().exists() or output.expanduser().is_symlink()):
+        _fail("FAB7_EXTENSION_OUTPUT_INVALID", "Extension build output already exists")
+    with tempfile.TemporaryDirectory(prefix="fab7-extension-build-") as directory:
+        package_root, source_sha256, package = build_local_package(
+            source,
+            Path(directory),
+            hosts,
+        )
+        destination = output
+        if destination is None:
+            destination = source.expanduser().resolve() / "dist" / (
+                f"{package['name']}-{package['version']}-{'-'.join(package['hosts'])}.zip"
+            )
+        destination = _write_package_archive(package_root, destination)
+        content = destination.read_bytes()
+        return {
+            "ok": True,
+            "status": "built",
+            "name": package["name"],
+            "version": package["version"],
+            "hosts": package["hosts"],
+            "output": str(destination),
+            "source_sha256": source_sha256,
+            "artifact_sha256": digest_bytes(content),
+        }
+
+
+def _build_targets(hosts: Iterable[str]) -> list[str]:
+    selected = tuple(hosts)
+    if not selected or len(selected) != len(set(selected)):
+        _fail(
+            "FAB7_EXTENSION_TARGET_INVALID",
+            "Extension build targets must be unique and non-empty",
+        )
+    if any(host not in SUPPORTED_HOSTS for host in selected):
+        _fail("FAB7_HOST_UNSUPPORTED", "Supported extension build hosts are claude and codex")
+    return sorted(selected)
+
+
+def _write_package_archive(package_root: Path, output: Path) -> Path:
+    if output.suffix != ".zip":
+        _fail("FAB7_EXTENSION_OUTPUT_INVALID", "Extension build output must end in .zip")
+    parent = output.expanduser().absolute().parent
+    if parent.is_symlink():
+        _fail("FAB7_EXTENSION_OUTPUT_INVALID", "Extension build output parent is symlinked")
+    parent.mkdir(parents=True, exist_ok=True)
+    destination = parent.resolve() / output.name
+    if destination.exists() or destination.is_symlink():
+        _fail("FAB7_EXTENSION_OUTPUT_INVALID", "Extension build output already exists")
+    temporary: Path | None = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            "w+b",
+            dir=destination.parent,
+            prefix=f".{destination.name}-",
+            delete=False,
+        ) as handle:
+            temporary = Path(handle.name)
+        with zipfile.ZipFile(
+            temporary,
+            "w",
+            compression=zipfile.ZIP_STORED,
+            strict_timestamps=True,
+        ) as archive:
+            for path in sorted(candidate for candidate in package_root.rglob("*") if candidate.is_file()):
+                relative = path.relative_to(package_root).as_posix()
+                info = zipfile.ZipInfo(relative, (1980, 1, 1, 0, 0, 0))
+                info.create_system = 3
+                info.external_attr = (stat.S_IFREG | stat.S_IMODE(path.stat().st_mode)) << 16
+                info.compress_type = zipfile.ZIP_STORED
+                archive.writestr(info, path.read_bytes())
+        temporary.chmod(0o644)
+        os.replace(temporary, destination)
+        return destination
+    finally:
+        if temporary is not None and temporary.exists():
+            temporary.unlink()
 
 
 def extract_package_archive(content: bytes, destination: Path) -> Path:

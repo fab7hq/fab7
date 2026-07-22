@@ -12,6 +12,28 @@ import fab7.cli as cli
 from fab7.cli import main
 
 
+def test_extension_create_rejects_host_selection() -> None:
+    with pytest.raises(SystemExit):
+        cli.build_parser().parse_args(
+            [
+                "ext",
+                "create",
+                ".",
+                "--name",
+                "muslin",
+                "--publisher",
+                "fab7hq",
+                "--host",
+                "claude",
+            ]
+        )
+
+
+def test_extension_build_requires_target_host() -> None:
+    with pytest.raises(SystemExit):
+        cli.build_parser().parse_args(["ext", "build", "."])
+
+
 def test_cli_complete_path(repo: Path, fab7_home: Path, capsys) -> None:
     assert main(["init", "--json"]) == 0
     assert json.loads(capsys.readouterr().out)["ok"]
@@ -82,6 +104,31 @@ def test_extension_cli_routes_refresh_local_install_doctor_and_uninstall(
     )
     monkeypatch.setattr(
         cli,
+        "create_extension_source",
+        lambda target, name, publisher, version: calls.append(
+            ("create", target, name, publisher, version)
+        )
+        or {
+            "ok": True,
+            "name": name,
+            "status": "created",
+            "target": str(target),
+        },
+    )
+    monkeypatch.setattr(
+        cli,
+        "build_extension_archive",
+        lambda source, output, hosts: calls.append(("build", source, output, hosts))
+        or {
+            "ok": True,
+            "name": "muslin",
+            "version": "0.1.0",
+            "status": "built",
+            "output": str(output or source / "dist/muslin-0.1.0.zip"),
+        },
+    )
+    monkeypatch.setattr(
+        cli,
         "install_local_extension",
         lambda path, host: calls.append(("install", path, host))
         or {
@@ -105,6 +152,17 @@ def test_extension_cli_routes_refresh_local_install_doctor_and_uninstall(
 
     assert main(["ext", "list", "--refresh", "--json"]) == 0
     assert json.loads(capsys.readouterr().out)["ok"] is True
+    assert main([
+        "ext", "create", str(tmp_path), "--name", "muslin", "--publisher", "fab7hq",
+        "--json",
+    ]) == 0
+    assert json.loads(capsys.readouterr().out)["status"] == "created"
+    archive = tmp_path / "muslin.zip"
+    assert main([
+        "ext", "build", str(tmp_path), "--host", "claude", "--host", "codex",
+        "--output", str(archive), "--json",
+    ]) == 0
+    assert json.loads(capsys.readouterr().out)["status"] == "built"
     assert main(["ext", "install", "--local", str(tmp_path), "--host", "claude", "--json"]) == 0
     assert json.loads(capsys.readouterr().out)["name"] == "muslin"
     assert main(["ext", "doctor", "--json"]) == 0
@@ -113,6 +171,8 @@ def test_extension_cli_routes_refresh_local_install_doctor_and_uninstall(
     assert json.loads(capsys.readouterr().out)["status"] == "uninstalled"
     assert calls == [
         ("refresh",),
+        ("create", tmp_path, "muslin", "fab7hq", "0.1.0"),
+        ("build", tmp_path, archive, ("claude", "codex")),
         ("install", tmp_path, "claude"),
         ("uninstall", "muslin", "claude"),
     ]

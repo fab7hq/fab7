@@ -3,7 +3,7 @@ title: Fab7 Architecture
 type: architecture
 status: implemented
 owner: architecture
-last_updated: 2026-07-22
+last_updated: 2026-07-23
 authority_for:
   - runtime boundary
   - component responsibilities
@@ -14,9 +14,10 @@ authority_for:
 
 The Fab7 proof core is one dependency-free Python package and one optional
 GitHub Action. A thin distribution layer owns deterministic releases, global
-and project installation, two host integrations, and external extension
-distribution. There is still no service, database, daemon, provider adapter,
-or extension runtime in core.
+and project installation, two host integrations, external extension
+distribution, and one generic extension-authoring command with shared host
+skills. There is still no
+service, database, daemon, provider adapter, or extension runtime in core.
 
 ## Complete flow
 
@@ -49,11 +50,20 @@ fab7 ci-check
 | `errors.py` | stable failure and result envelopes |
 | `install.py` | closed release and project manifests, global selection, project pinning, repair, and dispatch |
 | `hosts.py` | literal bounded Claude Code and Codex plugin registration commands |
+| `plugin/adapter.py` | build-time host adapter contract and shared action parsing |
+| `plugin/claude_adapter.py` | Claude manifest, marketplace, command, and skill rendering |
+| `plugin/codex_adapter.py` | Codex manifest, marketplace, and skill rendering |
+| `plugin/build.py` | shared native plugin roots and schema-2 extension package assembly |
+| `release_build.py` | deterministic source-release executable and host-root assembly |
+| `extension_scaffold.py` | collision-safe rendering of one built-in extension source template |
 | `extensions.py` | catalog refresh/list plus immutable install, diagnosis, host lifecycle, and uninstall |
 | `extension_package.py` | closed local-source, ZIP package, file, identity, compatibility, and receipt validation |
 
-Dependencies point inward to these literal functions. There is no interface
-hierarchy because no second implementation exists.
+Dependencies point inward to these literal functions. The proof core has no
+interface hierarchy. The distribution build has one earned `HostAdapter`
+boundary because Claude and Codex are two current implementations with
+different native manifests, marketplaces, invocation syntax, and surfaces.
+Adapters generate files only; they grant no runtime authority.
 
 ## Public commands
 
@@ -62,6 +72,8 @@ fab7 init
 fab7 install claude|codex
 fab7 ext refresh
 fab7 ext list [--refresh] [--catalog PATH]
+fab7 ext create [TARGET] --name NAME --publisher OWNER
+fab7 ext build [SOURCE] --host HOST [...] [--output ZIP]
 fab7 ext install NAME --host HOST [--catalog PATH]
 fab7 ext install --local PATH --host HOST
 fab7 ext doctor
@@ -115,11 +127,33 @@ integration. Local development installs are digest-bound snapshots, not live
 links. [`fab7hq/muslin`](https://github.com/fab7hq/muslin) proves the boundary
 by calling Fab7 only through its public binary; Denim remains deferred.
 
+The source-candidate `fab7 ext create` command renders one host-neutral built-in
+schema-2 source template without overwriting existing files. The shared Claude
+and Codex `ext-create` skills resolve source identity, delegate writing to that
+command, while the Fab7 release builder injects local progressive-disclosure
+copies of this overview, [`distribution.md`](distribution.md), and
+[`ledger.md`](ledger.md) into each generated host skill.
+`fab7 ext build --host HOST` then selects the target adapters and creates the
+closed ZIP; generated source contains no host selection, packaging script, or
+host-manifest copies. Tests and builds
+run only after human approval, and local installation rebuilds, validates,
+snapshots, and activates the source. No scaffold output or model statement
+becomes proof state.
+
+Fab7 host plugins also have one source boundary outside core. Four shared
+actions (`init`, `ext-create`, `ext-list`, and `ext-install`) are reviewed once
+as canonical Agent Skill templates. `plugin/build.py` passes them to the same
+Claude and Codex adapters used by schema-2 extension builds.
+`core/fab7/release_build.py` consumes those rendered roots when `install.sh`
+bootstraps from source. There is no source `scripts/` directory, runtime adapter
+registry, or unsupported-host placeholder.
+
 [`distribution.md`](distribution.md) owns the bootstrap, repository, layout,
 catalog, package, host, lifecycle, and release-evidence contracts. Extension
 distribution is released. Managed Fab7 and extension marketplace upgrades use
 the exact family boundaries defined there; unrelated same-name marketplaces
 still fail closed. Release `v0.2.1` is the first released implementation of
-that migration contract.
+that migration contract. The `v0.2.2` source candidate adds extension authoring
+without changing those runtime contracts.
 
 See [`ledger.md`](ledger.md) for the persisted record and gate contract.

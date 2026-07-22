@@ -8,6 +8,7 @@ import shutil
 import stat
 import subprocess
 import sys
+import tempfile
 import zipfile
 from pathlib import Path
 
@@ -16,7 +17,12 @@ import pytest
 import fab7.extension_package as extension_package
 from fab7 import __version__
 from fab7.errors import Fab7Error
-from fab7.extension_package import validate_package
+from fab7.extension_package import (
+    build_extension_archive,
+    build_local_package,
+    extract_package_archive,
+    validate_package,
+)
 from fab7.extensions import (
     extension_doctor,
     install_local_extension,
@@ -122,6 +128,84 @@ def _make_source(root: Path) -> Path:
         },
     )
     return root
+
+
+def _make_builtin_source(root: Path) -> Path:
+    executable = root / "src/muslin"
+    executable.parent.mkdir(parents=True)
+    executable.write_text("#!/usr/bin/env python3\nprint('muslin')\n")
+    skill = root / "skills/start/SKILL.md"
+    skill.parent.mkdir(parents=True)
+    skill.write_text(
+        "---\n"
+        "name: start\n"
+        "description: Start Muslin through {{invocation}}.\n"
+        "disable-model-invocation: true\n"
+        "---\n\n"
+        "Run `muslin start --json` for {{host}}.\n"
+    )
+    files = ["fab7-extension.json", "skills/start/SKILL.md", "src/muslin"]
+    _write_json(
+        root / "fab7-extension.json",
+        {
+            "schema": 2,
+            **{key: value for key, value in _identity().items() if key != "hosts"},
+            "build": {
+                "entrypoint": "src/muslin",
+                "files": files,
+                "skills": [{"name": "start", "source": "skills/start/SKILL.md"}],
+            },
+        },
+    )
+    return root
+
+
+def test_builtin_adapter_build_is_deterministic_and_installable(tmp_path: Path) -> None:
+    source = _make_builtin_source(tmp_path / "source")
+    with tempfile.TemporaryDirectory(prefix="fab7-build-test-") as directory:
+        package_root, source_sha256, package = build_local_package(source, Path(directory))
+        assert source_sha256.startswith("sha256:")
+        assert package["name"] == "muslin"
+        assert (package_root / "bin/muslin").stat().st_mode & 0o111
+        assert (
+            package_root / "hosts/claude/plugins/muslin/skills/start/SKILL.md"
+        ).is_file()
+        assert (
+            package_root / "hosts/codex/plugins/muslin/skills/start/SKILL.md"
+        ).is_file()
+
+    first = build_extension_archive(source, tmp_path / "first.zip", hosts=("claude",))
+    second = build_extension_archive(source, tmp_path / "second.zip", hosts=("claude",))
+    assert (tmp_path / "first.zip").read_bytes() == (tmp_path / "second.zip").read_bytes()
+    assert first["artifact_sha256"] == second["artifact_sha256"]
+    extracted = extract_package_archive(
+        (tmp_path / "first.zip").read_bytes(), tmp_path / "extracted"
+    )
+    built_package = validate_package(extracted)
+    assert built_package["name"] == "muslin"
+    assert built_package["hosts"] == ["claude"]
+    assert not (extracted / "hosts/codex").exists()
+
+    with pytest.raises(Fab7Error, match="FAB7_EXTENSION_TARGET_INVALID"):
+        build_extension_archive(source, tmp_path / "missing-target.zip", hosts=())
+    with pytest.raises(Fab7Error, match="FAB7_EXTENSION_TARGET_INVALID"):
+        build_extension_archive(
+            source,
+            tmp_path / "duplicate-target.zip",
+            hosts=("claude", "claude"),
+        )
+    with pytest.raises(Fab7Error, match="FAB7_HOST_UNSUPPORTED"):
+        build_extension_archive(source, tmp_path / "unsupported-target.zip", hosts=("cursor",))
+
+    plugin = PluginRecorder()
+    installed = install_local_extension(
+        source,
+        "claude",
+        home=tmp_path / ".fab7",
+        plugin_installer=plugin,
+    )
+    assert installed["status"] == "installed"
+    assert installed["origin"] == "local"
 
 
 def _archive(package: Path, destination: Path) -> bytes:

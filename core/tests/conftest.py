@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import subprocess
-import sys
 from pathlib import Path
 
 import pytest
 
 from fab7 import __version__
+from fab7.release_build import build_release
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -41,15 +41,7 @@ def repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
 def fab7_home(tmp_path_factory: pytest.TempPathFactory, monkeypatch: pytest.MonkeyPatch) -> Path:
     home = tmp_path_factory.mktemp("fab7-home") / ".fab7"
     release = home / "runtime" / __version__
-    process = subprocess.run(
-        [sys.executable, str(ROOT / "scripts" / "build_zipapp.py"), "--release-root", str(release)],
-        cwd=ROOT,
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        check=False,
-    )
-    assert process.returncode == 0, process.stderr
+    build_release(ROOT, release)
     (home / "bin").mkdir(parents=True)
     (home / "bin" / "fab7").symlink_to(Path(f"../runtime/{__version__}/bin/fab7"))
     monkeypatch.setenv("FAB7_HOME", str(home))

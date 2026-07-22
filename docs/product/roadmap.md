@@ -3,7 +3,7 @@ title: Fab7 Product Roadmap
 type: product
 status: accepted
 owner: product
-last_updated: 2026-07-22
+last_updated: 2026-07-23
 authority_for:
   - completed product capability
   - current exclusions
@@ -111,6 +111,48 @@ cannot migrate another active extension host implicitly.
 The [`marketplace migration plan`](../plans/marketplace-migration.md) owns the
 completed release and network proof. [`status.yaml`](../status.yaml) records
 the maintenance phase as completed.
+
+## Extension developer onboarding — implementation complete, release pending
+
+The `v0.2.2` source candidate adds `fab7 ext create` plus the thin
+`/fab7:ext-create` and `$fab7:ext-create` host skills. From any existing
+non-symlink folder, the explicit user invocation:
+
+- resolves a canonical extension identity and installed Fab7 compatibility;
+- renders one generic basic source scaffold without overwriting existing files;
+- creates a minimal host-neutral schema-2 extension manifest, one executable,
+  one canonical skill, and one standard-library test;
+- delegates target selection, native plugin generation, and deterministic ZIP
+  assembly to the public `fab7 ext build --host` command and shared adapters;
+- explains that the executable crosses the Fab7 boundary only through the
+  public binary;
+- offers a bundled, optional architecture walkthrough that maps the generated
+  files to Fab7 core, distribution, lifecycle, proof, and human authority; and
+- obtains human approval before running generated code or delegating to
+  `fab7 ext install --local` and `fab7 ext doctor`.
+
+The candidate also replaces the duplicated Claude and Codex copies of `init`,
+`ext-list`, `ext-install`, and `ext-create` with canonical action sources and
+focused Claude/Codex build adapters. The same assembler powers Fab7's release
+plugin roots and schema-2 extension packages. The creator adds no second
+validator or plugin builder. Registry publication, language selection, Git
+hosting, CI generation, unsupported-host adapters, and extension release
+automation remain excluded.
+
+Muslin `0.1.1` is the schema-2 compatibility candidate: its worktree is rebuilt
+from the generic `fab7 ext create` output and contains only the manifest,
+canonical skill, executable, and generated test. External verification calls
+`fab7 ext build --host claude --host codex` twice to prove deterministic target
+package output. The
+released registry fixture remains Muslin `0.1.0` until a separate publication
+decision.
+
+Implementation and an isolated installed-path journey are complete. Release
+authorization, hosted CI for the candidate, immutable release installation, and
+authenticated `/fab7:ext-create` and `$fab7:ext-create` model invocations remain
+open. The
+[`extension creator plan`](../plans/ext-create.md) owns the exact proof and
+release gate.
 
 ## Denim — deferred
 

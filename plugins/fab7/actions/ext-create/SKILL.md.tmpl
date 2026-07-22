@@ -1,0 +1,83 @@
+---
+name: ext-create
+description: Create host-neutral Fab7 extension source, then build and verify an explicit native target. Use when the developer invokes {{invocation}}, asks to create a Fab7 extension, or needs a working extension starting point.
+disable-model-invocation: true
+allowed-tools: Bash(fab7 --version), Bash(fab7 ext create:*), Bash(python3:*), Bash(fab7 ext build:*), Bash(fab7 ext install:*), Bash(fab7 ext doctor:*)
+---
+
+# Create a Fab7 extension
+
+Create the smallest complete extension source in the developer's chosen
+existing directory. Use Fab7's built-in template and public commands; do not
+invent another layout, copy an existing extension, or generate native host
+manifests.
+
+## Resolve the source identity
+
+1. Resolve the target with `pwd -P` unless the developer names another existing
+   directory. Refuse a symlinked target.
+2. Treat `$ARGUMENTS` as the proposed canonical extension name when present;
+   otherwise infer the name from the target directory.
+3. Infer the publisher from an exact GitHub `origin` URL when possible. Ask only
+   when it cannot be inferred safely.
+
+Canonical names and publishers use lowercase letters, digits, and internal
+hyphens. The repository identity is exactly
+`https://github.com/<publisher>/<extension>`.
+
+## Create the source
+
+Display and run one host-neutral command:
+
+```text
+fab7 ext create <target> \
+  --name <extension> \
+  --publisher <publisher> \
+  --json
+```
+
+Fab7 preflights the complete built-in template and refuses to replace existing
+files. If it reports a conflict, stop and report the exact paths. Do not delete,
+rename, or merge user files implicitly.
+
+Explain the generated boundary briefly:
+
+- `fab7-extension.json` owns source identity and declared adapter inputs; it
+  does not select a host.
+- `src/extension.py` is an external executable that calls the public `fab7`
+  command rather than importing Fab7.
+- `skills/start/SKILL.md` is canonical source that an adapter renders for the
+  selected build target.
+- `fab7 ext build` creates native plugins and the deterministic ZIP; the
+  extension owns no packaging implementation.
+
+Read [the architecture overview](references/overview.md) when the developer
+asks for Fab7's mental model, public boundaries, or component responsibilities.
+Read [the distribution architecture](references/distribution.md) only when a
+generated contract fails or the developer asks for source, build, package,
+installation, or host-lifecycle details. Read [the ledger and gate
+contract](references/ledger.md) when an extension will create or evaluate
+claims or evidence, or the developer asks how proof becomes merge-ready.
+
+## Verify and install
+
+Before running generated code, show the resolved target and declared
+source-file list. Select the current `{{host}}` as the build target unless the
+developer explicitly requests another or multiple supported targets. Show one
+`--host` argument per target in the exact test, build, and installation
+commands. Obtain explicit human approval.
+
+After approval:
+
+1. Run `python3 <target>/tests/test_extension.py`.
+2. Run `fab7 ext build <target> --host {{host}} --json`, adding another
+   `--host` only for each explicitly requested target, and retain its ZIP and
+   digest.
+3. Run `fab7 ext install --local <target> --host {{host}} --json` for the current
+   host. Install another target only when explicitly requested.
+4. Run `fab7 ext doctor --json`.
+
+Stop on the first failure and report its exact command and stable Fab7 error.
+On success, report the created files and completed checks, then give the native
+reload or restart action and `/<extension>:start` or `$<extension>:start`.
+Local installation is not publication, release, or accepted proof.

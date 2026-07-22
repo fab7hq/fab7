@@ -1,37 +1,56 @@
 schema_version: 1
-updated_at: "2026-07-22"
+updated_at: "2026-07-23"
 
 current_phase:
-  id: marketplace-migration
-  name: Managed host marketplace migration
-  status: completed
-  active_plan: docs/plans/marketplace-migration.md
+  id: extension-creator
+  name: Generic Fab7 extension creator
+  status: implementation_complete
+  active_plan: docs/plans/ext-create.md
   implementation_authorized: true
   implementation: complete
-  publication: complete
-  external_ci: passed
-  external_ci_run: https://github.com/fab7hq/fab7/actions/runs/29922785389
-  release: v0.2.1
-  release_url: https://github.com/fab7hq/fab7/releases/tag/v0.2.1
+  publication_authorized: true
+  publication: authorized
+  external_ci: pending
+  target_release: v0.2.2
   repositories:
     fab7: https://github.com/fab7hq/fab7
+    muslin: https://github.com/fab7hq/muslin
   evidence:
-    deterministic_suite: passed_84
+    focused_tests: passed_18
+    deterministic_suite: passed_96
     release_build: deterministic
-    source_checksum: passed
-    fab7_migration:
-      released_0.1.0_to_candidate_0.2.1: passed
-      released_0.2.0_to_candidate_0.2.1: passed
-      released_0.2.0_to_released_0.2.1: passed
-      repeated_install_after_migration: already_installed
-    extension_migration:
-      claude_muslin_0.1.0_to_0.1.1: passed
-      codex_muslin_0.1.0_to_0.1.1: passed
-      released_fab7_codex_registry_0.1.0_to_local_0.1.1: passed
+    host_plugin_build: deterministic
+    extension_archive_build: deterministic
+    extension_source_schema_1: compatible
+    extension_source_schema_2: passed
+    host_adapter_modules: claude_and_codex
+    shared_action_source: passed
+    generated_cache_exclusion: passed
+    claude_plugin_validation: passed
+    shell_syntax: passed
+    documentation_links: passed
+    status_syntax: passed
+    diff_hygiene: passed
+    generic_basic_template: passed
+    host_neutral_schema_2_source: passed
+    explicit_build_targets: passed
+    architecture_docs: injected_at_release_build
+    ext_create_local_references: passed_3
+    collision_rejection: passed
+    isolated_source_install: passed
+    isolated_local_extension_install: passed
+    muslin_recreated_with_ext_create: passed
+    muslin_schema_2_candidate: passed_0.1.1
+    extension_doctor: passed
+    installed_executable: observed_fab7_0.2.2
+    installed_zipapp_plugin_package: passed
+    installed_wheel_template_package: passed
+    authenticated_claude_skill_invocation: not_run
+    authenticated_codex_skill_invocation: not_run
     hosts:
       claude_code: 2.1.217
-      codex_cli: 0.144.6
-  next_gate: none
+      codex_cli: 0.145.0
+  next_gate: hosted_ci_and_authenticated_host_observation
 
 future_phases:
   - id: denim
@@ -48,6 +67,7 @@ authoritative:
   onboarding_plan: docs/plans/onboarding.md
   extension_distribution_plan: docs/plans/ext-registry.md
   marketplace_migration_plan: docs/plans/marketplace-migration.md
+  extension_creator_plan: docs/plans/ext-create.md
 
 completed_phases:
   - id: lean-baseline
@@ -87,6 +107,15 @@ completed_phases:
       - Linux release migration was not independently observed.
 
 resolved_decisions:
+  - id: host-plugin-source
+    resolution: >-
+      Review init, ext-list, ext-install, and ext-create once as shared Agent
+      Skill templates, then use focused Claude and Codex build adapters to
+      render native roots. Reuse the same assembler for Fab7 releases and
+      schema-2 extension packages through fab7 ext build. Keep fab7 ext create
+      host-neutral as the only deterministic scaffolder and make fab7 ext build
+      own explicit target selection; add no adapter or compatibility claim for
+      an unsupported host.
   - id: ext-registry-refresh
     resolution: >-
       Fetch only the fab7hq/ext-registry GitHub contents response for main,
@@ -97,8 +126,12 @@ resolved_decisions:
     resolution: >-
       Registry ZIPs and explicit local builds converge on one closed package,
       immutable installation receipt, executable selector, host integration,
-      diagnosis, and uninstall path. Local source uses a manifest-fixed bounded
-      non-shell build and a dev-source-digest install identity.
+      diagnosis, and uninstall path. Schema-1 local source retains its
+      manifest-fixed bounded non-shell build. Host-neutral schema-2 source
+      declares an entrypoint and canonical skills but no hosts; fab7 ext build
+      requires explicit targets and adds them to the package identity. Both use
+      a dev-source-digest install identity; the build emits the same package
+      contract as a deterministic ZIP without installation.
 
 open_decisions: []
 historical_context: []

@@ -12,7 +12,9 @@ The repository implements the lean proof gate, released onboarding, and the
 `0.2.0` extension-distribution path: catalog refresh, registry or explicit-local
 installation, immutable snapshots, native Claude/Codex activation, diagnosis,
 and bounded uninstall. Release `0.2.1` adds safe managed-marketplace migration
-when Fab7 or an extension changes version. Muslin is the closure fixture;
+when Fab7 or an extension changes version. The `0.2.2` source candidate adds
+generic `fab7 ext create` source scaffolding plus shared `/fab7:ext-create` and
+`$fab7:ext-create` host skills; it is not yet released. Muslin is the closure fixture;
 [`fab7hq/denim`](https://github.com/fab7hq/denim) remains deferred. See
 [`docs/architecture/distribution.md`](docs/architecture/distribution.md); the
 onboarding closure record is in
@@ -42,6 +44,8 @@ The registry extension path is:
 ```bash
 fab7 ext refresh
 fab7 ext list
+fab7 ext create /path/to/extension --name example --publisher owner
+fab7 ext build /path/to/extension --host claude
 fab7 ext install muslin --host claude  # or: codex
 fab7 ext doctor
 muslin start --json
@@ -56,6 +60,35 @@ fab7 ext install --local ../muslin --host claude  # or: codex
 
 See [`RUNBOOK.md`](RUNBOOK.md) for the complete new-user journey, expected
 global and project layouts, first proof, clone repair, and troubleshooting.
+
+## Create a local extension
+
+The `0.2.2` source candidate adds one generic source scaffold. Run it directly:
+
+```bash
+fab7 ext create . --name my-extension --publisher my-org
+fab7 ext build . --host claude
+```
+
+Or install the Fab7 plugin and invoke the shared host skill:
+
+```text
+/fab7:ext-create my-extension
+$fab7:ext-create my-extension
+```
+
+The command renders one collision-safe, host-neutral `basic` source template.
+The skill is a thin workflow over `fab7 ext create`, target-selected
+`fab7 ext build --host`, local installation, and diagnosis. Native Claude and
+Codex roots come only from Fab7's adapters; the generated extension contains no
+host selection, packaging script, or copied host manifest. It does not publish
+to the registry or create a GitHub repository. Its three local references are
+byte-identical copies of `overview.md`, `distribution.md`, and `ledger.md`; the
+Fab7 release builder injects them from `docs/architecture` rather than keeping
+a second checked-in copy. The skill loads only the one needed for deeper
+guidance and does not fetch those contracts from GitHub. See
+[`docs/plans/ext-create.md`](docs/plans/ext-create.md) for the implementation and
+release gate.
 
 ## Complete path
 

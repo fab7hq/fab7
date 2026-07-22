@@ -4,7 +4,7 @@ type: architecture
 status: accepted
 implementation_status: implemented
 owner: architecture
-last_updated: 2026-07-22
+last_updated: 2026-07-23
 authority_for:
   - repository ownership
   - user-global and project-local filesystem layouts
@@ -16,23 +16,34 @@ authority_for:
 # Fab7 onboarding and extension distribution
 
 Fab7 has one user-global distribution plane around its dependency-free proof
-core. It installs Fab7, registers thin host plugins, pins Fab7 per project, and
-installs extensions from either the reviewed catalog or one explicitly approved
-local source tree. Extensions remain external programs and call Fab7 only
-through its public binary.
+core. It installs Fab7, registers thin host plugins, pins Fab7 per project,
+creates generic extension source, and installs extensions from either
+the reviewed catalog or one explicitly approved local source tree. Extensions
+remain external programs and call Fab7 only through its public binary.
 
 The onboarding path is released and owner-accepted at `v0.1.0`. Extension
 distribution is released at `v0.2.0`; its immutable network-registry lifecycle
 was observed before closure. Release `v0.2.1` adds ownership-aware marketplace
-migration.
+migration. The `v0.2.2` source candidate adds `fab7 ext create` and shared
+Claude/Codex creator skills; it is not yet released.
+
+## Contents
+
+- Repository ownership
+- User-global and project-local layouts
+- Current commands and host plugin build
+- Bootstrap and host registration
+- Catalog, source, package, and runtime contracts
+- Installation, lifecycle, and extension authoring
+- Evidence, exclusions, and release boundary
 
 ## Repository ownership
 
 | Repository | Current state | Owns |
 |---|---|---|
-| [`fab7hq/fab7`](https://github.com/fab7hq/fab7) | released `v0.2.1` | proof core, installer, CLI, host plugins, catalog validator, and extension installer |
+| [`fab7hq/fab7`](https://github.com/fab7hq/fab7) | released `v0.2.1`; `v0.2.2` source candidate | proof core, installer, CLI, host plugins, generic extension creator, catalog validator, and extension installer |
 | [`fab7hq/ext-registry`](https://github.com/fab7hq/ext-registry) | released `v0.1.0` | one reviewed `catalog.yaml` and CI pinned to released Fab7; no extension source or artifacts |
-| [`fab7hq/muslin`](https://github.com/fab7hq/muslin) | released `v0.1.0` fixture | deterministic closure fixture, package artifact, host plugins, and tests |
+| [`fab7hq/muslin`](https://github.com/fab7hq/muslin) | released `v0.1.0`; schema-2 `v0.1.1` source candidate | deterministic closure fixture, canonical skill, package artifact, and tests |
 | [`fab7hq/denim`](https://github.com/fab7hq/denim) | deferred | first product extension when separately authorized |
 
 Muslin is proof infrastructure, not the first product extension. The registry
@@ -103,6 +114,8 @@ fab7 install claude|codex
 fab7 init
 fab7 ext refresh
 fab7 ext list [--refresh] [--catalog PATH]
+fab7 ext create [TARGET] --name NAME --publisher OWNER
+fab7 ext build [SOURCE] --host HOST [...] [--output ZIP]
 fab7 ext install NAME --host claude|codex [--catalog PATH]
 fab7 ext install --local PATH --host claude|codex
 fab7 ext doctor
@@ -113,10 +126,45 @@ Project proof commands still validate `.fab7/project.json` and dispatch to the
 pinned `.fab7/bin/fab7`. Extension commands do not dispatch into a project and
 do not alter proof records.
 
-The release-bundled host surfaces are `/fab7:init`, `/fab7:ext-list`, and
+The released host surfaces are `/fab7:init`, `/fab7:ext-list`, and
 `/fab7:ext-install` in Claude Code and the corresponding `$fab7:*` skills in
-Codex. Claude requires `/reload-plugins`; Codex loads new skills in a new
-session. The host files delegate to the CLI and do not implement distribution.
+Codex. The `v0.2.2` source candidate adds `/fab7:ext-create` and
+`$fab7:ext-create`. Claude requires `/reload-plugins`; Codex loads new skills in
+a new session. Host files delegate runtime state changes to the CLI.
+
+## Host plugin source and build
+
+Shared host behavior has one reviewed source:
+
+```text
+plugins/fab7/
+└── actions/
+    ├── ext-create/SKILL.md.tmpl
+    └── {init,ext-list,ext-install}/SKILL.md.tmpl
+
+docs/architecture/
+└── {overview,distribution,ledger}.md
+```
+
+`core/fab7/plugin/adapter.py` defines one build-time adapter contract. The
+focused `claude_adapter.py` and `codex_adapter.py` implementations own only the real
+differences: invocation prefix, command or skill destination, frontmatter,
+manifest, and marketplace shape. `build.py` owns shared deterministic assembly
+and Fab7's action composition. During a Fab7 release build it injects the three
+canonical architecture documents directly into each generated `ext-create`
+skill; there is no checked-in reference mirror or source `plugins/fab7/hosts`
+tree. `core/fab7/release_build.py` includes the executable, built-in source
+template, and complete host roots in a release.
+`install.sh` executes that source module directly during bootstrap; no source
+`scripts/` directory remains. The release digest covers every adapter,
+template, action, and reference input.
+
+This is build-time adaptation, not a runtime plugin abstraction. Fab7 and its
+extensions can call the same assembler, while installed extensions still see
+closed native host roots. Cursor or another host receives no placeholder
+adapter, manifest, CLI choice, or compatibility claim until its complete
+native build, validation, installation, activation, rollback, and uninstall
+path is implemented and observed.
 
 ## Bootstrap and host registration
 
@@ -164,9 +212,25 @@ candidate atomically replaces the last-known-good catalog and lock record.
 A registry install downloads the catalog-selected ZIP, verifies the catalog
 digest, extracts only bounded Unix regular files, and validates the package.
 A local install reads `fab7-extension.json`, stages only canonically declared
-regular files, derives their digest, and runs the manifest-fixed argv without a
-shell in an operating-system temporary directory. The host skill must obtain
-explicit human approval before requesting this local build.
+regular files, and derives their digest. Released schema-1 sources run their
+manifest-fixed argv without a shell in an operating-system temporary directory.
+Host-neutral schema-2 sources declare one entrypoint and canonical skill
+sources but no hosts; an explicit build target list tells Fab7's built-in
+adapters which native roots to create alongside the executable, package
+manifest, and digests without executing an extension-owned packaging script.
+The host skill must obtain explicit human approval before requesting either
+local build.
+
+`fab7 ext build [SOURCE] --host HOST [...] [--output ZIP]` exposes that exact
+build path without installation. It requires one or more unique supported
+targets, defaults to the current folder and
+`dist/<name>-<version>-<target[-target...]>.zip`, refuses to replace an existing
+output, emits a deterministic registry-ready ZIP containing only the selected
+native roots, and reports the target list plus source and artifact SHA-256
+digests. Local installation reuses the same schema parser and package builder;
+it supplies the complete built-in target set so one source digest retains a
+stable multi-host development snapshot, then activates only the requested
+host. It does not maintain another bundling contract.
 
 Both sources then use the same `extension.json` package contract:
 
@@ -202,6 +266,28 @@ package remain while another host is active. Removing the final host deletes
 the selector and all snapshots for that extension. It never removes unrelated
 Fab7 releases, extensions, host state, or project data.
 
+## Extension authoring surface
+
+`fab7 ext create` is the deterministic host-neutral authoring boundary. It takes
+an existing target, canonical name and publisher, and extension version. It
+preflights the complete built-in `basic` template and refuses any collision
+before writing. The schema-2 source contains no `hosts` field: it has one
+canonical `start` skill, one dependency-free executable, one manifest, and one
+test. It contains no packaging script or native host manifest.
+
+The shared `/fab7:ext-create` and `$fab7:ext-create` skills keep creation
+task-first: infer safe identity, call the CLI, explain the four generated files,
+and obtain approval before test, build, or installation. The release builder
+injects byte-identical local copies of the three authoritative architecture
+documents—`overview.md`, `distribution.md`, and `ledger.md`—into the generated
+skill. They load only when their specific deeper context is requested, so
+installed skills do not need GitHub access to explain Fab7's contracts.
+
+The creator does not initialize Git, create remotes, publish, generate CI, pick
+a host, or overwrite user work. `fab7 ext build --host` remains the only native
+plugin and ZIP assembler and owns target selection; `fab7 ext install --local`
+remains installation authority.
+
 ## Implemented and released evidence
 
 The deterministic suite covers catalog closure and last-known-good refresh,
@@ -228,6 +314,17 @@ uninstall.
 No authenticated model invocation of the host-native commands was performed;
 the host CLIs' plugin discovery was observed directly. Linux extension
 installation was not independently observed.
+
+For the `v0.2.2` source candidate, focused tests and a fresh isolated macOS home
+proved generic host-neutral creation, collision rejection, deterministic
+target-specific package
+output, release inclusion of template assets, and shared skill discovery in
+Claude Code `2.1.217` and Codex CLI `0.145.0`. Muslin `0.1.1` was subsequently
+cleared and recreated from `fab7 ext create` alone. Its generated test and two
+identical Claude-and-Codex builds passed; the exact source was installed into
+both hosts in a fresh home, passed diagnosis, and executed against Fab7
+`0.2.2`. The isolated host homes were not authenticated, so a model did not
+invoke either creator skill.
 
 ## Exclusions
 

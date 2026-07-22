@@ -10,6 +10,8 @@ from typing import Any
 
 from . import __version__, git
 from .errors import Fab7Error
+from .extension_package import build_extension_archive
+from .extension_scaffold import create_extension_source
 from .extensions import (
     catalog_listing,
     extension_doctor,
@@ -44,6 +46,17 @@ def build_parser() -> argparse.ArgumentParser:
     extension_list.add_argument("--json", action="store_true")
     extension_refresh = extension_commands.add_parser("refresh", help="refresh the reviewed extension catalog")
     extension_refresh.add_argument("--json", action="store_true")
+    extension_create = extension_commands.add_parser("create", help="create extension source files")
+    extension_create.add_argument("target", nargs="?", type=Path, default=Path("."))
+    extension_create.add_argument("--name", required=True)
+    extension_create.add_argument("--publisher", required=True)
+    extension_create.add_argument("--version", default="0.1.0")
+    extension_create.add_argument("--json", action="store_true")
+    extension_build = extension_commands.add_parser("build", help="build a deterministic extension ZIP")
+    extension_build.add_argument("source", nargs="?", type=Path, default=Path("."))
+    extension_build.add_argument("--host", required=True, action="append", choices=("claude", "codex"))
+    extension_build.add_argument("--output", type=Path)
+    extension_build.add_argument("--json", action="store_true")
     extension_install = extension_commands.add_parser("install", help="install a registry or local extension")
     extension_install.add_argument("name", nargs="?")
     extension_install.add_argument("--local", type=Path)
@@ -108,6 +121,17 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "ext" and args.extension_command == "refresh":
             data = refresh_catalog()
             return _finish(args, data, f"Fab7 extension catalog: {data['status']}")
+        if args.command == "ext" and args.extension_command == "create":
+            data = create_extension_source(
+                args.target,
+                name=args.name,
+                publisher=args.publisher,
+                version=args.version,
+            )
+            return _finish(args, data, f"Fab7 extension {data['name']}: {data['status']}")
+        if args.command == "ext" and args.extension_command == "build":
+            data = build_extension_archive(args.source, args.output, hosts=tuple(args.host))
+            return _finish(args, data, f"Fab7 extension built: {data['output']}")
         if args.command == "ext" and args.extension_command == "install":
             if (args.name is None) == (args.local is None):
                 raise Fab7Error(

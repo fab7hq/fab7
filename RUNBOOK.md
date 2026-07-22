@@ -23,6 +23,10 @@ transcripts were not retained.
 The released `v0.2.1` artifact migrated existing `v0.2.0` registrations in
 fresh isolated Codex and Claude homes; repeated registration was idempotent.
 
+The `v0.2.2` source candidate adds generic `fab7 ext create` plus shared
+`ext-create` skills for Claude and Codex; it is not a published release and
+requires the reviewed-source installation path below.
+
 The exact implementation evidence and closure limits live in
 [`docs/plans/onboarding.md`](docs/plans/onboarding.md#current-implementation-evidence).
 
@@ -278,6 +282,80 @@ fab7 ext uninstall muslin --host codex --json
 
 The registry contains only release URLs and digests. Local paths are explicit,
 never enter the shared catalog, and produce immutable development snapshots.
+
+## Create an extension from the source candidate
+
+After installing this reviewed checkout, create source directly in an existing
+non-symlink directory:
+
+```bash
+fab7 ext create /path/to/extension \
+  --name my-extension \
+  --publisher my-org \
+  --json
+```
+
+Creation is host-neutral. The command uses the installed Fab7 version as the
+minimum and refuses to replace any generated path.
+
+The registered host skills delegate to the same command:
+
+```text
+/fab7:ext-create my-extension
+$fab7:ext-create my-extension
+```
+
+Before running generated code, the skill displays the exact test, target build,
+and install commands plus the declared source files, then asks for explicit
+approval. The accepted path creates a deterministic ZIP through only the
+selected adapters, installs the same schema-2 source, and runs diagnosis.
+
+The standalone build command requires one or more target hosts and defaults to
+the current folder and a new target-qualified ZIP:
+
+```bash
+fab7 ext build --host claude --json
+# or
+fab7 ext build /path/to/extension \
+  --host claude \
+  --host codex \
+  --output /path/to/extension.zip \
+  --json
+```
+
+Without `--output`, the path is
+`dist/<name>-<version>-<target[-target...]>.zip`. The command reports its target
+list plus source and artifact SHA-256 digests and refuses to replace an existing
+output. It builds only; it does not install or publish the extension.
+
+For deeper onboarding, ask the skill about architecture, the extension
+contract, or proof and authority. It reads only the matching local reference
+and maps each generated file to the core/extension separation, deterministic
+package lifecycle, proof boundary, and retained human decisions.
+
+After success:
+
+```text
+/reload-plugins
+/my-extension:start
+```
+
+This is local extension development only. Registry submission, release,
+repository creation, and CI generation are outside the skill.
+
+Fab7's own Claude and Codex plugins are built from shared action sources and the
+same focused adapter modules used by schema-2 extension builds. To inspect a
+complete release and its rendered host artifacts, use a new output path:
+
+```bash
+PYTHONPATH=core python3 -m fab7.release_build --release-root <new-directory>
+claude plugin validate --strict <new-directory>/hosts/claude
+```
+
+There is no source `scripts/` directory. `install.sh` executes this core module
+with the reviewed source on `PYTHONPATH`, so it can bootstrap the executable
+before Fab7 is installed. Core owns generic scaffolding and adapter assembly.
+The module does not install rendered roots or claim unsupported hosts.
 
 ## Reference
 

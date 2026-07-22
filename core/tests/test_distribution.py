@@ -45,18 +45,11 @@ def _run_installer(test_home: Path, source: Path = ROOT) -> subprocess.Completed
 def _copy_build_source(target: Path, version: str = __version__) -> Path:
     (target / "core").mkdir(parents=True)
     shutil.copytree(ROOT / "core/fab7", target / "core/fab7")
-    shutil.copytree(ROOT / "scripts", target / "scripts")
     shutil.copytree(ROOT / "plugins", target / "plugins")
+    shutil.copytree(ROOT / "docs/architecture", target / "docs/architecture")
     if version != __version__:
         init = target / "core/fab7/__init__.py"
         init.write_text(init.read_text().replace(f'"{__version__}"', f'"{version}"'))
-        for manifest in (
-            target / "plugins/claude/fab7/.claude-plugin/plugin.json",
-            target / "plugins/codex/fab7/.codex-plugin/plugin.json",
-        ):
-            data = json.loads(manifest.read_text())
-            data["version"] = version
-            manifest.write_text(json.dumps(data, indent=2) + "\n")
     return target
 
 
@@ -89,10 +82,8 @@ def test_installer_is_idempotent_and_updates_path_after_success(tmp_path: Path) 
 
 def test_failed_build_does_not_mutate_install_or_profile(tmp_path: Path) -> None:
     source = _copy_build_source(tmp_path / "source")
-    manifest = source / "plugins/claude/fab7/.claude-plugin/plugin.json"
-    data = json.loads(manifest.read_text())
-    data["version"] = "9.9.9"
-    manifest.write_text(json.dumps(data) + "\n")
+    action = source / "plugins/fab7/actions/init/SKILL.md.tmpl"
+    action.write_text(action.read_text() + "{{unknown}}\n")
     test_home = tmp_path / "user"
     test_home.mkdir()
     profile = test_home / ".zshrc"

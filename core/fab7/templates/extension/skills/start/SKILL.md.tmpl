@@ -1,0 +1,11 @@
+---
+name: start
+description: Start $display_name and report the public Fab7 version. Use when the developer invokes {{invocation}} or asks to start $display_name.
+disable-model-invocation: true
+allowed-tools: Bash($name start:*)
+---
+
+# Start $display_name
+
+Run `$name start --json` exactly once. Report the structured result. Do not
+import Fab7, edit Fab7 state, or replace selected executables.

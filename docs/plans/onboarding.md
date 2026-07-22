@@ -4,7 +4,7 @@ type: plan
 status: completed
 implementation_authorized: true
 owner: engineering
-last_updated: 2026-07-20
+last_updated: 2026-07-23
 authority_for:
   - onboarding implementation sequence
   - onboarding work-package gates
@@ -84,22 +84,30 @@ registry, compatibility framework, persistent cache, receipt store, staging
 directory, lock directory, extension implementation, auto-update, or another
 record type.
 
-## Planned source shape
+## Maintained source shape
 
-Add only structures earned by the accepted path:
+Later extension-authoring maintenance consolidated the original release
+builders. The maintained source now keeps only the structures earned by the
+accepted path:
 
 ```text
 install.sh
-scripts/
-├── build_zipapp.py
-└── zipapp_main.py
 core/fab7/
 ├── cli.py
+├── extension_scaffold.py
 ├── install.py
-└── hosts.py
+├── hosts.py
+├── release_build.py
+├── templates/extension/...
+└── plugin/
+    ├── adapter.py
+    ├── build.py
+    ├── claude_adapter.py
+    └── codex_adapter.py
 plugins/
-├── claude/fab7/...
-└── codex/fab7/...
+└── fab7/
+    └── actions/...       # shared host instruction templates
+docs/architecture/...     # canonical ext-create reference inputs
 core/tests/
 ├── test_artifact.py
 ├── test_distribution.py
@@ -108,8 +116,17 @@ core/tests/
 
 `install.py` owns global and project layouts, release manifests, installation
 transactions, and command dispatch. `hosts.py` contains literal Claude Code and
-Codex command functions; it is not an adapter hierarchy. Split a module only if
-focused tests demonstrate a second current responsibility.
+Codex runtime command functions; it is not an adapter hierarchy.
+`release_build.py` is the pre-install core module: `install.sh` exposes the
+reviewed source through `PYTHONPATH`, then the module assembles the executable
+archive and asks the core plugin builder for both host roots. The focused
+adapter modules give shared actions one source, preserve complete native host
+roots, inject canonical architecture documents into the built `ext-create`
+skill, and also serve schema-2 extension builds. Installed Fab7 and external
+extensions use `fab7 ext build`; no source `scripts/`, generated host tree,
+reference mirror, or second plugin builder remains. The adapters do not add
+runtime host polymorphism.
+Split another boundary only if a verified host or responsibility earns it.
 
 ## Current implementation evidence
 
@@ -143,16 +160,17 @@ Tasks:
   asset `fab7-<VERSION>.source.sha256` beneath `fab7hq/fab7`;
 - O002: add failing tests that build twice from identical inputs and require
   identical bytes, version output, help output, and exit status;
-- O003: add `scripts/zipapp_main.py`, copied to the archive root as
-  `__main__.py`, that imports the Fab7 CLI and exits through
-  `SystemExit(main())`;
-- O004: implement `scripts/build_zipapp.py` with sorted package inputs, fixed
+- O003: generate the archive-root `__main__.py` from the release builder so it
+  imports the Fab7 CLI and exits through `SystemExit(main())` without retaining
+  a second source script;
+- O004: implement `core/fab7/release_build.py` with sorted package inputs, fixed
   archive metadata, a `#!/usr/bin/env python3` shebang, executable mode, and no
   tests or checkout-only files in the artifact;
 - O005: add a closed Fab7 release-manifest validator with only the fields owned
   by the architecture contract;
-- O006: stage and include reviewed Fab7 host-plugin source roots beside the
-  executable release without importing host code into core; and
+- O006: render and include reviewed Fab7 host-plugin roots beside the executable
+  release from shared actions plus explicit host inputs, without coupling the
+  proof path to a host runtime; and
 - O007: prove the artifact from outside the checkout with passing and failing
   CLI paths.
 
@@ -285,7 +303,7 @@ Exit gate:
 
 ```bash
 uv run python -m pytest
-python scripts/build_zipapp.py --check
+PYTHONPATH=core python -m fab7.release_build --check
 bash -n install.sh
 git diff --check
 ```

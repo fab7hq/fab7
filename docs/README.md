@@ -3,7 +3,7 @@ title: Fab7 Documentation
 type: index
 status: implemented
 owner: project
-last_updated: 2026-07-22
+last_updated: 2026-07-23
 ---
 
 # Fab7 documentation
@@ -34,6 +34,7 @@ deferred Denim.
 | [`plans/onboarding.md`](plans/onboarding.md) | Fab7-only onboarding work packages, dependency order, verification, and closure gate |
 | [`plans/ext-registry.md`](plans/ext-registry.md) | extension implementation evidence, publication order, network acceptance, and stop rules |
 | [`plans/marketplace-migration.md`](plans/marketplace-migration.md) | managed marketplace migration contract, proof, and maintenance release gate |
+| [`plans/ext-create.md`](plans/ext-create.md) | generic extension scaffold, shared host creator skills, implementation proof, and release gate |
 
 [`status.yaml`](status.yaml) points to this exact authority set. Repository
 engineering guidance lives in root [`AGENTS.md`](../AGENTS.md).

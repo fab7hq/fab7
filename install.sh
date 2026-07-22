@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-fab7_default_version="0.2.1"
+fab7_default_version="0.2.2"
 fab7_version=""
 fab7_source=""
 fab7_home_path="$HOME/.fab7"
@@ -190,11 +190,11 @@ if [[ "$fab7_version" != "$fab7_source_version" ]]; then
 fi
 
 fab7_release="$fab7_temp/release"
-fab7_build_args=("$fab7_python" "$fab7_source_root/scripts/build_zipapp.py" --source-root "$fab7_source_root" --release-root "$fab7_release")
+fab7_build_args=("$fab7_python" -m fab7.release_build --source-root "$fab7_source_root" --release-root "$fab7_release")
 if [[ -n "$fab7_source_sha" ]]; then
   fab7_build_args+=(--source-sha256 "$fab7_source_sha")
 fi
-"${fab7_build_args[@]}" >/dev/null
+PYTHONPATH="$fab7_source_root/core" "${fab7_build_args[@]}" >/dev/null
 if [[ "$($fab7_release/bin/fab7 --version)" != "$fab7_version" ]]; then
   printf 'Built Fab7 executable failed its version smoke test.\n' >&2
   exit 1

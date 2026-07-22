@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fab7-cli"
-version = "0.2.1"
+version = "0.2.2"
 description = "Fab7 Git-native claim, evidence, and merge gate."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -27,6 +27,9 @@ package-dir = { "" = "core" }
 [tool.setuptools.packages.find]
 where = ["core"]
 include = ["fab7*"]
+
+[tool.setuptools.package-data]
+fab7 = ["templates/**/*.tmpl"]
 
 [tool.pytest.ini_options]
 pythonpath = ["core"]

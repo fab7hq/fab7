@@ -3,7 +3,7 @@ title: Fab7 Product Vision
 type: product
 status: accepted
 owner: product
-last_updated: 2026-07-22
+last_updated: 2026-07-23
 authority_for:
   - Fab7 positioning
   - Fab7 product boundaries
@@ -60,7 +60,14 @@ The accepted distribution layer is a thin path around that core:
   current repository's `.fab7/` directory and later project work selects that
   local binary;
 - Fab7 installs external registry releases or explicitly approved local source
-  through one verified immutable package path and native host plugins.
+  through one verified immutable package path and native host plugins;
+- `fab7 ext create` renders one collision-safe host-neutral source scaffold;
+  thin Claude and Codex creator skills offer an optional architecture
+  walkthrough, then delegate target selection plus native plugin and ZIP
+  assembly to `fab7 ext build --host` before validation and installation
+  through that existing path; and
+- shared Fab7 host actions have one source and are deterministically rendered
+  by focused Claude and Codex adapters used by both Fab7 and its extensions.
 
 The separate [`fab7hq/ext-registry`](https://github.com/fab7hq/ext-registry)
 owns `catalog.yaml`; [`fab7hq/muslin`](https://github.com/fab7hq/muslin) is the
@@ -70,9 +77,10 @@ catalog or become mutable runtime links. Extensions communicate with Fab7
 through its public binary and structured output, not imports or shared state.
 
 Neither layer expands proof authority, loads extensions into core, or makes
-host output accepted evidence. Onboarding is owner-accepted; extension
-implementation is complete locally and awaits publication plus network proof;
-Denim remains deferred. See
+host output accepted evidence. Onboarding and extension distribution are
+released; the extension creator is implemented in the `v0.2.2` source
+candidate and awaits release authorization and authenticated Claude and Codex
+observations; Denim remains deferred. See
 [`../architecture/distribution.md`](../architecture/distribution.md) for the
 contracts and [`roadmap.md`](roadmap.md) for the release gate.
 
