@@ -22,15 +22,19 @@ Local paths never enter the shared registry and never become runtime links.
 
 ## Install
 
+Choose an immutable tag from the
+[`fab7hq/fab7` releases](https://github.com/fab7hq/fab7/releases), then replace
+`vX.Y.Z` in the command:
+
 ```bash
-curl -fsSL https://raw.githubusercontent.com/fab7hq/fab7/v0.2.0/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/fab7hq/fab7/vX.Y.Z/install.sh | bash
 ```
 
-The installer verifies the immutable `v0.2.0` source archive against its
-release checksum before building. Contributors can instead use a reviewed
-checkout: `bash install.sh --source .`. Open a new login shell before running
-`fab7`; verification and host registration are covered in
-[`RUNBOOK.md`](RUNBOOK.md).
+The installer derives the selected version from that tagged script and verifies
+the matching immutable source archive against its release checksum before
+building. Contributors can instead use a reviewed checkout:
+`bash install.sh --source .`. Open a new login shell before running `fab7`;
+verification and host registration are covered in [`RUNBOOK.md`](RUNBOOK.md).
 
 The registry extension path is:
 
