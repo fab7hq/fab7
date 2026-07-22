@@ -109,22 +109,23 @@ source. External verification calls
   A fresh isolated Fab7 `0.2.2` installation activated that exact source in
   both hosts, passed diagnosis, and ran `muslin start` against Fab7 `0.2.2`.
 
-No authenticated model invoked either host skill, so plugin registration and
-the complete deterministic installed path are observed, but model-guided
-developer onboarding is not.
+Authenticated Claude Code and Codex sessions invoked the exact candidate's
+`ext-create` skill in isolated repositories. Each created, tested, built, and
+installed one host-specific fixture; a fresh second session invoked its
+generated `start` skill and observed Fab7 `0.2.2`. The temporary integrations
+were then removed. Hosted CI also passed for candidate commit
+`153540e103a42f3fc8a47c65be5e6b8c9a6864fb` in
+[run 29949097707](https://github.com/fab7hq/fab7/actions/runs/29949097707).
 
 ## Release gate
 
-Implementation is complete locally. The owner authorized publication of target
-release `v0.2.2` on 2026-07-23. Before release:
+Implementation, hosted CI, and authenticated host observations are complete.
+The owner authorized publication of target release `v0.2.2` on 2026-07-23.
+The remaining gates are:
 
-1. retain hosted CI for the exact candidate commit;
-2. invoke `/fab7:ext-create` in an authenticated fresh Claude session;
-3. invoke `$fab7:ext-create` in an authenticated fresh Codex session; and
-4. after publication, install the immutable release in a fresh home.
+1. tag and publish the exact release with its source-archive checksum asset;
+2. install the immutable release in a fresh home; and
+3. publish and register Muslin `0.1.1` in dependency order.
 
-For each host, approve the displayed test/build/install commands, reload or
-start a new session, and observe the generated start skill. Do not describe the
-feature as released or model-observed before those gates pass. Muslin `0.1.1`
-publication remains a separate dependency-ordered decision after Fab7
-`v0.2.2`.
+Do not describe the feature as released until the immutable tag, checksum, and
+fresh network installation pass.

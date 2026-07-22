@@ -4,13 +4,15 @@ updated_at: "2026-07-23"
 current_phase:
   id: extension-creator
   name: Generic Fab7 extension creator
-  status: implementation_complete
+  status: release_ready
   active_plan: docs/plans/ext-create.md
   implementation_authorized: true
   implementation: complete
   publication_authorized: true
   publication: authorized
-  external_ci: pending
+  external_ci: passed
+  external_ci_run: https://github.com/fab7hq/fab7/actions/runs/29949097707
+  candidate_commit: 153540e103a42f3fc8a47c65be5e6b8c9a6864fb
   target_release: v0.2.2
   repositories:
     fab7: https://github.com/fab7hq/fab7
@@ -45,12 +47,12 @@ current_phase:
     installed_executable: observed_fab7_0.2.2
     installed_zipapp_plugin_package: passed
     installed_wheel_template_package: passed
-    authenticated_claude_skill_invocation: not_run
-    authenticated_codex_skill_invocation: not_run
+    authenticated_claude_skill_invocation: passed_ext_create_and_start
+    authenticated_codex_skill_invocation: passed_ext_create_and_start
     hosts:
       claude_code: 2.1.217
       codex_cli: 0.145.0
-  next_gate: hosted_ci_and_authenticated_host_observation
+  next_gate: immutable_release_publication
 
 future_phases:
   - id: denim
