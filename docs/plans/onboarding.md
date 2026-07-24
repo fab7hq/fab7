@@ -4,7 +4,7 @@ type: plan
 status: completed
 implementation_authorized: true
 owner: engineering
-last_updated: 2026-07-23
+last_updated: 2026-07-24
 authority_for:
   - onboarding implementation sequence
   - onboarding work-package gates
@@ -94,7 +94,10 @@ accepted path:
 install.sh
 core/fab7/
 ├── cli.py
-├── extension_scaffold.py
+├── extension/
+│   ├── lifecycle.py
+│   ├── package.py
+│   └── scaffold.py
 ├── install.py
 ├── hosts.py
 ├── release_build.py
@@ -122,7 +125,7 @@ reviewed source through `PYTHONPATH`, then the module assembles the executable
 archive and asks the core plugin builder for both host roots. The focused
 adapter modules give shared actions one source, preserve complete native host
 roots, inject canonical architecture documents into the built `ext-create`
-skill, and also serve schema-2 extension builds. Installed Fab7 and external
+skill, and also serve extension builds. Installed Fab7 and external
 extensions use `fab7 ext build`; no source `scripts/`, generated host tree,
 reference mirror, or second plugin builder remains. The adapters do not add
 runtime host polymorphism.

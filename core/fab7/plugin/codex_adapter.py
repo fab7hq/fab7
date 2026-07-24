@@ -18,6 +18,16 @@ class CodexAdapter(HostAdapter):
         metadata: PluginMetadata,
         actions: tuple[PluginAction, ...],
     ) -> dict[str, object]:
+        interface = {
+            "displayName": metadata.display_name,
+            "shortDescription": metadata.description,
+            "longDescription": metadata.description,
+            "developerName": metadata.publisher,
+            "category": "Productivity",
+            "defaultPrompt": metadata.default_prompt,
+        }
+        if metadata.capabilities:
+            interface["capabilities"] = list(metadata.capabilities)
         return {
             "name": metadata.name,
             "version": metadata.version,
@@ -27,15 +37,7 @@ class CodexAdapter(HostAdapter):
             "repository": metadata.repository,
             "license": metadata.license,
             "skills": "./skills/",
-            "interface": {
-                "displayName": metadata.display_name,
-                "shortDescription": metadata.description,
-                "longDescription": metadata.description,
-                "developerName": metadata.publisher,
-                "category": "Productivity",
-                "capabilities": list(metadata.capabilities),
-                "defaultPrompt": metadata.default_prompt,
-            },
+            "interface": interface,
         }
 
     def marketplace(self, metadata: PluginMetadata) -> dict[str, object]:

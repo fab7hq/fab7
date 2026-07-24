@@ -78,6 +78,40 @@ def audit(root: Path, work_item: str) -> dict[str, Any]:
 def doctor(root: Path) -> dict[str, Any]:
     result = Result()
     checks: list[dict[str, Any]] = [{"name": "git", "ok": True, "detail": str(root)}]
+    try:
+        from .install import fab7_home, selected_release
+        from .toolchain import RECOMMENDED_UV_VERSION, inspect_toolchain
+
+        _release, manifest = selected_release()
+        toolchain = inspect_toolchain(fab7_home())
+        compared_fields = (
+            "python",
+            "pyinstaller",
+            "pyinstaller_hooks",
+            "target",
+            "build_requirements_sha256",
+        )
+        if any(toolchain[field] != manifest["toolchain"][field] for field in compared_fields):
+            raise Fab7Error(
+                "FAB7_TOOLCHAIN_DRIFT",
+                "The selected Fab7 release toolchain differs from the host toolchain",
+            )
+        uv_version = toolchain["uv"]["version"]
+        advisory = (
+            ""
+            if uv_version == RECOMMENDED_UV_VERSION
+            else f"; tested with uv {RECOMMENDED_UV_VERSION}"
+        )
+        checks.append(
+            {
+                "name": "toolchain",
+                "ok": True,
+                "detail": f"{toolchain['target']}; uv {uv_version}{advisory}",
+            }
+        )
+    except Fab7Error as exc:
+        result.errors.append(exc)
+        checks.append({"name": "toolchain", "ok": False, "detail": exc.message})
     records_dir = root / RECORDS_DIR
     checks.append({"name": "workspace", "ok": records_dir.is_dir(), "detail": str(records_dir)})
     if not records_dir.is_dir():

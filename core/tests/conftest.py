@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import subprocess
+import shutil
 from pathlib import Path
 
 import pytest
@@ -37,12 +38,24 @@ def repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     return tmp_path
 
 
-@pytest.fixture
-def fab7_home(tmp_path_factory: pytest.TempPathFactory, monkeypatch: pytest.MonkeyPatch) -> Path:
+@pytest.fixture(scope="session")
+def _shared_fab7_home(tmp_path_factory: pytest.TempPathFactory) -> Path:
     home = tmp_path_factory.mktemp("fab7-home") / ".fab7"
     release = home / "runtime" / __version__
-    build_release(ROOT, release)
+    build_release(ROOT, release, home=home)
     (home / "bin").mkdir(parents=True)
     (home / "bin" / "fab7").symlink_to(Path(f"../runtime/{__version__}/bin/fab7"))
+    return home
+
+
+@pytest.fixture
+def fab7_home(
+    _shared_fab7_home: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> Path:
+    home = _shared_fab7_home
+    for release in (home / "runtime").iterdir():
+        if release.name != __version__:
+            shutil.rmtree(release)
     monkeypatch.setenv("FAB7_HOME", str(home))
     return home

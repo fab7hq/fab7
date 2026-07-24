@@ -21,9 +21,22 @@ onboarding closure record is in
 [`docs/plans/onboarding.md`](docs/plans/onboarding.md), and registry work is
 tracked in [`docs/plans/ext-registry.md`](docs/plans/ext-registry.md).
 
+This checkout is the unreleased `0.4.0` candidate. It keeps the single
+schema-1 extension manifest and adds mandatory `pyproject.toml` plus `uv.lock`
+dependency ownership. Fab7 and extensions are native executables built with
+Fab7-owned CPython 3.14.6 and PyInstaller 6.21.0. There is no compatibility
+with the retired Python zipapp path. The current immutable release remains
+`0.2.2`.
+
 Local paths never enter the shared registry and never become runtime links.
 
 ## Install
+
+The host must already provide a valid `uv` on `PATH`. `install.sh` does not
+install or upgrade uv. Fab7 is tested with `uv 0.11.29` and warns, but does not
+stop, when another version is present. It uses the available uv to install
+Fab7-owned standard CPython 3.14.6 beneath `FAB7_HOME`; ambient or system
+Python is not used.
 
 Choose an immutable tag from the
 [`fab7hq/fab7` releases](https://github.com/fab7hq/fab7/releases), then replace
@@ -63,7 +76,8 @@ global and project layouts, first proof, clone repair, and troubleshooting.
 
 ## Create a local extension
 
-Release `0.2.2` includes one generic source scaffold. Run it directly:
+The `0.4.0` candidate includes one generic uv-project scaffold. Run it directly
+from a reviewed checkout:
 
 ```bash
 fab7 ext create . --name my-extension --publisher my-org
@@ -78,17 +92,27 @@ $fab7:ext-create my-extension
 ```
 
 The command renders one collision-safe, host-neutral `basic` source template.
+Its manifest contains only schema, name, publisher, and version.
+`pyproject.toml` owns sorted public-PyPI dependencies, `uv.lock` closes their
+hashes for Python 3.14, and `src/extension.py` is the fixed entrypoint.
+Ordinary modules under `src/`, tests under `tests/`, and direct skill
+directories under `skills/` are discovered without editing the manifest.
 The skill is a thin workflow over `fab7 ext create`, target-selected
-`fab7 ext build --host`, local installation, and diagnosis. Native Claude and
-Codex roots come only from Fab7's adapters; the generated extension contains no
-host selection, packaging script, or copied host manifest. It does not publish
+`fab7 ext build --host`, local installation, and diagnosis. Fab7 creates a
+fresh build environment, installs only locked wheels into an isolated
+dependency root, and bundles them into the current-platform native executable.
+Native Claude and Codex roots come only from Fab7's adapters; the generated
+extension contains no host selection, packaging script, persistent venv, or
+copied host manifest. It does not publish
 to the registry or create a GitHub repository. Its three local references are
 byte-identical copies of `overview.md`, `distribution.md`, and `ledger.md`; the
 Fab7 release builder injects them from `docs/architecture` rather than keeping
 a second checked-in copy. The skill loads only the one needed for deeper
 guidance and does not fetch those contracts from GitHub. See
 [`docs/plans/ext-create.md`](docs/plans/ext-create.md) for the implementation and
-release gate.
+released creator history, and
+[`docs/plans/uv-migration.md`](docs/plans/uv-migration.md) for the current
+source, dependency, build, and release contract.
 
 ## Complete path
 
@@ -118,7 +142,8 @@ host component delegates to the same `fab7 init --json` command. Claude needs
 ## Development
 
 ```bash
-uv sync --python 3.12
+uv --version  # 0.11.29 is the tested recommendation
+uv sync --python 3.14.6
 uv run python -m pytest
 git diff --check
 ```

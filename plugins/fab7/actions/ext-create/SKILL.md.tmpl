@@ -2,7 +2,7 @@
 name: ext-create
 description: Create host-neutral Fab7 extension source, then build and verify an explicit native target. Use when the developer invokes {{invocation}}, asks to create a Fab7 extension, or needs a working extension starting point.
 disable-model-invocation: true
-allowed-tools: Bash(fab7 --version), Bash(fab7 ext create:*), Bash(python3:*), Bash(fab7 ext build:*), Bash(fab7 ext install:*), Bash(fab7 ext doctor:*)
+allowed-tools: Bash(fab7 --version), Bash(fab7 ext create:*), Bash(uv run:*), Bash(fab7 ext build:*), Bash(fab7 ext install:*), Bash(fab7 ext doctor:*)
 ---
 
 # Create a Fab7 extension
@@ -42,14 +42,21 @@ rename, or merge user files implicitly.
 
 Explain the generated boundary briefly:
 
-- `fab7-extension.json` owns source identity and declared adapter inputs; it
-  does not select a host.
+- `fab7-extension.json` owns only source identity; it does not list files,
+  capabilities, compatibility ranges, or a host.
+- `pyproject.toml` owns the exact Python requirement and sorted public-PyPI
+  runtime dependencies; `uv.lock` closes their hashes for CPython 3.14.6.
 - `src/extension.py` is an external executable that calls the public `fab7`
-  command rather than importing Fab7.
-- `skills/start/SKILL.md` is canonical source that an adapter renders for the
-  selected build target.
-- `fab7 ext build` creates native plugins and the deterministic ZIP; the
-  extension owns no packaging implementation.
+  command rather than importing Fab7. Other modules can live anywhere under
+  `src/`; Fab7 discovers the complete tree.
+- `tests/` is discovered into source identity but is not shipped or run by the
+  build.
+- Each direct `skills/<name>/SKILL.md` and its adjacent files are canonical
+  source that an adapter renders for the selected build target.
+- `fab7 ext build` creates a fresh isolated environment, installs only locked
+  wheels through the shared Fab7 uv cache, runs Fab7's pinned PyInstaller
+  hooks, and emits the current-platform native executable and deterministic
+  ZIP. The extension owns no environment or packaging implementation.
 
 Read [the architecture overview](references/overview.md) when the developer
 asks for Fab7's mental model, public boundaries, or component responsibilities.
@@ -61,15 +68,18 @@ claims or evidence, or the developer asks how proof becomes merge-ready.
 
 ## Verify and install
 
-Before running generated code, show the resolved target and declared
-source-file list. Select the current `{{host}}` as the build target unless the
-developer explicitly requests another or multiple supported targets. Show one
-`--host` argument per target in the exact test, build, and installation
+Before running generated code, show the resolved target, `pyproject.toml`
+dependencies, lock digest, and automatically discovered `src/`, `tests/`, and
+`skills/` trees. Explain that testing or building may download locked public
+wheels and that the build executes PyInstaller analysis and hooks for the
+current native platform. Select the current `{{host}}` as the host target
+unless the developer explicitly requests another or multiple supported hosts.
+Show one `--host` argument per host in the exact test, build, and installation
 commands. Obtain explicit human approval.
 
 After approval:
 
-1. Run `python3 <target>/tests/test_extension.py`.
+1. Run `uv run --isolated --locked --python 3.14.6 python <target>/tests/test_extension.py`.
 2. Run `fab7 ext build <target> --host {{host}} --json`, adding another
    `--host` only for each explicitly requested target, and retain its ZIP and
    digest.

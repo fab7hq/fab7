@@ -1,22 +1,26 @@
 ---
 title: Fab7 Extension Creator
 type: plan
-status: completed
+status: superseded
 implementation_authorized: true
 publication_authorized: true
 owner: product-and-engineering
-last_updated: 2026-07-23
+last_updated: 2026-07-24
 target_release: v0.2.2
+superseded_by: docs/plans/extension-source-reset.md
 authority_for:
-  - extension developer onboarding
-  - generic source scaffold boundary
-  - implementation and release gates
+  - v0.2.2 extension creator release history
 depends_on:
   - docs/product/roadmap.md
   - docs/architecture/distribution.md
 ---
 
 # Fab7 extension creator
+
+This is the immutable `v0.2.2` closure record. Its source contract is retired
+and is not accepted by the current implementation. The
+[`extension source reset`](extension-source-reset.md) owns the only active
+extension source, package, receipt, and catalog contract.
 
 ## Outcome
 
@@ -30,9 +34,9 @@ fab7 ext create . --name example --publisher example
 fab7 ext build . --host claude --host codex
 ```
 
-`fab7 ext create` owns one generic host-neutral basic source scaffold. It writes
-only a schema-2 manifest without `hosts`, an executable, canonical skill, and
-standard-library test. `fab7 ext build --host` reads that source and uses only
+At `v0.2.2`, `fab7 ext create` owned one generic host-neutral basic source
+scaffold. It wrote the then-current manifest, executable, canonical skill, and
+standard-library test. `fab7 ext build --host` read that source and used only
 the selected target adapters to build native roots plus a deterministic ZIP.
 The existing `fab7 ext install --local` path remains the acceptance authority.
 The shared host skill explains this sequence. During a Fab7 release build, the
@@ -74,8 +78,8 @@ Fab7 has one canonical owner for `init`, `ext-list`, `ext-install`, and
 and Codex modules renders complete native layouts. A source script is
 unnecessary: `install.sh` runs `core/fab7/release_build.py` as a source module,
 which delegates plugin rendering to the same core assembler. No source
-`scripts/` directory remains. Installed Fab7 and external schema-2 extensions
-use `fab7 ext build` directly.
+`scripts/` directory remains. Installed Fab7 and external extensions used
+`fab7 ext build` directly.
 
 Muslin `0.1.1` proves the external creation boundary. Its worktree was cleared
 and recreated directly with `fab7 ext create`; it now contains exactly the
@@ -95,8 +99,8 @@ source. External verification calls
   `distribution.md`, and `ledger.md`, absence of source reference and host
   output trees, and absence of a scaffold script or templates inside the
   installed skill.
-- Schema-1 local builds remain compatible; schema-2 builds use the public
-  entrypoint and canonical skills contract.
+- The released creator used the then-current public entrypoint and canonical
+  skills contract. That contract is now retired without compatibility.
 - The complete deterministic Fab7 suite passes with `96` tests, and the release
   builder's drift check passes.
 - A fresh isolated source installation registered Fab7 `0.2.2` in both native

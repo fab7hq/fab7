@@ -17,7 +17,31 @@ from .ledger import init as init_records
 
 
 MANIFEST_FIELDS = {
-    "schema", "name", "version", "source_sha256", "executable_sha256", "python"
+    "schema",
+    "name",
+    "version",
+    "source_sha256",
+    "executable_sha256",
+    "target",
+    "toolchain",
+}
+TOOLCHAIN_FIELDS = {
+    "uv",
+    "python",
+    "pyinstaller",
+    "pyinstaller_hooks",
+    "target",
+    "build_requirements_sha256",
+    "sha256",
+}
+UV_FIELDS = {"path", "version", "sha256"}
+PYTHON_FIELDS = {
+    "path",
+    "implementation",
+    "version",
+    "platform",
+    "architecture",
+    "sha256",
 }
 PROJECT_FIELDS = {"schema", "fab7_version", "executable_sha256"}
 SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
@@ -51,7 +75,7 @@ def validate_release(release_root: Path) -> dict[str, Any]:
         or manifest.get("name") != "fab7"
         or not isinstance(manifest.get("version"), str)
         or not VERSION_RE.fullmatch(manifest["version"])
-        or manifest.get("python") != ">=3.11"
+        or not isinstance(manifest.get("target"), str)
     ):
         raise Fab7Error("FAB7_RELEASE_INVALID", "Fab7 release identity is invalid")
     for field in ("source_sha256", "executable_sha256"):
@@ -59,6 +83,7 @@ def validate_release(release_root: Path) -> dict[str, Any]:
             raise Fab7Error("FAB7_RELEASE_INVALID", f"Fab7 release {field} is invalid")
     if manifest["version"] != release_root.name:
         raise Fab7Error("FAB7_RELEASE_INVALID", "Fab7 release directory does not match its version")
+    _validate_toolchain(manifest["toolchain"], manifest["target"], release_root)
     if not os.access(executable, os.X_OK):
         raise Fab7Error("FAB7_RELEASE_INVALID", "Fab7 release executable is not executable")
     if _digest(executable) != manifest["executable_sha256"]:
@@ -67,6 +92,61 @@ def validate_release(release_root: Path) -> dict[str, Any]:
         if not (release_root / "hosts" / host).is_dir():
             raise Fab7Error("FAB7_RELEASE_INVALID", f"Fab7 release is missing its {host} host root")
     return manifest
+
+
+def _validate_toolchain(value: Any, target: str, release_root: Path) -> None:
+    from .toolchain import (
+        PYINSTALLER_HOOKS_VERSION,
+        PYINSTALLER_VERSION,
+        PYTHON_VERSION,
+        UV_VERSION_RE,
+    )
+
+    if not isinstance(value, dict) or set(value) != TOOLCHAIN_FIELDS:
+        raise Fab7Error("FAB7_RELEASE_INVALID", "Fab7 release toolchain fields are invalid")
+    uv = value.get("uv")
+    python = value.get("python")
+    if (
+        not isinstance(uv, dict)
+        or set(uv) != UV_FIELDS
+        or not isinstance(uv.get("version"), str)
+        or UV_VERSION_RE.fullmatch(uv["version"]) is None
+        or not isinstance(uv.get("path"), str)
+        or not isinstance(uv.get("sha256"), str)
+        or not SHA256_RE.fullmatch(uv["sha256"])
+        or not isinstance(python, dict)
+        or set(python) != PYTHON_FIELDS
+        or python.get("implementation") != "CPython"
+        or python.get("version") != PYTHON_VERSION
+        or python.get("platform") not in {"darwin", "linux"}
+        or python.get("architecture") not in {"arm64", "x86_64"}
+        or not isinstance(python.get("path"), str)
+        or not isinstance(python.get("sha256"), str)
+        or not SHA256_RE.fullmatch(python["sha256"])
+        or value.get("pyinstaller") != PYINSTALLER_VERSION
+        or value.get("pyinstaller_hooks") != PYINSTALLER_HOOKS_VERSION
+        or value.get("target") != target
+        or not isinstance(value.get("build_requirements_sha256"), str)
+        or not SHA256_RE.fullmatch(value["build_requirements_sha256"])
+        or not isinstance(value.get("sha256"), str)
+        or not SHA256_RE.fullmatch(value["sha256"])
+    ):
+        raise Fab7Error("FAB7_RELEASE_INVALID", "Fab7 release toolchain identity is invalid")
+    encoded = json.dumps(
+        {key: item for key, item in value.items() if key != "sha256"},
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode()
+    if "sha256:" + hashlib.sha256(encoded).hexdigest() != value["sha256"]:
+        raise Fab7Error("FAB7_RELEASE_INVALID", "Fab7 release toolchain digest does not match")
+    home = release_root.parent.parent
+    try:
+        Path(python["path"]).resolve().relative_to((home / "toolchains" / "python").resolve())
+    except ValueError as exc:
+        raise Fab7Error(
+            "FAB7_RELEASE_INVALID",
+            "Fab7 release Python path escapes the owned toolchain",
+        ) from exc
 
 
 def selected_release(home: Path | None = None) -> tuple[Path, dict[str, Any]]:

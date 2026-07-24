@@ -16,38 +16,36 @@ from typing import Any, Callable
 from urllib.parse import SplitResult, urlsplit
 from urllib.request import Request, urlopen
 
-from .errors import Fab7Error
-from .extension_package import (
-    MAX_PACKAGE_BYTES,
+from ..errors import Fab7Error
+from .package import (
+    IDENTITY_FIELDS,
+    MAX_SOURCE_BYTES,
     build_local_package,
     digest_bytes,
-    extract_package_archive,
+    extract_source_archive,
     identity_from,
     materialize_installation,
+    package_archive_digest,
     parse_version,
     require_compatible,
     set_integrations,
     validate_installation,
-    validate_package,
 )
-from .hosts import install_plugin, uninstall_plugin
-from .install import fab7_home
+from ..hosts import install_plugin, uninstall_plugin
+from ..install import fab7_home
+from ..toolchain import inspect_toolchain
 
 
 CATALOG_FIELDS = {"schema", "registry", "catalog_version", "extensions"}
 ENTRY_FIELDS = {
     "name",
     "publisher",
-    "repository",
     "version",
-    "fab7_min",
-    "fab7_max_exclusive",
-    "executable",
-    "capabilities",
+    "fab7_api",
     "hosts",
-    "artifact",
+    "source",
 }
-ARTIFACT_FIELDS = {"url", "sha256"}
+SOURCE_BUNDLE_FIELDS = {"url", "sha256"}
 REGISTRY_ID = "fab7hq/ext-registry"
 MAX_CATALOG_BYTES = 1024 * 1024
 NAME_RE = re.compile(r"^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$")
@@ -227,12 +225,19 @@ def install_local_extension(
     home: Path | None = None,
     plugin_installer: PluginInstaller | None = None,
     plugin_uninstaller: PluginUninstaller | None = None,
+    uv_executable: str | Path | None = None,
 ) -> dict[str, Any]:
     _host(host)
     with tempfile.TemporaryDirectory(prefix="fab7-extension-build-") as directory:
         temporary = Path(directory)
-        package_root, source_sha256, package = build_local_package(source, temporary)
-        install_id = "dev-" + source_sha256.removeprefix("sha256:")
+        package_root, source_sha256, package = build_local_package(
+            source,
+            temporary,
+            home=home,
+            uv_executable=uv_executable,
+        )
+        package_sha256 = package_archive_digest(package_root)
+        install_id = "dev-" + package_sha256.removeprefix("sha256:")
         origin = {"type": "local", "source_sha256": source_sha256}
         return _install_prepared(
             package_root,
@@ -255,6 +260,7 @@ def install_registry_extension(
     fetcher: Fetcher | None = None,
     plugin_installer: PluginInstaller | None = None,
     plugin_uninstaller: PluginUninstaller | None = None,
+    uv_executable: str | Path | None = None,
 ) -> dict[str, Any]:
     _canonical_name(name)
     _host(host)
@@ -267,23 +273,37 @@ def install_registry_extension(
     require_compatible(identity)
     if host not in identity["hosts"]:
         raise Fab7Error("FAB7_EXTENSION_HOST_UNSUPPORTED", f"Extension does not support {host}")
-    artifact = entry["artifact"]
-    archive = (fetcher or _fetch)(artifact["url"], MAX_PACKAGE_BYTES)
-    if digest_bytes(archive) != artifact["sha256"]:
-        raise Fab7Error("FAB7_EXTENSION_DIGEST_MISMATCH", "Extension artifact digest does not match")
-    with tempfile.TemporaryDirectory(prefix="fab7-extension-package-") as directory:
-        package_root = extract_package_archive(archive, Path(directory) / "package")
-        package = validate_package(package_root, identity)
+    source_bundle = entry["source"]
+    archive = (fetcher or _fetch)(source_bundle["url"], MAX_SOURCE_BYTES)
+    if digest_bytes(archive) != source_bundle["sha256"]:
+        raise Fab7Error("FAB7_EXTENSION_DIGEST_MISMATCH", "Extension source digest does not match")
+    with tempfile.TemporaryDirectory(prefix="fab7-extension-source-") as directory:
+        temporary = Path(directory)
+        source_root = extract_source_archive(archive, temporary / "source")
+        package_root, source_sha256, package = build_local_package(
+            source_root,
+            temporary / "build",
+            identity["hosts"],
+            home=home,
+            uv_executable=uv_executable,
+        )
+        if {field: package[field] for field in IDENTITY_FIELDS} != identity:
+            raise Fab7Error(
+                "FAB7_EXTENSION_SOURCE_INVALID",
+                "Registry extension source identity does not match the catalog",
+            )
+        package_sha256 = package_archive_digest(package_root)
         origin = {
             "type": "registry",
             "catalog_version": catalog["catalog_version"],
-            "artifact_url": artifact["url"],
-            "artifact_sha256": artifact["sha256"],
+            "source_url": source_bundle["url"],
+            "source_bundle_sha256": source_bundle["sha256"],
+            "source_sha256": source_sha256,
         }
         return _install_prepared(
             package_root,
             package,
-            identity["version"],
+            f"{identity['version']}-{package_sha256.removeprefix('sha256:')}",
             origin,
             host,
             home=home,
@@ -320,6 +340,8 @@ def installed_extensions(*, home: Path | None = None) -> list[dict[str, Any]]:
                 "origin": receipt["origin"]["type"],
                 "hosts": receipt["hosts"],
                 "integrations": receipt["integrations"],
+                "target": receipt["build"]["target"],
+                "package_sha256": receipt["package_sha256"],
             }
         )
     return installed
@@ -333,6 +355,11 @@ def extension_doctor(*, home: Path | None = None) -> dict[str, Any]:
         installed = []
         errors.append(exc.to_dict())
     extension_home = _extension_home(home)
+    try:
+        toolchain = inspect_toolchain(extension_home)
+    except Fab7Error as exc:
+        toolchain = None
+        errors.append(exc.to_dict())
     try:
         snapshot_count = _validate_installation_store(extension_home)
     except Fab7Error as exc:
@@ -356,6 +383,7 @@ def extension_doctor(*, home: Path | None = None) -> dict[str, Any]:
         "ok": not errors,
         "errors": errors,
         "catalog_version": catalog_version,
+        "toolchain": toolchain,
         "installed": installed,
         "snapshot_count": snapshot_count,
     }
@@ -584,6 +612,8 @@ def _install_prepared_locked(
         "install_id": install_id,
         "origin": origin["type"],
         "host": host,
+        "target": package["build"]["target"],
+        "package_sha256": package_archive_digest(package_root),
         "executable": str(selector),
         "activation": host_result.get("activation"),
     }
@@ -790,17 +820,17 @@ def _validate_entry(entry: Any) -> None:
         raise Fab7Error("FAB7_CATALOG_INVALID", exc.message) from exc
     version = _version(identity["version"], "Extension version")
     repository_path = f"{identity['publisher']}/{identity['name']}"
-    _artifact(entry["artifact"], repository_path, version)
+    _source_bundle(entry["source"], repository_path, version)
 
 
-def _artifact(value: Any, repository_path: str, version: tuple[int, int, int]) -> None:
-    if not isinstance(value, dict) or set(value) != ARTIFACT_FIELDS:
-        _invalid("Extension artifact fields are invalid")
+def _source_bundle(value: Any, repository_path: str, version: tuple[int, int, int]) -> None:
+    if not isinstance(value, dict) or set(value) != SOURCE_BUNDLE_FIELDS:
+        _invalid("Extension source fields are invalid")
     url = value["url"]
     digest = value["sha256"]
     if not isinstance(url, str) or not isinstance(digest, str) or not SHA256_RE.fullmatch(digest):
-        _invalid("Extension artifact identity is invalid")
-    parsed = _url(url, "Extension artifact identity is invalid")
+        _invalid("Extension source identity is invalid")
+    parsed = _url(url, "Extension source identity is invalid")
     version_text = ".".join(str(part) for part in version)
     prefix = f"/{repository_path}/releases/download/v{version_text}/"
     asset_name = parsed.path.removeprefix(prefix)
@@ -813,7 +843,7 @@ def _artifact(value: Any, repository_path: str, version: tuple[int, int, int]) -
         or not ASSET_RE.fullmatch(asset_name)
         or url != f"https://github.com{parsed.path}"
     ):
-        _invalid("Extension artifact URL is not an immutable GitHub release asset")
+        _invalid("Extension source URL is not an immutable GitHub release asset")
 
 
 def _version(value: Any, label: str) -> tuple[int, int, int]:

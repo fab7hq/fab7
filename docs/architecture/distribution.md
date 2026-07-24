@@ -4,7 +4,7 @@ type: architecture
 status: accepted
 implementation_status: implemented
 owner: architecture
-last_updated: 2026-07-23
+last_updated: 2026-07-24
 authority_for:
   - repository ownership
   - user-global and project-local filesystem layouts
@@ -25,7 +25,9 @@ The onboarding path is released and owner-accepted at `v0.1.0`. Extension
 distribution is released at `v0.2.0`; its immutable network-registry lifecycle
 was observed before closure. Release `v0.2.1` adds ownership-aware marketplace
 migration. Release `v0.2.2` adds `fab7 ext create` and shared Claude/Codex
-creator skills.
+creator skills. The checkout now implements the breaking `v0.4.0` uv and
+native-build migration over the unpublished schema-1 reset; publication and
+external repository migration remain separate owner decisions.
 
 ## Contents
 
@@ -41,9 +43,9 @@ creator skills.
 
 | Repository | Current state | Owns |
 |---|---|---|
-| [`fab7hq/fab7`](https://github.com/fab7hq/fab7) | released `v0.2.2` | proof core, installer, CLI, host plugins, generic extension creator, catalog validator, and extension installer |
+| [`fab7hq/fab7`](https://github.com/fab7hq/fab7) | `v0.4.0` candidate; `v0.2.2` released | proof core, pinned native builder, installer, CLI, host plugins, generic extension creator, catalog validator, and extension installer |
 | [`fab7hq/ext-registry`](https://github.com/fab7hq/ext-registry) | released `v0.1.1` | one reviewed `catalog.yaml` and CI pinned to released Fab7; no extension source or artifacts |
-| [`fab7hq/muslin`](https://github.com/fab7hq/muslin) | released `v0.1.1` | deterministic closure fixture, canonical skill, package artifact, and tests |
+| [`fab7hq/muslin`](https://github.com/fab7hq/muslin) | local `0.2.0` uv recreation; `v0.1.1` released | deterministic closure fixture, canonical skill, package artifact, and tests |
 | [`fab7hq/denim`](https://github.com/fab7hq/denim) | deferred | first product extension when separately authorized |
 
 Muslin is proof infrastructure, not the first product extension. The registry
@@ -57,6 +59,9 @@ Fab7 creates paths only when their owning operation first needs them:
 ```text
 ~/.fab7/
 ├── .extension.lock
+├── cache/uv/
+├── toolchains/python/
+├── builds/
 ├── bin/
 │   ├── fab7 -> ../runtime/<selected-version>/bin/fab7
 │   └── <extension> -> ../extensions/<name>/<install-id>/bin/<name>
@@ -78,10 +83,13 @@ Fab7 creates paths only when their owning operation first needs them:
 | Path | Intention |
 |---|---|
 | `bin/` | Stable selectors placed on `PATH`; never implementation source. |
-| `runtime/<version>/` | Immutable installed Fab7 release, including the two complete host marketplace roots. |
+| `cache/uv/` | Shared concurrency-safe uv cache; never installed dependency state. |
+| `toolchains/python/` | Fab7-owned standard CPython 3.14.6. |
+| `builds/` | Fresh task roots; successful operations remove their task directory. |
+| `runtime/<version>/` | Immutable installed native Fab7 release, including the two complete host marketplace roots. |
 | `catalog.yaml` | Last-known-good, fully validated registry content. |
 | `catalog.lock.json` | Registry, branch, Git blob SHA, and catalog content digest observed during refresh. |
-| `extensions/<name>/<install-id>/` | Immutable extension snapshot. Registry IDs are exact versions; local IDs are `dev-<source-digest>`. |
+| `extensions/<name>/<install-id>/` | Immutable target/toolchain-bound native extension snapshot. Registry IDs are `<version>-<package-digest>`; local IDs are `dev-<package-digest>`. |
 | `manifest.json` | Closed installation receipt: identity, compatibility, file digests and modes, origin, supported hosts, and active host integrations. |
 | `.extension.lock` | Empty lock file. The operating-system lock exists only during catalog or extension mutation and is released on process exit. |
 
@@ -167,12 +175,27 @@ path is implemented and observed.
 
 ## Bootstrap and host registration
 
-`install.sh` supports macOS and Linux with Bash or Zsh, Git, and Python 3.11 or
-newer. It verifies an immutable tagged source archive against its release
-checksum, builds a deterministic executable before mutation, installs it under
+`install.sh` supports macOS and Linux with Bash or Zsh, Git, and a valid host
+uv. It does not install or upgrade uv and requires no system Python. Missing
+or malformed uv fails before Fab7-owned mutation. Version `0.11.29` is the
+tested recommendation; another valid version produces an advisory and
+continues. The installer verifies an immutable tagged source archive against
+its release checksum, uses uv to install standard GIL-enabled CPython 3.14.6
+beneath `FAB7_HOME`, creates a fresh builder, installs the hash-locked
+PyInstaller 6.21.0 toolchain, and builds a deterministic native executable. It
+installs the closed release under
 `runtime/<version>/`, atomically selects it, and then adds one idempotent PATH
 block to the chosen shell profile. `--source PATH` is the reviewed-checkout
-lane used for development and release validation.
+lane used for development and release validation. Python installation disables
+uv's user-level executable shim, so no managed-Python path is written outside
+`FAB7_HOME`.
+
+The host uv executable, managed CPython, and `cache/uv` are the only shared
+build inputs. Fab7's release and each extension build use a fresh venv and
+dependency root. Ambient venv, Python path, uv/pip index configuration, and
+user packages are removed from the build environment. Installed Fab7 and
+extension snapshots contain no venv, dependency tree, cache, or source
+checkout.
 
 `fab7 install claude|codex` validates the release-bundled marketplace root,
 uses literal bounded native host commands, verifies plugin discovery, and
@@ -190,15 +213,13 @@ library and duplicate-key rejection. Its root is exactly `schema`, `registry`,
 `catalog_version`, and canonical `extensions`. Each entry is closed over:
 
 ```text
-name, publisher, repository, version,
-fab7_min, fab7_max_exclusive,
-executable, capabilities, hosts, artifact
+name, publisher, version, fab7_api, hosts, source
 ```
 
-The artifact is an exact GitHub `releases/download/vVERSION/` asset plus a
-SHA-256 digest. Entries and list values are sorted and unique. Unknown fields,
-moving release URLs, invalid compatibility, or noncanonical identity fail
-closed.
+The source is an exact GitHub `releases/download/vVERSION/` source-bundle asset
+plus its SHA-256 digest. `fab7_api` is exactly `1`. Entries and list values are
+sorted and unique. Unknown fields, moving release URLs, another API, or
+noncanonical identity fail closed.
 
 Refresh reads only `fab7hq/ext-registry` through GitHub's contents API at
 `main`. Fab7 validates the response's file type, Base64 bytes, size, and Git
@@ -206,34 +227,68 @@ blob SHA, then validates the complete catalog. It rejects a lower catalog
 version and rejects conflicting bytes at the same version. Only a valid
 candidate atomically replaces the last-known-good catalog and lock record.
 
-## One package contract, two sources
+## One native builder, two source origins
 
-A registry install downloads the catalog-selected ZIP, verifies the catalog
-digest, extracts only bounded Unix regular files, and validates the package.
-A local install reads `fab7-extension.json`, stages only canonically declared
-regular files, and derives their digest. Released schema-1 sources run their
-manifest-fixed argv without a shell in an operating-system temporary directory.
-Host-neutral schema-2 sources declare one entrypoint and canonical skill
-sources but no hosts; an explicit build target list tells Fab7's built-in
-adapters which native roots to create alongside the executable, package
-manifest, and digests without executing an extension-owned packaging script.
-The host skill must obtain explicit human approval before requesting either
-local build.
+A registry install downloads the catalog-selected source bundle, verifies its
+digest, and extracts only bounded Unix regular files. A local install reads the
+same source tree directly after explicit approval. Both enter the identical
+validator and native builder.
+
+The validator reads the four-field `fab7-extension.json`, closed
+`pyproject.toml`, current `uv.lock`, and bounded regular files beneath `src/`,
+`tests/`, and `skills/`. It accepts only schema `1`; there is no legacy parser,
+zipapp, or compatibility lane. The canonical entrypoint is always
+`src/extension.py`. `pyproject.toml` must match source name/version, require
+`==3.14.*`, and keep sorted runtime dependencies in
+`[project].dependencies`. `uv.lock` must resolve those dependencies from only
+the public PyPI registry and provide wheel hashes. Workspaces, editables, local
+or VCS paths, direct URLs, private or alternate indexes, and sdists fail
+closed.
+
+Every discovered `src/` file and the locally materialized locked-wheel root
+enter one current-platform PyInstaller executable. Every discovered `tests/`
+file affects source identity but is neither shipped nor run by build. Each
+direct `skills/<name>/` directory must contain `SKILL.md`; Fab7 renders it and
+copies its adjacent files into the selected native host roots. Generated
+Python caches, `.venv`, and `dist` trees are ignored. Symlinks, unsupported
+paths, empty required trees, `src/__main__.py`, stale locks, and sources outside
+the 512-file or 32 MiB limits fail closed.
+
+The source manifest is exactly:
+
+```json
+{
+  "name": "example",
+  "publisher": "example",
+  "schema": 1,
+  "version": "0.1.0"
+}
+```
+
+Authors do not list files, choose an entrypoint, declare capabilities, select
+hosts, state Fab7 version ranges, or choose PyInstaller. An explicit host list
+tells Fab7's built-in adapters which native roots to create. PyInstaller
+analysis and hooks execute during a build, so direct invocation or explicit
+host-skill approval is required after disclosing dependency downloads, current
+native target, and hook execution.
 
 `fab7 ext build [SOURCE] --host HOST [...] [--output ZIP]` exposes that exact
 build path without installation. It requires one or more unique supported
-targets, defaults to the current folder and
-`dist/<name>-<version>-<target[-target...]>.zip`, refuses to replace an existing
-output, emits a deterministic registry-ready ZIP containing only the selected
-native roots, and reports the target list plus source and artifact SHA-256
+host roots, defaults to the current folder and
+`dist/<name>-<version>-<native-target>-<host[-host...]>.zip`, refuses to replace
+an existing output, emits a deterministic current-platform ZIP, and reports
+the native target, host list, source, lock, toolchain, and package SHA-256
 digests. Local installation reuses the same schema parser and package builder;
 it supplies the complete built-in target set so one source digest retains a
 stable multi-host development snapshot, then activates only the requested
 host. It does not maintain another bundling contract.
 
-Both sources then use the same `extension.json` package contract:
+Both origins then use the same schema-1 `extension.json` package contract:
 
-- exact extension identity and Fab7 compatibility;
+- exact fields `schema`, `name`, `publisher`, `version`, `fab7_api`, `hosts`,
+  `build`, and `files`, with generated `fab7_api: 1`;
+- a closed build identity covering source, lock export, dependency root,
+  native target, Fab7 toolchain, and executable digests;
 - one executable at `bin/<name>` with mode `0755`;
 - an optional root `LICENSE` and all host files at mode `0644`, with host files
   contained beneath declared host roots;
@@ -248,8 +303,9 @@ registers the requested host plugin, and only then records that integration.
 Failures restore the prior selector and host registration or return an explicit
 rollback failure.
 
-Reinstalling unchanged source is idempotent. Changed source produces a new
-digest-bound snapshot. If the requested host is the sole active integration,
+Reinstalling unchanged source, target, and toolchain is idempotent. A changed
+source, lock, target, toolchain, dependency root, or executable produces a new
+package-digest-bound snapshot. If the requested host is the sole active integration,
 Fab7 migrates it and keeps the prior snapshot as an inactive rollback copy. If
 another host is active, Fab7 rejects implicit migration; the user must
 explicitly uninstall those host integrations before selecting changed bytes.
@@ -270,13 +326,18 @@ Fab7 releases, extensions, host state, or project data.
 `fab7 ext create` is the deterministic host-neutral authoring boundary. It takes
 an existing target, canonical name and publisher, and extension version. It
 preflights the complete built-in `basic` template and refuses any collision
-before writing. The schema-2 source contains no `hosts` field: it has one
-canonical `start` skill, one dependency-free executable, one manifest, and one
-test. It contains no packaging script or native host manifest.
+before writing. The schema-1 source has the exact four-field manifest, minimal
+closed `pyproject.toml`, generated `uv.lock`, canonical `src/extension.py`, one
+`start` skill, and one standard-library test. Creation is transactional across
+template writes and locking. It contains no packaging script, persistent venv,
+or native host manifest. Authors may add public-PyPI runtime dependencies,
+ordinary packages and modules beneath `src/`, tests beneath `tests/`, and
+additional canonical skill directories without editing the manifest.
 
 The shared `/fab7:ext-create` and `$fab7:ext-create` skills keep creation
-task-first: infer safe identity, call the CLI, explain the four generated files,
-and obtain approval before test, build, or installation. The release builder
+task-first: infer safe identity, call the CLI, explain the generated source and
+locked dependency boundary, and obtain approval before isolated test, build,
+or installation. The release builder
 injects byte-identical local copies of the three authoritative architecture
 documents—`overview.md`, `distribution.md`, and `ledger.md`—into the generated
 skill. They load only when their specific deeper context is requested, so
@@ -325,10 +386,52 @@ package. A final fresh home installed Fab7 from the immutable `v0.2.2` tag,
 refreshed ext-registry `v0.1.1`, installed Muslin by registry name into both
 hosts, passed diagnosis, and ran it against Fab7 `0.2.2`.
 
+The `v0.3.0` candidate replaces that extension source and artifact contract
+without backward compatibility. Local deterministic tests prove the four-field
+schema, canonical entrypoint, recursive module execution, automatic test
+hashing without shipment, adjacent skill-file copying, cache exclusion,
+source bounds, simplified catalog/package/receipt closure, and byte-stable
+archives. Muslin integration evidence follows; ext-registry, hosted CI,
+immutable release artifacts, and fresh network or authenticated Claude/Codex
+journeys still require separate proof.
+
+Muslin `0.2.0` has since been recreated locally by Fab7 `0.3.0` with
+`src/extension.py` importing `src/helper.py`. Two packages matched byte for
+byte; the executable contained both modules. Real Claude Code `2.1.217` and
+Codex CLI `0.145.0` installed the snapshot in a disposable home, diagnosis and
+execution passed, partial uninstall preserved the remaining host, and final
+uninstall removed it. Ext-registry, hosted CI, immutable release artifacts,
+authenticated model invocation, and network installation remain unproved.
+
+The `v0.4.0` implementation supersedes that unpublished package path.
+On 2026-07-24, sandboxed `uv 0.11.29` installed standard CPython `3.14.6`;
+PyInstaller `6.21.0` produced byte-identical Fab7 binaries and byte-identical
+extension packages from fresh builders. The real sibling Muslin source was
+removed from its active path and recreated as a fresh `0.2.0` repository by
+native Fab7 `0.4.0`; root commit
+`b73f43708bfd52c76c8ba93de7a83ac0d7606d09` owns the reset source. Its
+canonical `src/extension.py` imports
+`src/helper.py`; its uv project locks PyYAML `6.0.3`. Two native packages were
+byte-identical with SHA-256
+`7cdfa957b276de1ce741c5064e7110afcbc05c15c85ea57241fd6ceed2b00b6a`, and
+the executable ran against native Fab7 `0.4.0` with the bundled dependency.
+Real Claude and Codex CLIs passed isolated local installation, diagnosis,
+execution, partial uninstall, and final removal.
+
+Deterministic tests cover the new source, package, receipt, catalog, rollback,
+and required-but-version-advisory uv contracts. Hosted Linux/macOS CI,
+ext-registry migration, an immutable Muslin release, fresh network installation,
+publication, and authenticated Claude/Codex journeys remain
+unproved and unauthorized. The complete local suite passed `108` tests,
+including fresh-home installer rollback, non-recommended uv acceptance, and
+concurrent extensions with conflicting dependency versions sharing only the
+managed Python and uv cache.
+
 ## Exclusions
 
-Fab7 still has no extension runtime in core, dependency solver, catalog
-federation, private registry, ranking, ratings, background updater, install
-hook, cross-extension import contract, mutable development link, service,
-daemon, dashboard, or compatibility shim. Denim remains a separate future
-product decision.
+Fab7 still has no extension runtime in core, catalog federation, private or
+alternate dependency index, sdist builder, VCS/path/editable dependency,
+cross-compiler, remote builder, ranking, ratings, background updater, install
+hook, cross-extension import contract, mutable development link, persistent
+runtime venv, service, daemon, dashboard, or compatibility shim. Denim remains
+a separate future product decision.

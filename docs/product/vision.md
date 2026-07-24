@@ -3,7 +3,7 @@ title: Fab7 Product Vision
 type: product
 status: accepted
 owner: product
-last_updated: 2026-07-23
+last_updated: 2026-07-24
 authority_for:
   - Fab7 positioning
   - Fab7 product boundaries
@@ -61,10 +61,13 @@ The accepted distribution layer is a thin path around that core:
   local binary;
 - Fab7 installs external registry releases or explicitly approved local source
   through one verified immutable package path and native host plugins;
-- `fab7 ext create` renders one collision-safe host-neutral source scaffold;
-  thin Claude and Codex creator skills offer an optional architecture
-  walkthrough, then delegate target selection plus native plugin and ZIP
-  assembly to `fab7 ext build --host` before validation and installation
+- `fab7 ext create` renders one collision-safe host-neutral source scaffold
+  with an exact four-field schema-1 manifest and canonical
+  `src/extension.py`; mandatory `pyproject.toml` and `uv.lock` own its Python
+  3.14 dependencies; Fab7 discovers its source, tests, and skills, while thin
+  Claude and Codex creator skills offer an optional architecture walkthrough
+  and delegate target selection plus isolated native executable, plugin, and
+  ZIP assembly to `fab7 ext build --host` before validation and installation
   through that existing path; and
 - shared Fab7 host actions have one source and are deterministically rendered
   by focused Claude and Codex adapters used by both Fab7 and its extensions.
@@ -78,7 +81,10 @@ through its public binary and structured output, not imports or shared state.
 
 Neither layer expands proof authority, loads extensions into core, or makes
 host output accepted evidence. Onboarding, extension distribution, and the
-extension creator are released through `v0.2.2`; Denim remains deferred. See
+extension creator are released through `v0.2.2`; the breaking single-schema
+source reset was not published and is superseded by the `v0.4.0` uv-managed
+native-build candidate.
+Denim remains deferred. See
 [`../architecture/distribution.md`](../architecture/distribution.md) for the
 contracts and [`roadmap.md`](roadmap.md) for the release gate.
 

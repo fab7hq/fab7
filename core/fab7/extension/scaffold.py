@@ -2,15 +2,22 @@
 
 from __future__ import annotations
 
-import json
 from importlib.resources import files
 from importlib.resources.abc import Traversable
 from pathlib import Path, PurePosixPath
 from string import Template
 
-from . import __version__
-from .errors import Fab7Error
-from .extension_package import parse_version, source_identity_from
+from .. import __version__
+from ..errors import Fab7Error
+from ..install import fab7_home
+from ..toolchain import (
+    PYTHON_VERSION,
+    provision_toolchain,
+    run_tool,
+    toolchain_roots,
+    uv_environment,
+)
+from .package import parse_version, source_identity_from
 
 
 TEMPLATE = "basic"
@@ -22,28 +29,18 @@ def create_extension_source(
     name: str,
     publisher: str,
     version: str = "0.1.0",
-    fab7_min: str = __version__,
+    home: Path | None = None,
+    uv_executable: str | Path | None = None,
 ) -> dict[str, object]:
     """Render the built-in source template without replacing existing files."""
 
     try:
-        major, minor, _patch = parse_version(
-            fab7_min,
-            "FAB7_EXTENSION_CREATE_INVALID",
-            "Fab7 minimum",
-        )
         parse_version(version, "FAB7_EXTENSION_CREATE_INVALID", "Extension version")
-        fab7_max_exclusive = f"{major}.{minor + 1}.0"
         identity = source_identity_from(
             {
                 "name": name,
                 "publisher": publisher,
-                "repository": f"https://github.com/{publisher}/{name}",
                 "version": version,
-                "fab7_min": fab7_min,
-                "fab7_max_exclusive": fab7_max_exclusive,
-                "executable": name,
-                "capabilities": ["sample"],
             },
             "FAB7_EXTENSION_CREATE_INVALID",
         )
@@ -62,15 +59,15 @@ def create_extension_source(
 
     template_root = files("fab7").joinpath("templates", "extension")
     template_files = _template_files(template_root)
-    source_files = sorted(relative.removesuffix(".tmpl") for relative, _source in template_files)
+    source_files = sorted(
+        [relative.removesuffix(".tmpl") for relative, _source in template_files]
+        + ["uv.lock"]
+    )
     values = {
         "display_name": " ".join(part.capitalize() for part in name.split("-")),
-        "fab7_max_exclusive": fab7_max_exclusive,
-        "fab7_min": fab7_min,
+        "fab7_version": __version__,
         "name": name,
         "publisher": publisher,
-        "repository": identity["repository"],
-        "source_files_json": json.dumps(source_files, indent=2).replace("\n", "\n    "),
         "version": version,
     }
     rendered: dict[Path, str] = {}
@@ -80,8 +77,14 @@ def create_extension_source(
         rendered[destination] = Template(source.read_text()).substitute(values)
 
     conflicts = sorted(
-        path.relative_to(target).as_posix()
-        for path in rendered
+        relative
+        for relative, path in {
+            **{
+                path.relative_to(target).as_posix(): path
+                for path in rendered
+            },
+            "uv.lock": target / "uv.lock",
+        }.items()
         if path.exists() or path.is_symlink()
     )
     if conflicts:
@@ -91,10 +94,61 @@ def create_extension_source(
             {"paths": conflicts},
         )
 
-    for path, content in rendered.items():
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(content)
-        path.chmod(0o644)
+    created: list[Path] = []
+    lock_path = target / "uv.lock"
+    try:
+        for path, content in rendered.items():
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(content)
+            path.chmod(0o644)
+            created.append(path)
+        selected_home = home or fab7_home()
+        toolchain = provision_toolchain(
+            selected_home,
+            uv_executable=uv_executable,
+            install=False,
+        )
+        roots = toolchain_roots(selected_home)
+        run_tool(
+            [
+                toolchain["uv"]["path"],
+                "lock",
+                "--project",
+                str(target),
+                "--python",
+                toolchain["python"]["path"],
+                "--managed-python",
+                "--no-python-downloads",
+                "--no-config",
+            ],
+            uv_environment(roots),
+            "FAB7_EXTENSION_LOCK_FAILED",
+            "Fab7 could not create the extension uv.lock",
+        )
+        lock = lock_path
+        if lock.is_symlink() or not lock.is_file():
+            raise Fab7Error(
+                "FAB7_EXTENSION_LOCK_FAILED",
+                "uv did not create the extension lock",
+            )
+        lock.chmod(0o644)
+        created.append(lock)
+    except Exception:
+        if lock_path.is_file() and not lock_path.is_symlink():
+            lock_path.unlink()
+        for path in reversed(created):
+            if path.is_file() and not path.is_symlink():
+                path.unlink()
+        for directory in sorted(
+            {path.parent for path in rendered if path.parent != target},
+            key=lambda item: len(item.parts),
+            reverse=True,
+        ):
+            try:
+                directory.rmdir()
+            except OSError:
+                pass
+        raise
 
     return {
         "ok": True,
@@ -103,18 +157,20 @@ def create_extension_source(
         "name": name,
         "target": str(target),
         "extension": {
-            field: identity[field]
-            for field in (
-                "name",
-                "publisher",
-                "repository",
-                "version",
-                "fab7_min",
-                "fab7_max_exclusive",
-            )
+            **identity,
+            "repository": f"https://github.com/{publisher}/{name}",
         },
         "files": source_files,
-        "test_command": ["python3", str(target / "tests/test_extension.py")],
+        "test_command": [
+            "uv",
+            "run",
+            "--isolated",
+            "--locked",
+            "--python",
+            PYTHON_VERSION,
+            "python",
+            str(target / "tests/test_extension.py"),
+        ],
         "build_command_template": [
             "fab7", "ext", "build", str(target), "--host", "HOST", "--json"
         ],

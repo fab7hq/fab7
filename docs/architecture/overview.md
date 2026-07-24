@@ -3,7 +3,7 @@ title: Fab7 Architecture
 type: architecture
 status: implemented
 owner: architecture
-last_updated: 2026-07-23
+last_updated: 2026-07-24
 authority_for:
   - runtime boundary
   - component responsibilities
@@ -12,11 +12,11 @@ authority_for:
 
 # Fab7 architecture
 
-The Fab7 proof core is one dependency-free Python package and one optional
-GitHub Action. A thin distribution layer owns deterministic releases, global
-and project installation, two host integrations, external extension
-distribution, and one generic extension-authoring command with shared host
-skills. There is still no
+The Fab7 proof core remains dependency-free and has one optional GitHub Action.
+A thin distribution layer uses required host uv plus pinned CPython and
+PyInstaller for deterministic native releases, global and project
+installation, two host integrations, external extension distribution, and one
+generic extension-authoring command with shared host skills. There is still no
 service, database, daemon, provider adapter, or extension runtime in core.
 
 ## Complete flow
@@ -53,11 +53,13 @@ fab7 ci-check
 | `plugin/adapter.py` | build-time host adapter contract and shared action parsing |
 | `plugin/claude_adapter.py` | Claude manifest, marketplace, command, and skill rendering |
 | `plugin/codex_adapter.py` | Codex manifest, marketplace, and skill rendering |
-| `plugin/build.py` | shared native plugin roots and schema-2 extension package assembly |
-| `release_build.py` | deterministic source-release executable and host-root assembly |
-| `extension_scaffold.py` | collision-safe rendering of one built-in extension source template |
-| `extensions.py` | catalog refresh/list plus immutable install, diagnosis, host lifecycle, and uninstall |
-| `extension_package.py` | closed local-source, ZIP package, file, identity, compatibility, and receipt validation |
+| `plugin/build.py` | shared native plugin-root rendering |
+| `extension/package.py` | closed source discovery, executable/package assembly, ZIP, file, identity, compatibility, and receipt contracts |
+| `extension/scaffold.py` | collision-safe rendering of one built-in extension source template |
+| `extension/lifecycle.py` | catalog refresh/list plus immutable install, diagnosis, host lifecycle, and uninstall |
+| `toolchain.py` | required host uv, tested-version advisory, managed CPython 3.14.6, target, cache, environment, and toolchain identity |
+| `native_build.py` | fresh uv builder, locked wheel root, PyInstaller invocation, smoke, and cleanup |
+| `release_build.py` | deterministic native source-release executable and host-root assembly |
 
 Dependencies point inward to these literal functions. The proof core has no
 interface hierarchy. The distribution build has one earned `HostAdapter`
@@ -128,22 +130,31 @@ links. [`fab7hq/muslin`](https://github.com/fab7hq/muslin) proves the boundary
 by calling Fab7 only through its public binary; Denim remains deferred.
 
 The source-candidate `fab7 ext create` command renders one host-neutral built-in
-schema-2 source template without overwriting existing files. The shared Claude
-and Codex `ext-create` skills resolve source identity, delegate writing to that
-command, while the Fab7 release builder injects local progressive-disclosure
-copies of this overview, [`distribution.md`](distribution.md), and
-[`ledger.md`](ledger.md) into each generated host skill.
-`fab7 ext build --host HOST` then selects the target adapters and creates the
-closed ZIP; generated source contains no host selection, packaging script, or
-host-manifest copies. Tests and builds
-run only after human approval, and local installation rebuilds, validates,
-snapshots, and activates the source. No scaffold output or model statement
-becomes proof state.
+schema-1 uv project without overwriting existing files. Its manifest owns only
+name, publisher, schema, and version; `pyproject.toml` owns sorted public-PyPI
+dependencies and `uv.lock` closes them for CPython 3.14.6.
+`src/extension.py` is the fixed entrypoint; Fab7 automatically discovers the
+complete `src/`, `tests/`, and `skills/` trees, hashes tests without shipping
+them, renders each canonical skill with its adjacent files, and bundles source
+plus locked wheels into one native executable. No legacy source or zipapp
+shape is accepted.
+
+The shared Claude and Codex `ext-create` skills resolve source identity and
+delegate writing to that command, while the Fab7 release builder injects local
+progressive-disclosure copies of this overview,
+[`distribution.md`](distribution.md), and [`ledger.md`](ledger.md) into each
+generated host skill. `fab7 ext build --host HOST` then selects the target
+adapters and creates the closed ZIP; generated source contains no host
+selection, packaging script, or host-manifest copies. Tests and builds run only
+after human approval, and local installation rebuilds, validates, snapshots,
+and activates the source. No scaffold output or model statement becomes proof
+state.
 
 Fab7 host plugins also have one source boundary outside core. Four shared
 actions (`init`, `ext-create`, `ext-list`, and `ext-install`) are reviewed once
 as canonical Agent Skill templates. `plugin/build.py` passes them to the same
-Claude and Codex adapters used by schema-2 extension builds.
+Claude and Codex adapters that `extension/package.py` uses for schema-1
+extension builds.
 `core/fab7/release_build.py` consumes those rendered roots when `install.sh`
 bootstraps from source. There is no source `scripts/` directory, runtime adapter
 registry, or unsupported-host placeholder.
@@ -155,5 +166,14 @@ the exact family boundaries defined there; unrelated same-name marketplaces
 still fail closed. Release `v0.2.1` is the first released implementation of
 that migration contract. Release `v0.2.2` adds extension authoring without
 changing those runtime contracts.
+
+The checkout's `v0.4.0` candidate supersedes the unpublished `v0.3.0` reset
+without backward compatibility. It requires host uv, recommends the version
+used by release proof without enforcing it, installs Fab7-owned CPython 3.14.6,
+builds native Fab7 and extension executables in fresh environments, shares
+only the managed interpreter and uv cache, and makes the registry distribute
+source bundles for local target builds. Repository implementation and local
+deterministic proof are complete. Publication and external
+Muslin/registry/live-host proof are not complete.
 
 See [`ledger.md`](ledger.md) for the persisted record and gate contract.

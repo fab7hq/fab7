@@ -3,7 +3,7 @@ title: Fab7 Product Roadmap
 type: product
 status: accepted
 owner: product
-last_updated: 2026-07-23
+last_updated: 2026-07-24
 authority_for:
   - completed product capability
   - current exclusions
@@ -67,9 +67,9 @@ extensions into the proof core:
   integration is removed.
 
 The thin host surfaces are `/fab7:ext-list`, `/fab7:ext-install`,
-`$fab7:ext-list`, and `$fab7:ext-install`. Local source execution remains an
+`$fab7:ext-list`, and `$fab7:ext-install`. Local source installation remains an
 explicit human grant; the skill resolves and displays the source before asking
-Fab7 to run the manifest-fixed bounded build.
+Fab7 to assemble its bounded discovered files.
 
 [`fab7hq/muslin`](https://github.com/fab7hq/muslin) is the minimal closure
 fixture. Its only runtime behavior is `muslin start`, which calls the public
@@ -112,16 +112,16 @@ The [`marketplace migration plan`](../plans/marketplace-migration.md) owns the
 completed release and network proof. [`status.yaml`](../status.yaml) records
 the maintenance phase as completed.
 
-## Extension developer onboarding — released and complete
+## Extension developer onboarding — released, source contract superseded
 
 Release `v0.2.2` adds `fab7 ext create` plus the thin
 `/fab7:ext-create` and `$fab7:ext-create` host skills. From any existing
 non-symlink folder, the explicit user invocation:
 
-- resolves a canonical extension identity and installed Fab7 compatibility;
+- resolves a canonical extension identity;
 - renders one generic basic source scaffold without overwriting existing files;
-- creates a minimal host-neutral schema-2 extension manifest, one executable,
-  one canonical skill, and one standard-library test;
+- creates one host-neutral manifest, one executable source, one canonical
+  skill, and one standard-library test;
 - delegates target selection, native plugin generation, and deterministic ZIP
   assembly to the public `fab7 ext build --host` command and shared adapters;
 - explains that the executable crosses the Fab7 boundary only through the
@@ -134,16 +134,16 @@ non-symlink folder, the explicit user invocation:
 The release also replaces the duplicated Claude and Codex copies of `init`,
 `ext-list`, `ext-install`, and `ext-create` with canonical action sources and
 focused Claude/Codex build adapters. The same assembler powers Fab7's release
-plugin roots and schema-2 extension packages. The creator adds no second
+plugin roots and extension packages. The creator adds no second
 validator or plugin builder. Registry publication, language selection, Git
 hosting, CI generation, unsupported-host adapters, and extension release
 automation remain excluded. Muslin `v0.1.1` and ext-registry `v0.1.1` were
 released after Fab7, and a fresh network installation passed in both supported
 hosts.
 
-Muslin `v0.1.1` is the released schema-2 compatibility fixture. Its worktree was
-rebuilt from generic `fab7 ext create` output and contains only the manifest,
-canonical skill, executable, and generated test. Two
+Muslin `v0.1.1` is the released creator fixture. Its worktree was rebuilt from
+generic `fab7 ext create` output and contains only the manifest, canonical
+skill, executable, and generated test. Two
 `fab7 ext build --host claude --host codex` runs proved deterministic target
 package output before publication.
 
@@ -152,6 +152,76 @@ invocations, immutable Fab7 installation, network registry refresh, and Muslin
 installation passed. The
 [`extension creator plan`](../plans/ext-create.md) owns the exact closure proof
 and residual limit.
+
+## Single schema-1 extension source — superseded before publication
+
+The `v0.3.0` candidate deliberately replaces every earlier extension source,
+package, receipt, and catalog shape. There is no backward-compatible parser or
+migration mode. An extension author now maintains exactly:
+
+```json
+{
+  "name": "example",
+  "publisher": "example",
+  "schema": 1,
+  "version": "0.1.0"
+}
+```
+
+`src/extension.py` is always the entrypoint. Fab7 automatically discovers all
+bounded regular files under `src/`, `tests/`, and `skills/`: source modules are
+shipped in one deterministic Python executable archive, tests affect source
+identity without being shipped or run, and direct skill directories are
+rendered with their adjacent files. Authors no longer list files, configure
+the entrypoint, declare capabilities, or maintain Fab7 minimum/maximum ranges.
+Fab7 generates `fab7_api: 1` in the closed package, receipt, and catalog
+contracts.
+
+That implementation used only the Python standard library. It was not
+published before the dependency and native-build need was accepted, so
+`v0.4.0` supersedes its zipapp package path without a compatibility release.
+
+Local deterministic verification is complete. Muslin `0.2.0` has been
+recreated under the reset contract and its multi-file source, deterministic
+package, both-host local installation, diagnosis, execution, and uninstall
+have passed. Publication is not complete: ext-registry must be updated, hosted
+CI must pass, immutable artifacts must be released in dependency order, and
+fresh network plus authenticated Claude and Codex journeys must be observed.
+The [`extension source reset plan`](../plans/extension-source-reset.md) owns
+those gates.
+
+## uv-managed native distribution — implemented, release pending
+
+The accepted `v0.4.0` path requires host uv, recommends tested version
+`0.11.29` without enforcing it, installs Fab7-owned standard CPython `3.14.6`,
+and uses PyInstaller `6.21.0` only inside fresh build environments. Fab7 and
+extensions become self-contained native executables. The managed interpreter
+and one concurrency-safe uv cache are shared; builder venvs and extension
+dependency roots are never shared or installed.
+
+Every extension keeps the four-field schema-1 manifest and canonical
+`src/extension.py`, while mandatory `pyproject.toml` and `uv.lock` own sorted
+public-PyPI dependencies and their hashes. Registry entries now identify
+immutable source bundles. Registry and explicitly approved local source use
+the same target-local builder, package identity, immutable snapshot, host
+activation, rollback, diagnosis, and uninstall path.
+
+Local Apple Silicon implementation proof has passed for exact Python
+bootstrap, byte-identical native Fab7 and extension builds, a multi-file
+PyYAML extension, generated uv projects, source-registry convergence,
+dependency-free installed snapshots, concurrent conflicting dependency
+builds, installer rollback, non-recommended uv acceptance, and all `108`
+deterministic tests. The real sibling Muslin source was also removed and
+recreated as a fresh `0.2.0` uv project using native Fab7 `0.4.0`; root commit
+`b73f43708bfd52c76c8ba93de7a83ac0d7606d09` owns its locked PyYAML helper.
+Byte-identical native packages and the local lifecycle in both real host CLIs
+passed.
+
+Publication remains unauthorized. Hosted macOS/Linux CI, ext-registry
+migration, an immutable Muslin release, fresh network installation, and
+authenticated Claude/Codex journeys remain release gates. The
+[`uv migration plan`](../plans/uv-migration.md) owns the complete contract and
+stop condition.
 
 ## Denim — deferred
 
@@ -166,6 +236,7 @@ separate authorization.
 There is no generic record framework, extension runtime in core, methodology,
 planning or orchestration layer, configurable policy engine, provider registry,
 service, daemon, dashboard, third-party submission workflow, catalog
-federation, dependency solver, background updater, install hook, private
-registry, cross-extension import contract, mutable source link, or
-unsupported-host compatibility shim.
+federation, private dependency index, sdist build, background updater, install
+hook, cross-extension import contract, mutable source link, persistent
+extension venv, remote builder, cross-compilation, or unsupported-host
+compatibility shim.

@@ -10,9 +10,7 @@ from typing import Any
 
 from . import __version__, git
 from .errors import Fab7Error
-from .extension_package import build_extension_archive
-from .extension_scaffold import create_extension_source
-from .extensions import (
+from .extension.lifecycle import (
     catalog_listing,
     extension_doctor,
     install_local_extension,
@@ -20,6 +18,8 @@ from .extensions import (
     refresh_catalog,
     uninstall_extension,
 )
+from .extension.package import build_extension_archive
+from .extension.scaffold import create_extension_source
 from .gate import audit, check, doctor
 from .hosts import install_host
 from .install import dispatch_project, init_project
@@ -52,7 +52,10 @@ def build_parser() -> argparse.ArgumentParser:
     extension_create.add_argument("--publisher", required=True)
     extension_create.add_argument("--version", default="0.1.0")
     extension_create.add_argument("--json", action="store_true")
-    extension_build = extension_commands.add_parser("build", help="build a deterministic extension ZIP")
+    extension_build = extension_commands.add_parser(
+        "build",
+        help="build a deterministic native extension ZIP",
+    )
     extension_build.add_argument("source", nargs="?", type=Path, default=Path("."))
     extension_build.add_argument("--host", required=True, action="append", choices=("claude", "codex"))
     extension_build.add_argument("--output", type=Path)
@@ -257,7 +260,10 @@ def _finish_extension_list(args: argparse.Namespace, data: dict[str, Any]) -> in
     else:
         print(f"Fab7 extensions: {data['count']}")
         for extension in data["extensions"]:
-            print(f"{extension['name']} {extension['version']} {extension['repository']}")
+            repository = (
+                f"https://github.com/{extension['publisher']}/{extension['name']}"
+            )
+            print(f"{extension['name']} {extension['version']} {repository}")
         for installed in data.get("installed", []):
             print(
                 f"installed {installed['name']} {installed['version']} "

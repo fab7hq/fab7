@@ -1,10 +1,14 @@
 from __future__ import annotations
 
+import copy
+import hashlib
 import json
 import sys
 from pathlib import Path
 
+import fab7.toolchain as toolchain_module
 from fab7.gate import check, doctor
+from fab7.install import selected_release
 from fab7.ledger import append, create_claim, init, record_path, verify
 
 from conftest import git
@@ -63,9 +67,42 @@ def test_ledger_rewrite_is_rejected(repo: Path) -> None:
     assert "FAB7_LEDGER_REWRITE" in [error.code for error in errors]
 
 
-def test_doctor_checks_only_workspace_and_ledger(repo: Path) -> None:
+def test_doctor_checks_toolchain_workspace_and_ledger(
+    repo: Path,
+    fab7_home: Path,
+) -> None:
     assert not doctor(repo)["ok"]
     init(repo)
     result = doctor(repo)
     assert result["ok"]
-    assert [check["name"] for check in result["checks"]] == ["git", "workspace", "ledger"]
+    assert [check["name"] for check in result["checks"]] == [
+        "git",
+        "toolchain",
+        "workspace",
+        "ledger",
+    ]
+
+
+def test_doctor_accepts_a_different_valid_uv_version(
+    repo: Path,
+    fab7_home: Path,
+    monkeypatch,
+) -> None:
+    init(repo)
+    _release, manifest = selected_release(fab7_home)
+    current = copy.deepcopy(manifest["toolchain"])
+    current["uv"]["version"] = "99.0.0"
+    current["uv"]["sha256"] = "sha256:" + hashlib.sha256(b"different uv").hexdigest()
+    encoded = json.dumps(
+        {key: value for key, value in current.items() if key != "sha256"},
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode()
+    current["sha256"] = "sha256:" + hashlib.sha256(encoded).hexdigest()
+    monkeypatch.setattr(toolchain_module, "inspect_toolchain", lambda _home: current)
+
+    result = doctor(repo)
+
+    assert result["ok"]
+    toolchain = next(check for check in result["checks"] if check["name"] == "toolchain")
+    assert "uv 99.0.0; tested with uv 0.11.29" in toolchain["detail"]

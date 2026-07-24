@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import shlex
 import shutil
 import subprocess
 from pathlib import Path
@@ -16,12 +17,25 @@ from fab7.install import init_project, validate_project
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def _run_installer(test_home: Path, source: Path = ROOT) -> subprocess.CompletedProcess[str]:
+def _run_installer(
+    test_home: Path,
+    source: Path = ROOT,
+    *,
+    command_path: str | None = None,
+) -> subprocess.CompletedProcess[str]:
     environment = {
         **os.environ,
         "HOME": str(test_home),
         "SHELL": "/bin/zsh",
+        "VIRTUAL_ENV": "/ambient/venv",
+        "PYTHONHOME": "/ambient/python-home",
+        "PYTHONPATH": "/ambient/python-path",
+        "PIP_INDEX_URL": "https://private.example/simple",
+        "UV_INDEX_URL": "https://private.example/simple",
+        "UV_CONFIG_FILE": "/ambient/uv.toml",
     }
+    if command_path is not None:
+        environment["PATH"] = command_path
     return subprocess.run(
         [
             "bash",
@@ -47,6 +61,8 @@ def _copy_build_source(target: Path, version: str = __version__) -> Path:
     shutil.copytree(ROOT / "core/fab7", target / "core/fab7")
     shutil.copytree(ROOT / "plugins", target / "plugins")
     shutil.copytree(ROOT / "docs/architecture", target / "docs/architecture")
+    shutil.copyfile(ROOT / "pyproject.toml", target / "pyproject.toml")
+    shutil.copyfile(ROOT / "uv.lock", target / "uv.lock")
     if version != __version__:
         init = target / "core/fab7/__init__.py"
         init.write_text(init.read_text().replace(f'"{__version__}"', f'"{version}"'))
@@ -62,7 +78,14 @@ def test_installer_is_idempotent_and_updates_path_after_success(tmp_path: Path) 
     profile = test_home / ".zshrc"
     first_profile = profile.read_text()
     assert first_profile.count("# >>> fab7 >>>") == 1
-    assert list(sorted(path.name for path in (test_home / ".fab7").iterdir())) == ["bin", "runtime"]
+    assert list(sorted(path.name for path in (test_home / ".fab7").iterdir())) == [
+        "bin",
+        "builds",
+        "cache",
+        "runtime",
+        "toolchains",
+    ]
+    assert not (test_home / ".local").exists()
 
     second = _run_installer(test_home)
     assert second.returncode == 0, second.stderr
@@ -92,7 +115,10 @@ def test_failed_build_does_not_mutate_install_or_profile(tmp_path: Path) -> None
     failed = _run_installer(test_home, source)
     assert failed.returncode != 0
     assert profile.read_text() == "unchanged\n"
-    assert not (test_home / ".fab7").exists()
+    assert not (test_home / ".fab7/bin").exists()
+    assert not (test_home / ".fab7/runtime").exists()
+    assert (test_home / ".fab7/toolchains/python").is_dir()
+    assert (test_home / ".fab7/cache/uv").is_dir()
 
 
 def test_installer_rejects_empty_fab7_home(tmp_path: Path) -> None:
@@ -110,6 +136,105 @@ def test_installer_rejects_empty_fab7_home(tmp_path: Path) -> None:
     assert process.returncode != 0
     assert "must not be empty" in process.stderr
     assert not (test_home / ".zshrc").exists()
+
+
+def test_installer_rejects_missing_uv_before_mutation(tmp_path: Path) -> None:
+    test_home = tmp_path / "user"
+    test_home.mkdir()
+    process = subprocess.run(
+        [
+            "/bin/bash",
+            str(ROOT / "install.sh"),
+            "--source",
+            str(ROOT),
+            "--fab7-home",
+            str(test_home / ".fab7"),
+            "--profile",
+            str(test_home / ".zshrc"),
+        ],
+        cwd=ROOT,
+        env={
+            "HOME": str(test_home),
+            "PATH": "/usr/bin:/bin",
+            "SHELL": "/bin/zsh",
+        },
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    assert process.returncode != 0
+    assert "requires uv on PATH" in process.stderr
+    assert not (test_home / ".fab7").exists()
+    assert not (test_home / ".zshrc").exists()
+
+
+def test_installer_rejects_invalid_uv_before_mutation(tmp_path: Path) -> None:
+    test_home = tmp_path / "user"
+    test_home.mkdir()
+    tools = tmp_path / "tools"
+    tools.mkdir()
+    uv = tools / "uv"
+    uv.write_text("#!/bin/sh\nprintf 'uv development\\n'\n")
+    uv.chmod(0o755)
+
+    process = subprocess.run(
+        [
+            "/bin/bash",
+            str(ROOT / "install.sh"),
+            "--source",
+            str(ROOT),
+            "--fab7-home",
+            str(test_home / ".fab7"),
+            "--profile",
+            str(test_home / ".zshrc"),
+        ],
+        cwd=ROOT,
+        env={
+            "HOME": str(test_home),
+            "PATH": f"{tools}:/usr/bin:/bin",
+            "SHELL": "/bin/zsh",
+        },
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    assert process.returncode != 0
+    assert "invalid uv --version response" in process.stderr
+    assert not (test_home / ".fab7").exists()
+    assert not (test_home / ".zshrc").exists()
+
+
+def test_installer_accepts_nonrecommended_uv_version(tmp_path: Path) -> None:
+    test_home = tmp_path / "user"
+    test_home.mkdir()
+    tools = tmp_path / "tools"
+    tools.mkdir()
+    actual_uv = shutil.which("uv")
+    assert actual_uv is not None
+    wrapper = tools / "uv"
+    wrapper.write_text(
+        "#!/bin/sh\n"
+        "if [ \"${1:-}\" = \"--version\" ]; then\n"
+        "  printf 'uv 99.0.0\\n'\n"
+        "  exit 0\n"
+        "fi\n"
+        f"exec {shlex.quote(str(Path(actual_uv).resolve()))} \"$@\"\n"
+    )
+    wrapper.chmod(0o755)
+
+    process = _run_installer(
+        test_home,
+        command_path=f"{tools}:{os.environ['PATH']}",
+    )
+
+    assert process.returncode == 0, process.stderr
+    assert "tested with uv 0.11.29; continuing with uv 99.0.0" in process.stderr
+    manifest = json.loads(
+        (test_home / ".fab7/runtime/0.4.0/manifest.json").read_text()
+    )
+    assert manifest["toolchain"]["uv"]["version"] == "99.0.0"
 
 
 def test_profile_failure_restores_selection_and_removes_new_release(tmp_path: Path) -> None:

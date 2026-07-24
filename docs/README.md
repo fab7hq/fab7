@@ -3,14 +3,14 @@ title: Fab7 Documentation
 type: index
 status: implemented
 owner: project
-last_updated: 2026-07-23
+last_updated: 2026-07-24
 ---
 
 # Fab7 documentation
 
-The active documentation separates the proof core, owner-accepted onboarding,
-released extension distribution, its marketplace-migration maintenance, and
-deferred Denim.
+The active documentation separates the proof core, released onboarding and
+extension history, the implemented but unpublished extension source reset, the
+implemented but unpublished uv migration, and deferred Denim.
 
 ## Product
 
@@ -35,6 +35,8 @@ deferred Denim.
 | [`plans/ext-registry.md`](plans/ext-registry.md) | extension implementation evidence, publication order, network acceptance, and stop rules |
 | [`plans/marketplace-migration.md`](plans/marketplace-migration.md) | managed marketplace migration contract, proof, and maintenance release gate |
 | [`plans/ext-create.md`](plans/ext-create.md) | generic extension scaffold, shared host creator skills, implementation proof, and release gate |
+| [`plans/extension-source-reset.md`](plans/extension-source-reset.md) | superseded v0.3 schema-1 source reset and retained local evidence |
+| [`plans/uv-migration.md`](plans/uv-migration.md) | implemented uv prerequisite and recommendation, pinned Python toolchain, isolated native builds, and remaining release gates |
 
 [`status.yaml`](status.yaml) points to this exact authority set. Repository
 engineering guidance lives in root [`AGENTS.md`](../AGENTS.md).

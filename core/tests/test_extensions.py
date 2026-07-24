@@ -9,7 +9,12 @@ import pytest
 
 from fab7.cli import main
 from fab7.errors import Fab7Error
-from fab7.extensions import catalog_listing, extension_doctor, load_catalog, refresh_catalog
+from fab7.extension.lifecycle import (
+    catalog_listing,
+    extension_doctor,
+    load_catalog,
+    refresh_catalog,
+)
 
 
 def _catalog(*extensions: dict[str, object]) -> dict[str, object]:
@@ -25,15 +30,11 @@ def _denim() -> dict[str, object]:
     return {
         "name": "denim",
         "publisher": "fab7hq",
-        "repository": "https://github.com/fab7hq/denim",
         "version": "0.1.0",
-        "fab7_min": "0.1.0",
-        "fab7_max_exclusive": "0.2.0",
-        "executable": "denim",
-        "capabilities": ["project-workflow"],
+        "fab7_api": 1,
         "hosts": ["claude", "codex"],
-        "artifact": {
-            "url": "https://github.com/fab7hq/denim/releases/download/v0.1.0/denim-0.1.0.tar.gz",
+        "source": {
+            "url": "https://github.com/fab7hq/denim/releases/download/v0.1.0/denim-0.1.0.source.zip",
             "sha256": "sha256:" + "a" * 64,
         },
     }
@@ -91,27 +92,24 @@ def test_ext_list_is_global_and_deterministic(tmp_path: Path, monkeypatch, capsy
         lambda value: value.update({"catalog_version": "1"}),
         lambda value: value.update({"unknown": True}),
         lambda value: value["extensions"][0].update({"source": "../denim"}),
-        lambda value: value["extensions"][0]["artifact"].update({"unknown": True}),
+        lambda value: value["extensions"][0]["source"].update({"unknown": True}),
         lambda value: value["extensions"][0].update({"publisher": "other"}),
-        lambda value: value["extensions"][0].update({"executable": "other"}),
-        lambda value: value["extensions"][0].update({"fab7_max_exclusive": "0.1.0"}),
-        lambda value: value["extensions"][0].update({"capabilities": ["z", "a"]}),
+        lambda value: value["extensions"][0].update({"repository": "other"}),
+        lambda value: value["extensions"][0].update({"fab7_api": 2}),
         lambda value: value["extensions"][0].update({"hosts": ["codex", "claude"]}),
         lambda value: value["extensions"][0].update({"hosts": ["unknown"]}),
         lambda value: value["extensions"][0].update({"version": "01.0.0"}),
         lambda value: value["extensions"][0].update({"version": "1" * 5000 + ".0.0"}),
-        lambda value: value["extensions"][0].update({"repository": "https://github.com/fab7hq/denim/"}),
-        lambda value: value["extensions"][0].update({"repository": "https://[invalid"}),
         lambda value: value["extensions"][0].update(
-            {"artifact": {"url": "https://github.com/fab7hq/denim/releases/latest/download/denim.tar.gz", "sha256": "sha256:" + "a" * 64}}
+            {"source": {"url": "https://github.com/fab7hq/denim/releases/latest/download/denim.source.zip", "sha256": "sha256:" + "a" * 64}}
         ),
         lambda value: value["extensions"][0].update(
-            {"artifact": {"url": "https://github.com/fab7hq/denim/releases/download/v0.1.0/path/denim.tar.gz", "sha256": "sha256:" + "a" * 64}}
+            {"source": {"url": "https://github.com/fab7hq/denim/releases/download/v0.1.0/path/denim.source.zip", "sha256": "sha256:" + "a" * 64}}
         ),
         lambda value: value["extensions"][0].update(
-            {"artifact": {"url": "https://[invalid", "sha256": "sha256:" + "a" * 64}}
+            {"source": {"url": "https://[invalid", "sha256": "sha256:" + "a" * 64}}
         ),
-        lambda value: value["extensions"][0]["artifact"].update({"sha256": "sha256:invalid"}),
+        lambda value: value["extensions"][0]["source"].update({"sha256": "sha256:invalid"}),
     ],
 )
 def test_catalog_rejects_noncanonical_or_open_shapes(tmp_path: Path, mutate) -> None:
@@ -145,10 +143,8 @@ def test_catalog_rejects_duplicate_or_unsorted_extensions(tmp_path: Path) -> Non
     canvas.update(
         {
             "name": "canvas",
-            "repository": "https://github.com/fab7hq/canvas",
-            "executable": "canvas",
-            "artifact": {
-                "url": "https://github.com/fab7hq/canvas/releases/download/v0.1.0/canvas-0.1.0.tar.gz",
+            "source": {
+                "url": "https://github.com/fab7hq/canvas/releases/download/v0.1.0/canvas-0.1.0.source.zip",
                 "sha256": "sha256:" + "b" * 64,
             },
         }

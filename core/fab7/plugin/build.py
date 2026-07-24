@@ -1,13 +1,11 @@
-"""Shared deterministic plugin and extension package assembly."""
+"""Shared deterministic native plugin assembly."""
 
 from __future__ import annotations
 
-import hashlib
-import json
 import re
 import shutil
-from pathlib import Path, PurePosixPath
-from typing import Any, Iterable
+from pathlib import Path
+from typing import Iterable
 
 from ..errors import Fab7Error
 from .adapter import HostAdapter, PluginAction, PluginMetadata
@@ -116,59 +114,6 @@ def plugin_source_files(source_root: Path) -> list[Path]:
     return paths
 
 
-def build_extension_package(
-    source_root: Path,
-    output_root: Path,
-    identity: dict[str, Any],
-    entrypoint: str,
-    skills: list[dict[str, str]],
-) -> None:
-    _empty_output(output_root)
-    output_root.mkdir(parents=True)
-    executable = output_root / "bin" / identity["executable"]
-    executable.parent.mkdir(parents=True)
-    shutil.copyfile(_source_file(source_root, entrypoint), executable)
-    executable.chmod(0o755)
-
-    actions = tuple(
-        PluginAction(
-            name=row["name"],
-            template=_source_file(source_root, row["source"]).read_text(),
-            surface="skill",
-        )
-        for row in skills
-    )
-    display_name = " ".join(part.capitalize() for part in identity["name"].split("-"))
-    description = f"{display_name} extension for Fab7."
-    metadata = PluginMetadata(
-        name=identity["name"],
-        display_name=display_name,
-        version=identity["version"],
-        description=description,
-        publisher=identity["publisher"],
-        publisher_url=f"https://github.com/{identity['publisher']}",
-        repository=identity["repository"],
-        license="MIT",
-        capabilities=tuple(identity["capabilities"]),
-        default_prompt=f"Start {display_name}.",
-    )
-    build_plugin_roots(output_root / "hosts", metadata, identity["hosts"], actions)
-
-    rows = []
-    for path in sorted(candidate for candidate in output_root.rglob("*") if candidate.is_file()):
-        rows.append(
-            {
-                "path": path.relative_to(output_root).as_posix(),
-                "mode": "0755" if path == executable else "0644",
-                "sha256": "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest(),
-            }
-        )
-    manifest = {"schema": 1, **identity, "files": rows}
-    manifest_path = output_root / "extension.json"
-    manifest_path.write_text(json.dumps(manifest, sort_keys=True, indent=2) + "\n")
-    manifest_path.chmod(0o644)
-
-
 def _validate_inputs(
     metadata: PluginMetadata,
     hosts: tuple[str, ...],
@@ -191,10 +136,3 @@ def _validate_inputs(
 def _empty_output(output_root: Path) -> None:
     if output_root.is_symlink() or output_root.exists():
         raise Fab7Error("FAB7_PLUGIN_BUILD_CONFLICT", f"Plugin output already exists: {output_root}")
-
-
-def _source_file(root: Path, relative: str) -> Path:
-    path = root.joinpath(*PurePosixPath(relative).parts)
-    if path.is_symlink() or not path.is_file():
-        raise Fab7Error("FAB7_EXTENSION_SOURCE_INVALID", "Extension build source is invalid")
-    return path

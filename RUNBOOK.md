@@ -7,11 +7,15 @@ This runbook takes a new user through the smallest complete Fab7 path:
 3. initialize one Git repository under `<repo>/.fab7/`; and
 4. record and verify one completion claim.
 
-Fab7 currently supports macOS or Linux, Bash or Zsh, Git, and Python 3.11 or
-newer. Windows, other shells, and Denim are outside this path. Release `v0.2.0`
+Fab7 currently supports macOS or Linux, Bash or Zsh, Git, a valid host `uv`,
+and Fab7-managed standard CPython `3.14.6`. Fab7 is tested with uv `0.11.29`,
+but that version is advisory rather than required. Windows, other shells, and
+Denim are outside this path. Release `v0.2.0`
 adds registry and explicit-local extension distribution; release `v0.2.1`
 adds safe managed-marketplace migration across versions; and release `v0.2.2`
-adds generic extension creation and target-specific builds.
+adds generic extension creation and target-specific builds. This checkout is
+the unreleased `v0.4.0` candidate with native Fab7 and extension executables,
+locked extension dependencies, a shared uv cache, and isolated build state.
 
 ## Current release status
 
@@ -28,6 +32,13 @@ The released `v0.2.2` artifact adds generic `fab7 ext create` plus shared
 `ext-create` skills for Claude and Codex. Its immutable network installation,
 registry refresh, and Muslin `v0.1.1` installation passed in both hosts.
 
+The checkout's `v0.4.0` migration has local Apple Silicon proof for
+byte-identical Fab7 and extension binaries, multi-file PyYAML execution,
+concurrent conflicting-dependency isolation, fresh-home installation, and the
+complete `108`-test deterministic suite. Do not treat ext-registry, hosted CI,
+immutable releases, or authenticated host journeys as migrated until the uv
+plan's remaining gates pass.
+
 The exact implementation evidence and closure limits live in
 [`docs/plans/onboarding.md`](docs/plans/onboarding.md#current-implementation-evidence).
 
@@ -37,12 +48,15 @@ Run:
 
 ```bash
 git --version
-python3 --version
+uv --version
 printf '%s\n' "$SHELL"
 ```
 
-Confirm Python is 3.11 or newer and the shell ends in `bash` or `zsh`. Install
-and authenticate at least one supported agentic CLI before host registration:
+Confirm uv runs and the shell ends in `bash` or `zsh`. Version `0.11.29` is
+the tested recommendation; another valid version produces an advisory and
+continues. `install.sh` will install CPython 3.14.6 beneath `FAB7_HOME`; no
+system Python is required. Install and authenticate at least one supported
+agentic CLI before host registration:
 
 ```bash
 claude --version
@@ -166,6 +180,9 @@ The resulting ownership boundary is:
 
 ```text
 ~/.fab7/                         # user-global, never committed
+├── cache/uv/                   # shared concurrency-safe download cache
+├── toolchains/python/          # managed standard CPython 3.14.6
+├── builds/                     # task directories; successful builds clean up
 ├── bin/
 │   └── fab7                    # selected executable
 └── runtime/
@@ -263,8 +280,9 @@ fab7 ext doctor --json
 muslin start --json
 ```
 
-For local extension development, inspect the source manifest before granting
-its bounded build, then replace the name-based install with:
+For local extension development, inspect the source manifest and discovered
+trees before granting Fab7's bounded assembly, then replace the name-based
+install with:
 
 ```bash
 fab7 ext install --local /path/to/muslin --host claude --json
@@ -281,8 +299,10 @@ fab7 ext uninstall muslin --host claude --json
 fab7 ext uninstall muslin --host codex --json
 ```
 
-The registry contains only release URLs and digests. Local paths are explicit,
-never enter the shared catalog, and produce immutable development snapshots.
+The registry contains only immutable extension source-bundle URLs and digests.
+Registry and local source both build through the same isolated native builder.
+Local paths are explicit, never enter the shared catalog, and produce immutable
+target- and toolchain-bound development snapshots.
 
 ## Create an extension
 
@@ -296,8 +316,28 @@ fab7 ext create /path/to/extension \
   --json
 ```
 
-Creation is host-neutral. The command uses the installed Fab7 version as the
-minimum and refuses to replace any generated path.
+Creation is host-neutral. The command refuses to replace any generated path.
+Its manifest is exactly:
+
+```json
+{
+  "name": "my-extension",
+  "publisher": "my-org",
+  "schema": 1,
+  "version": "0.1.0"
+}
+```
+
+`src/extension.py` is always the entrypoint. Add ordinary Python packages and
+modules anywhere beneath `src/`; Fab7 includes them automatically.
+`pyproject.toml` owns sorted public-PyPI runtime dependencies and
+`uv.lock` is mandatory and current for CPython 3.14.6. Fab7 accepts only locked
+wheels; local paths, VCS or direct URLs, private indexes, editables, and sdists
+fail closed. It also
+discovers every bounded regular file beneath `tests/` and `skills/`. Tests
+affect the source digest but are not shipped or executed by build. Each direct
+`skills/<name>/` directory must contain `SKILL.md`, and adjacent references or
+assets are copied with that skill.
 
 The registered host skills delegate to the same command:
 
@@ -306,10 +346,12 @@ The registered host skills delegate to the same command:
 $fab7:ext-create my-extension
 ```
 
-Before running generated code, the skill displays the exact test, target build,
-and install commands plus the declared source files, then asks for explicit
-approval. The accepted path creates a deterministic ZIP through only the
-selected adapters, installs the same schema-2 source, and runs diagnosis.
+Before running generated code, the skill displays dependencies, lock identity,
+the exact isolated test, target build, and install commands plus the discovered
+`src/`, `tests/`, and `skills/` trees. It discloses wheel downloads and
+PyInstaller hook execution, then asks for explicit approval. The accepted path
+creates a deterministic current-platform native ZIP through only the selected
+adapters, installs the same schema-1 source, and runs diagnosis.
 
 The standalone build command requires one or more target hosts and defaults to
 the current folder and a new target-qualified ZIP:
@@ -325,9 +367,10 @@ fab7 ext build /path/to/extension \
 ```
 
 Without `--output`, the path is
-`dist/<name>-<version>-<target[-target...]>.zip`. The command reports its target
-list plus source and artifact SHA-256 digests and refuses to replace an existing
-output. It builds only; it does not install or publish the extension.
+`dist/<name>-<version>-<native-target>-<host[-host...]>.zip`. The command
+reports its native target, host list, source, lock, toolchain, and package
+SHA-256 identities and refuses to replace an existing output. It builds only;
+it does not install or publish the extension.
 
 For deeper onboarding, ask the skill about architecture, the extension
 contract, or proof and authority. It reads only the matching local reference
@@ -345,11 +388,13 @@ This is local extension development only. Registry submission, release,
 repository creation, and CI generation are outside the skill.
 
 Fab7's own Claude and Codex plugins are built from shared action sources and the
-same focused adapter modules used by schema-2 extension builds. To inspect a
+same focused adapter modules used by schema-1 extension builds. To inspect a
 complete release and its rendered host artifacts, use a new output path:
 
 ```bash
-PYTHONPATH=core python3 -m fab7.release_build --release-root <new-directory>
+uv run --python 3.14.6 python -m fab7.release_build \
+  --release-root <new-directory> \
+  --fab7-home <disposable-home>
 claude plugin validate --strict <new-directory>/hosts/claude
 ```
 

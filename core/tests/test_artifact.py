@@ -6,7 +6,6 @@ import os
 import shutil
 import subprocess
 import sys
-import zipfile
 from pathlib import Path
 
 from fab7 import __version__
@@ -16,8 +15,8 @@ from fab7.release_build import build_release
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def _build(target: Path) -> None:
-    build_release(ROOT, target)
+def _build(target: Path, home: Path) -> None:
+    build_release(ROOT, target, home=home)
 
 
 def _snapshot(root: Path) -> list[tuple[str, int, str]]:
@@ -38,8 +37,9 @@ def _snapshot(root: Path) -> list[tuple[str, int, str]]:
 def test_release_tree_is_deterministic_and_executable(tmp_path: Path) -> None:
     first = tmp_path / "first"
     second = tmp_path / "second"
-    _build(first)
-    _build(second)
+    home = tmp_path / "build-home"
+    _build(first, home)
+    _build(second, home)
 
     assert _snapshot(first) == _snapshot(second)
     assert not list(first.rglob("__pycache__"))
@@ -55,22 +55,42 @@ def test_release_tree_is_deterministic_and_executable(tmp_path: Path) -> None:
     )
     assert result.returncode == 0, result.stderr
     assert result.stdout.strip() == __version__
-    with zipfile.ZipFile(executable) as archive:
-        assert {
-            "fab7/templates/extension/fab7-extension.json.tmpl",
-            "fab7/templates/extension/skills/start/SKILL.md.tmpl",
-            "fab7/templates/extension/src/extension.py.tmpl",
-            "fab7/templates/extension/tests/test_extension.py.tmpl",
-            "fab7/plugin/__init__.py",
-            "fab7/plugin/adapter.py",
-            "fab7/plugin/build.py",
-            "fab7/plugin/claude_adapter.py",
-            "fab7/plugin/codex_adapter.py",
-        }.issubset(archive.namelist())
+    created_root = tmp_path / "created"
+    created_root.mkdir()
+    created = subprocess.run(
+        [
+            str(executable),
+            "ext",
+            "create",
+            str(created_root),
+            "--name",
+            "native-check",
+            "--publisher",
+            "fab7hq",
+            "--json",
+        ],
+        env={**os.environ, "FAB7_HOME": str(home)},
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        check=False,
+    )
+    assert created.returncode == 0, created.stderr
+    assert {
+        "fab7-extension.json",
+        "pyproject.toml",
+        "uv.lock",
+    }.issubset(path.name for path in created_root.iterdir())
 
     manifest = json.loads((first / "manifest.json").read_text())
     assert set(manifest) == {
-        "schema", "name", "version", "source_sha256", "executable_sha256", "python"
+        "schema",
+        "name",
+        "version",
+        "source_sha256",
+        "executable_sha256",
+        "target",
+        "toolchain",
     }
     assert manifest["executable_sha256"] == "sha256:" + hashlib.sha256(executable.read_bytes()).hexdigest()
     assert (first / "hosts/claude/.claude-plugin/marketplace.json").is_file()
@@ -111,9 +131,16 @@ def test_release_tree_is_deterministic_and_executable(tmp_path: Path) -> None:
         ).read_bytes()
 
 
-def test_builder_check_mode_is_clean() -> None:
+def test_builder_check_mode_is_clean(tmp_path: Path) -> None:
     process = subprocess.run(
-        [sys.executable, "-m", "fab7.release_build", "--check"],
+        [
+            sys.executable,
+            "-m",
+            "fab7.release_build",
+            "--check",
+            "--fab7-home",
+            str(tmp_path / "build-home"),
+        ],
         cwd=ROOT,
         env={**os.environ, "PYTHONPATH": str(ROOT / "core")},
         text=True,
@@ -154,11 +181,14 @@ def test_release_digest_tracks_injected_architecture_documents(tmp_path: Path) -
     shutil.copytree(ROOT / "core/fab7", source / "core/fab7")
     shutil.copytree(ROOT / "plugins/fab7", source / "plugins/fab7")
     shutil.copytree(ROOT / "docs/architecture", source / "docs/architecture")
+    shutil.copyfile(ROOT / "pyproject.toml", source / "pyproject.toml")
+    shutil.copyfile(ROOT / "uv.lock", source / "uv.lock")
 
-    first = build_release(source, tmp_path / "first")
+    home = tmp_path / "build-home"
+    first = build_release(source, tmp_path / "first", home=home)
     overview = source / "docs/architecture/overview.md"
     overview.write_text(overview.read_text() + "\n")
-    second = build_release(source, tmp_path / "second")
+    second = build_release(source, tmp_path / "second", home=home)
 
     assert first["source_sha256"] != second["source_sha256"]
     for host in ("claude", "codex"):

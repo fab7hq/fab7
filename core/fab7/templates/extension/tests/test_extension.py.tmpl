@@ -19,7 +19,7 @@ class Fab7ExtensionTest(unittest.TestCase):
             fake_bin = temporary / "fake-bin"
             fake_bin.mkdir()
             fake_fab7 = fake_bin / "fab7"
-            fake_fab7.write_text("#!/bin/sh\nprintf '$fab7_min\\n'\n")
+            fake_fab7.write_text("#!/bin/sh\nprintf '$fab7_version\\n'\n")
             fake_fab7.chmod(0o755)
             process = subprocess.run(
                 [sys.executable, str(ROOT / "src/extension.py"), "start", "--json"],
@@ -32,7 +32,7 @@ class Fab7ExtensionTest(unittest.TestCase):
             self.assertEqual(process.returncode, 0, process.stderr)
             result = json.loads(process.stdout)
             self.assertEqual(result["extension"], "$name")
-            self.assertEqual(result["fab7_version"], "$fab7_min")
+            self.assertEqual(result["fab7_version"], "$fab7_version")
 
 
 if __name__ == "__main__":

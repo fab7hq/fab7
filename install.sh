@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-fab7_default_version="0.2.2"
+fab7_default_version="0.4.0"
+fab7_recommended_uv="0.11.29"
+fab7_required_python="3.14.6"
 fab7_version=""
 fab7_source=""
 fab7_home_path="$HOME/.fab7"
@@ -63,13 +65,20 @@ case "$(uname -s)" in
     ;;
 esac
 
-command -v git >/dev/null 2>&1 || { printf 'Fab7 requires Git.\n' >&2; exit 1; }
-command -v python3 >/dev/null 2>&1 || { printf 'Fab7 requires Python 3.11 or newer.\n' >&2; exit 1; }
-fab7_python="$(command -v python3)"
-"$fab7_python" -c 'import sys; raise SystemExit(0 if sys.version_info >= (3, 11) else 1)' || {
-  printf 'Fab7 requires Python 3.11 or newer.\n' >&2
+command -v uv >/dev/null 2>&1 || {
+  printf 'Fab7 requires uv on PATH. Install it from https://docs.astral.sh/uv/getting-started/installation/\n' >&2
   exit 1
 }
+fab7_uv="$(command -v uv)"
+fab7_uv_version="$("$fab7_uv" --version 2>/dev/null | awk 'NR == 1 {print $2}')"
+if [[ ! "$fab7_uv_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-+][0-9A-Za-z.-]+)?$ ]]; then
+  printf 'Fab7 found an invalid uv --version response.\n' >&2
+  exit 1
+fi
+if [[ "$fab7_uv_version" != "$fab7_recommended_uv" ]]; then
+  printf 'Fab7 is tested with uv %s; continuing with uv %s.\n' "$fab7_recommended_uv" "$fab7_uv_version" >&2
+fi
+command -v git >/dev/null 2>&1 || { printf 'Fab7 requires Git.\n' >&2; exit 1; }
 
 if [[ -z "$fab7_profile" ]]; then
   case "${SHELL:-}" in
@@ -81,6 +90,66 @@ if [[ -z "$fab7_profile" ]]; then
       ;;
   esac
 fi
+
+if [[
+  -L "$fab7_home_path" ||
+  -L "$fab7_home_path/toolchains" ||
+  -L "$fab7_home_path/cache" ||
+  -L "$fab7_home_path/builds" ||
+  -L "$fab7_home_path/runtime" ||
+  -L "$fab7_home_path/bin"
+]]; then
+  printf 'Fab7 installation directories must not be symlinks.\n' >&2
+  exit 1
+fi
+mkdir -p "$fab7_home_path/toolchains/python" "$fab7_home_path/cache/uv"
+fab7_uv_environment=(
+  env
+  -u VIRTUAL_ENV
+  -u PYTHONPATH
+  -u PYTHONHOME
+  -u PIP_CONFIG_FILE
+  -u PIP_INDEX_URL
+  -u PIP_EXTRA_INDEX_URL
+  -u UV_CONFIG_FILE
+  -u UV_DEFAULT_INDEX
+  -u UV_EXTRA_INDEX_URL
+  -u UV_FIND_LINKS
+  -u UV_INDEX
+  -u UV_INDEX_URL
+  -u UV_PROJECT
+  UV_CACHE_DIR="$fab7_home_path/cache/uv"
+  UV_PYTHON_INSTALL_DIR="$fab7_home_path/toolchains/python"
+  UV_PYTHON_INSTALL_BIN=0
+  UV_MANAGED_PYTHON=1
+  UV_NO_CONFIG=1
+)
+"${fab7_uv_environment[@]}" "$fab7_uv" python install "$fab7_required_python" \
+  --install-dir "$fab7_home_path/toolchains/python" \
+  --cache-dir "$fab7_home_path/cache/uv" \
+  --no-bin \
+  --no-config >/dev/null
+fab7_python="$("${fab7_uv_environment[@]}" UV_PYTHON_DOWNLOADS=never "$fab7_uv" python find \
+  "$fab7_required_python" \
+  --managed-python \
+  --no-python-downloads \
+  --no-config \
+  --no-project)"
+fab7_python_environment=(
+  "${fab7_uv_environment[@]}"
+  UV_PYTHON_DOWNLOADS=never
+  PYTHONNOUSERSITE=1
+  PYTHONDONTWRITEBYTECODE=1
+  PYTHONHASHSEED=0
+  SOURCE_DATE_EPOCH=0
+  TZ=UTC
+  LC_ALL=C
+)
+"${fab7_python_environment[@]}" "$fab7_python" -I -c \
+  'import platform,sysconfig; raise SystemExit(0 if platform.python_implementation() == "CPython" and platform.python_version() == "3.14.6" and not sysconfig.get_config_var("Py_GIL_DISABLED") else 1)' || {
+  printf 'Fab7 requires standard GIL-enabled CPython %s.\n' "$fab7_required_python" >&2
+  exit 1
+}
 
 fab7_temp="$(mktemp -d "${TMPDIR:-/tmp}/fab7-install.XXXXXX")"
 fab7_install_temp=""
@@ -105,7 +174,7 @@ else
   fab7_checksum_url="https://github.com/fab7hq/fab7/releases/download/v${fab7_version}/fab7-${fab7_version}.source.sha256"
   fab7_archive="$fab7_temp/fab7.tar.gz"
   fab7_checksum="$fab7_temp/fab7.source.sha256"
-  "$fab7_python" - "$fab7_archive_url" "$fab7_archive" "$fab7_checksum_url" "$fab7_checksum" <<'PY'
+  "${fab7_python_environment[@]}" "$fab7_python" -I - "$fab7_archive_url" "$fab7_archive" "$fab7_checksum_url" "$fab7_checksum" <<'PY'
 import pathlib
 import sys
 import urllib.request
@@ -122,7 +191,7 @@ for url, destination in ((sys.argv[1], sys.argv[2]), (sys.argv[3], sys.argv[4]))
         raise SystemExit("Fab7 download is too large")
     pathlib.Path(destination).write_bytes(data)
 PY
-  fab7_expected="$($fab7_python - "$fab7_checksum" <<'PY'
+  fab7_expected="$("${fab7_python_environment[@]}" "$fab7_python" -I - "$fab7_checksum" <<'PY'
 import pathlib
 import re
 import sys
@@ -133,7 +202,7 @@ if not fields or not re.fullmatch(r"[0-9a-f]{64}", fields[0]):
 print(fields[0])
 PY
 )"
-  fab7_actual="$($fab7_python - "$fab7_archive" <<'PY'
+  fab7_actual="$("${fab7_python_environment[@]}" "$fab7_python" -I - "$fab7_archive" <<'PY'
 import hashlib
 import pathlib
 import sys
@@ -146,7 +215,7 @@ PY
     exit 1
   fi
   fab7_source_sha="sha256:$fab7_actual"
-  fab7_source_root="$($fab7_python - "$fab7_archive" "$fab7_temp/source" <<'PY'
+  fab7_source_root="$("${fab7_python_environment[@]}" "$fab7_python" -I - "$fab7_archive" "$fab7_temp/source" <<'PY'
 import pathlib
 import shutil
 import sys
@@ -182,7 +251,7 @@ PY
 )"
 fi
 
-fab7_source_version="$(PYTHONPATH="$fab7_source_root/core" "$fab7_python" -c 'from fab7 import __version__; print(__version__)')"
+fab7_source_version="$("${fab7_python_environment[@]}" PYTHONPATH="$fab7_source_root/core" "$fab7_python" -sP -c 'from fab7 import __version__; print(__version__)')"
 fab7_version="${fab7_version:-$fab7_source_version}"
 if [[ "$fab7_version" != "$fab7_source_version" ]]; then
   printf 'Requested Fab7 version does not match the source.\n' >&2
@@ -190,11 +259,26 @@ if [[ "$fab7_version" != "$fab7_source_version" ]]; then
 fi
 
 fab7_release="$fab7_temp/release"
-fab7_build_args=("$fab7_python" -m fab7.release_build --source-root "$fab7_source_root" --release-root "$fab7_release")
+fab7_build_args=(
+  "${fab7_python_environment[@]}"
+  PYTHONPATH="$fab7_source_root/core"
+  "$fab7_python"
+  -sP
+  -m
+  fab7.release_build
+  --source-root
+  "$fab7_source_root"
+  --release-root
+  "$fab7_release"
+  --fab7-home
+  "$fab7_home_path"
+  --uv
+  "$fab7_uv"
+)
 if [[ -n "$fab7_source_sha" ]]; then
   fab7_build_args+=(--source-sha256 "$fab7_source_sha")
 fi
-PYTHONPATH="$fab7_source_root/core" "${fab7_build_args[@]}" >/dev/null
+"${fab7_build_args[@]}" >/dev/null
 if [[ "$($fab7_release/bin/fab7 --version)" != "$fab7_version" ]]; then
   printf 'Built Fab7 executable failed its version smoke test.\n' >&2
   exit 1
@@ -226,7 +310,7 @@ if [[ -L "$fab7_target" ]]; then
   exit 1
 fi
 if [[ -e "$fab7_target" ]]; then
-  "$fab7_python" - "$fab7_release" "$fab7_target" <<'PY'
+  "${fab7_python_environment[@]}" "$fab7_python" -I - "$fab7_release" "$fab7_target" <<'PY'
 import hashlib
 import pathlib
 import stat
@@ -248,7 +332,7 @@ if snapshot(sys.argv[1]) != snapshot(sys.argv[2]):
 PY
 else
   fab7_install_temp="$(mktemp -d "$fab7_home_path/runtime/.fab7-${fab7_version}.XXXXXX")"
-  "$fab7_python" - "$fab7_release" "$fab7_install_temp/release" <<'PY'
+  "${fab7_python_environment[@]}" "$fab7_python" -I - "$fab7_release" "$fab7_install_temp/release" <<'PY'
 import pathlib
 import shutil
 import sys
@@ -279,7 +363,7 @@ rm -f -- "$fab7_selector_temp"
 ln -s "../runtime/$fab7_version/bin/fab7" "$fab7_selector_temp"
 mv -f "$fab7_selector_temp" "$fab7_selector"
 
-if ! "$fab7_python" - "$fab7_profile" "$fab7_home_path" "$HOME" <<'PY'
+if ! "${fab7_python_environment[@]}" "$fab7_python" -I - "$fab7_profile" "$fab7_home_path" "$HOME" <<'PY'
 import pathlib
 import shlex
 import sys
