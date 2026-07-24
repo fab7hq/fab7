@@ -13,37 +13,21 @@ but that version is advisory rather than required. Windows, other shells, and
 Denim are outside this path. Release `v0.2.0`
 adds registry and explicit-local extension distribution; release `v0.2.1`
 adds safe managed-marketplace migration across versions; and release `v0.2.2`
-adds generic extension creation and target-specific builds. This checkout is
-the unreleased `v0.4.0` candidate with native Fab7 and extension executables,
-locked extension dependencies, a shared uv cache, and isolated build state.
+adds generic extension creation and target-specific builds. Release `v0.4.0`
+adds native Fab7 and extension executables, locked extension dependencies, a
+shared uv cache, and isolated build state.
 
 ## Current release status
 
-`v0.2.2` is the current Fab7 release. Its installer verifies the matching
-GitHub tag archive against the release checksum asset before building. Release
-`v0.1.0` established the onboarding path, which the owner accepted on
-2026-07-20 after source and network verification; exact platform and host
-transcripts were not retained.
+`v0.4.0` is the current Fab7 release. Its installer verifies the matching
+GitHub tag archive against `fab7-0.4.0.source.sha256` before building. Hosted
+macOS and Linux CI passed all `108` tests. A fresh isolated macOS home installed
+the immutable release with valid non-recommended uv `0.11.32`, refreshed
+ext-registry catalog `0.2.0`, installed released Muslin `0.2.0` into Claude and
+Codex, passed diagnosis and execution, and observed idempotent reinstall.
 
-The released `v0.2.1` artifact migrated existing `v0.2.0` registrations in
-fresh isolated Codex and Claude homes; repeated registration was idempotent.
-
-The released `v0.2.2` artifact adds generic `fab7 ext create` plus shared
-`ext-create` skills for Claude and Codex. Its immutable network installation,
-registry refresh, and Muslin `v0.1.1` installation passed in both hosts.
-
-The `v0.4.0` candidate is on `main` at
-`f323c2155f39c3113dc72a36bcf5239a8baa17f6`. Local Apple Silicon proof covers
-byte-identical Fab7 and extension binaries, multi-file PyYAML execution,
-concurrent conflicting-dependency isolation, fresh-home installation, and the
-complete `108`-test deterministic suite. Hosted macOS and Linux CI passed.
-Fresh GitHub `main` clones also installed native Fab7 and Muslin `0.2.0` into
-both host CLIs in an isolated home.
-
-That is reviewed-branch source proof, not an immutable release or registry
-installation. Do not treat ext-registry, version tags, GitHub release assets,
-release-checksum installation, or authenticated model journeys as migrated
-until the uv plan's remaining gates pass.
+No authenticated model session invoked the released skills; native host CLI
+discovery and the complete deterministic release path were observed directly.
 
 The exact implementation evidence and closure limits live in
 [`docs/plans/onboarding.md`](docs/plans/onboarding.md#current-implementation-evidence).
@@ -72,12 +56,12 @@ codex --version
 
 ## 2. Install Fab7 for the user
 
-### Immutable `v0.2.2` release
+### Immutable `v0.4.0` release
 
 Installation is one command:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/fab7hq/fab7/v0.2.2/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/fab7hq/fab7/v0.4.0/install.sh | bash
 ```
 
 The installer fetches the matching GitHub tag archive and release checksum,

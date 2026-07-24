@@ -1,11 +1,11 @@
 ---
 title: Fab7 uv Migration
 type: plan
-status: implemented
+status: complete
 implementation_authorized: true
-publication_authorized: false
+publication_authorized: true
 implementation: complete
-publication: not_started
+publication: released
 owner: product-and-engineering
 last_updated: 2026-07-25
 target_release: v0.4.0
@@ -503,8 +503,18 @@ Muslin `0.2.0`, and repeated Codex installation returned `already_installed`.
 The target-local package SHA-256 was
 `321ae560e09887fc639feb7a29d0f25814bae4f95e871db12e221e0c42d67757`.
 
-This proves public-branch source installation, not immutable release or
-registry installation. Neither repository has a new version tag or GitHub
-release, ext-registry has not been migrated, and no release-checksum network
-installation or authenticated model journey was performed. Publication
-remains a separate owner decision.
+The owner then authorized publication. Fab7 `v0.4.0` was released with source
+archive SHA-256
+`27239cbd59e718f5ff3e735b1f004501cac4f81fe08e82972a3cb45f8750b44a`.
+Muslin `v0.2.0` was released with source-bundle SHA-256
+`b467f0823c109788be5652263ff4b4fa9eccb9bdf1b18c3a52bd3a7bf5a528a7`,
+and ext-registry catalog `0.2.0` published that exact identity.
+
+A fresh isolated home downloaded the immutable Fab7 tag archive and checksum,
+installed native Fab7 `0.4.0`, refreshed the public catalog, downloaded and
+built released Muslin, activated it in Claude Code `2.1.218` and Codex CLI
+`0.145.0`, passed diagnosis and execution, and returned
+`already_installed` on repeat installation. The target-local package SHA-256
+was `f8ec1b798f78abb4fa847d43eedbc386b1ccab582db35e840dce84877e940b72`.
+No authenticated model session invoked the released skills; native host
+discovery and the deterministic release path were observed directly.

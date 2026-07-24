@@ -190,7 +190,7 @@ fresh network plus authenticated Claude and Codex journeys must be observed.
 The [`extension source reset plan`](../plans/extension-source-reset.md) owns
 those gates.
 
-## uv-managed native distribution — implemented, release pending
+## uv-managed native distribution — released and complete
 
 The accepted `v0.4.0` path requires host uv, recommends tested version
 `0.11.29` without enforcing it, installs Fab7-owned standard CPython `3.14.6`,
@@ -223,9 +223,11 @@ Hosted macOS/Linux CI passed. Fresh GitHub clones also passed native Fab7
 installation and both-host Muslin installation, discovery, execution,
 diagnosis, and idempotence in an isolated home.
 
-Publication remains unauthorized. Ext-registry migration, immutable version
-tags and releases, release-checksum network installation, and authenticated
-Claude/Codex journeys remain release gates. The
+Fab7 `v0.4.0`, Muslin `v0.2.0`, and ext-registry catalog `0.2.0` are released.
+A fresh isolated home passed immutable Fab7 installation, catalog refresh,
+Muslin registry installation into both hosts, diagnosis, execution, native
+host discovery, and idempotence. Authenticated model invocation was not
+performed and remains a recorded residual rather than release evidence. The
 [`uv migration plan`](../plans/uv-migration.md) owns the complete contract and
 stop condition.
 

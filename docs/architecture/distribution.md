@@ -26,8 +26,8 @@ distribution is released at `v0.2.0`; its immutable network-registry lifecycle
 was observed before closure. Release `v0.2.1` adds ownership-aware marketplace
 migration. Release `v0.2.2` adds `fab7 ext create` and shared Claude/Codex
 creator skills. The checkout now implements the breaking `v0.4.0` uv and
-native-build migration over the unpublished schema-1 reset; publication and
-external repository migration remain separate owner decisions.
+native-build migration over the unpublished schema-1 reset. Fab7 `v0.4.0`,
+Muslin `v0.2.0`, and ext-registry catalog `0.2.0` are released.
 
 ## Contents
 
@@ -43,9 +43,9 @@ external repository migration remain separate owner decisions.
 
 | Repository | Current state | Owns |
 |---|---|---|
-| [`fab7hq/fab7`](https://github.com/fab7hq/fab7) | `v0.4.0` candidate; `v0.2.2` released | proof core, pinned native builder, installer, CLI, host plugins, generic extension creator, catalog validator, and extension installer |
-| [`fab7hq/ext-registry`](https://github.com/fab7hq/ext-registry) | released `v0.1.1` | one reviewed `catalog.yaml` and CI pinned to released Fab7; no extension source or artifacts |
-| [`fab7hq/muslin`](https://github.com/fab7hq/muslin) | local `0.2.0` uv recreation; `v0.1.1` released | deterministic closure fixture, canonical skill, package artifact, and tests |
+| [`fab7hq/fab7`](https://github.com/fab7hq/fab7) | released `v0.4.0` | proof core, pinned native builder, installer, CLI, host plugins, generic extension creator, catalog validator, and extension installer |
+| [`fab7hq/ext-registry`](https://github.com/fab7hq/ext-registry) | catalog `0.2.0` on `main` | one reviewed `catalog.yaml` and CI pinned to released Fab7; no extension source or artifacts |
+| [`fab7hq/muslin`](https://github.com/fab7hq/muslin) | released `v0.2.0` | deterministic closure fixture, canonical skill, source-bundle asset, and tests |
 | [`fab7hq/denim`](https://github.com/fab7hq/denim) | deferred | first product extension when separately authorized |
 
 Muslin is proof infrastructure, not the first product extension. The registry
@@ -428,10 +428,14 @@ installation, native execution, diagnosis, host discovery, and idempotence for
 Muslin. The network-built extension package SHA-256 was
 `321ae560e09887fc639feb7a29d0f25814bae4f95e871db12e221e0c42d67757`.
 
-Ext-registry migration, immutable version tags and releases,
-release-checksum network installation, publication, and authenticated
-Claude/Codex journeys remain unproved and unauthorized. The complete local
-suite passed `108` tests,
+Fab7 `v0.4.0`, Muslin `v0.2.0`, and ext-registry catalog `0.2.0` were then
+published. A fresh isolated home passed release-checksum Fab7 installation,
+registry refresh, Muslin download and native build, both-host integration,
+diagnosis, execution, discovery, and idempotence. The registry-built package
+SHA-256 was
+`f8ec1b798f78abb4fa847d43eedbc386b1ccab582db35e840dce84877e940b72`.
+Authenticated Claude/Codex model journeys remain unperformed; native host
+discovery was observed directly. The complete local suite passed `108` tests,
 including fresh-home installer rollback, non-recommended uv acceptance, and
 concurrent extensions with conflicting dependency versions sharing only the
 managed Python and uv cache.

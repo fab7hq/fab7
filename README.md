@@ -14,19 +14,18 @@ installation, immutable snapshots, native Claude/Codex activation, diagnosis,
 and bounded uninstall. Release `0.2.1` adds safe managed-marketplace migration
 when Fab7 or an extension changes version. Release `0.2.2` adds generic
 `fab7 ext create` source scaffolding plus shared `/fab7:ext-create` and
-`$fab7:ext-create` host skills. Muslin is the closure fixture;
+`$fab7:ext-create` host skills. Release `0.4.0` replaces the Python zipapp path
+with uv-managed native Fab7 and extension builds. Muslin is the closure fixture;
 [`fab7hq/denim`](https://github.com/fab7hq/denim) remains deferred. See
 [`docs/architecture/distribution.md`](docs/architecture/distribution.md); the
 onboarding closure record is in
 [`docs/plans/onboarding.md`](docs/plans/onboarding.md), and registry work is
 tracked in [`docs/plans/ext-registry.md`](docs/plans/ext-registry.md).
 
-This checkout is the unreleased `0.4.0` candidate. It keeps the single
-schema-1 extension manifest and adds mandatory `pyproject.toml` plus `uv.lock`
-dependency ownership. Fab7 and extensions are native executables built with
-Fab7-owned CPython 3.14.6 and PyInstaller 6.21.0. There is no compatibility
-with the retired Python zipapp path. The current immutable release remains
-`0.2.2`.
+Release `0.4.0` keeps the single schema-1 extension manifest and adds mandatory
+`pyproject.toml` plus `uv.lock` dependency ownership. Fab7 and extensions are
+native executables built with Fab7-owned CPython 3.14.6 and PyInstaller 6.21.0.
+There is no compatibility with the retired Python zipapp path.
 
 Local paths never enter the shared registry and never become runtime links.
 

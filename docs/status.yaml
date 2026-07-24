@@ -4,16 +4,18 @@ updated_at: "2026-07-25"
 current_phase:
   id: uv-migration
   name: uv-managed native Fab7 and extension builds
-  status: implementation_complete
+  status: completed
   active_plan: docs/plans/uv-migration.md
   implementation_authorized: true
   implementation: complete
-  publication_authorized: false
-  publication: not_started
+  publication_authorized: true
+  publication: released
   external_ci: passed
-  external_ci_run: https://github.com/fab7hq/fab7/actions/runs/30113297361
+  external_ci_run: https://github.com/fab7hq/fab7/actions/runs/30113871792
   candidate_commit: f323c2155f39c3113dc72a36bcf5239a8baa17f6
+  release_commit: 410177b1712eba95aa88ed72124133493b932b9b
   target_release: v0.4.0
+  release_url: https://github.com/fab7hq/fab7/releases/tag/v0.4.0
   repositories:
     fab7: https://github.com/fab7hq/fab7
     muslin: https://github.com/fab7hq/muslin
@@ -55,6 +57,14 @@ current_phase:
     network_muslin_package_sha256: "sha256:321ae560e09887fc639feb7a29d0f25814bae4f95e871db12e221e0c42d67757"
     network_host_cli_discovery: passed_claude_2.1.218_and_codex_0.145.0
     network_muslin_idempotence: passed_already_installed
+    immutable_fab7_release: passed_v0.4.0
+    fab7_source_archive_sha256: "sha256:27239cbd59e718f5ff3e735b1f004501cac4f81fe08e82972a3cb45f8750b44a"
+    immutable_muslin_release: passed_v0.2.0
+    muslin_source_bundle_sha256: "sha256:b467f0823c109788be5652263ff4b4fa9eccb9bdf1b18c3a52bd3a7bf5a528a7"
+    network_release_install: passed_v0.4.0_with_uv_0.11.32
+    network_registry_install: passed_catalog_0.2.0_muslin_0.2.0_claude_and_codex
+    network_registry_package_sha256: "sha256:f8ec1b798f78abb4fa847d43eedbc386b1ccab582db35e840dce84877e940b72"
+    network_registry_idempotence: passed_already_installed
     native_execution: observed_fab7_0.4.0
     conflicting_dependency_concurrency: passed_packaging_24_2_and_25_0
     build_root_cleanup: passed
@@ -71,9 +81,9 @@ current_phase:
     diff_check: passed
     hosted_macos_linux_ci: passed_108
     external_muslin_source: pushed_main_b73f43708bfd52c76c8ba93de7a83ac0d7606d09
-    external_extension_registry: not_migrated
+    external_extension_registry: migrated_catalog_0.2.0
     authenticated_hosts: not_run
-  next_gate: authorize_immutable_release_and_ext_registry_migration
+  next_gate: none
 
 future_phases:
   - id: denim
