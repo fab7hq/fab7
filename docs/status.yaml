@@ -1,5 +1,5 @@
 schema_version: 1
-updated_at: "2026-07-24"
+updated_at: "2026-07-25"
 
 current_phase:
   id: uv-migration
@@ -10,7 +10,9 @@ current_phase:
   implementation: complete
   publication_authorized: false
   publication: not_started
-  external_ci: not_run
+  external_ci: passed
+  external_ci_run: https://github.com/fab7hq/fab7/actions/runs/30113297361
+  candidate_commit: f323c2155f39c3113dc72a36bcf5239a8baa17f6
   target_release: v0.4.0
   repositories:
     fab7: https://github.com/fab7hq/fab7
@@ -47,6 +49,12 @@ current_phase:
     muslin_native_package: byte_identical_two_builds
     muslin_package_sha256: "sha256:7cdfa957b276de1ce741c5064e7110afcbc05c15c85ea57241fd6ceed2b00b6a"
     muslin_local_host_lifecycle: passed_claude_and_codex
+    network_fab7_source_install: passed_main_f323c2155f39c3113dc72a36bcf5239a8baa17f6
+    network_install_uv: accepted_0.11.32_with_0.11.29_advisory
+    network_muslin_source_install: passed_main_b73f43708bfd52c76c8ba93de7a83ac0d7606d09
+    network_muslin_package_sha256: "sha256:321ae560e09887fc639feb7a29d0f25814bae4f95e871db12e221e0c42d67757"
+    network_host_cli_discovery: passed_claude_2.1.218_and_codex_0.145.0
+    network_muslin_idempotence: passed_already_installed
     native_execution: observed_fab7_0.4.0
     conflicting_dependency_concurrency: passed_packaging_24_2_and_25_0
     build_root_cleanup: passed
@@ -61,11 +69,11 @@ current_phase:
     documentation_links: passed
     status_yaml: passed
     diff_check: passed
-    hosted_macos_linux_ci: not_run
-    external_muslin_source: recreated_local_committed
+    hosted_macos_linux_ci: passed_108
+    external_muslin_source: pushed_main_b73f43708bfd52c76c8ba93de7a83ac0d7606d09
     external_extension_registry: not_migrated
     authenticated_hosts: not_run
-  next_gate: run_hosted_macos_linux_ci_before_separate_publication_decision
+  next_gate: authorize_immutable_release_and_ext_registry_migration
 
 future_phases:
   - id: denim

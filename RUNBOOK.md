@@ -32,12 +32,18 @@ The released `v0.2.2` artifact adds generic `fab7 ext create` plus shared
 `ext-create` skills for Claude and Codex. Its immutable network installation,
 registry refresh, and Muslin `v0.1.1` installation passed in both hosts.
 
-The checkout's `v0.4.0` migration has local Apple Silicon proof for
+The `v0.4.0` candidate is on `main` at
+`f323c2155f39c3113dc72a36bcf5239a8baa17f6`. Local Apple Silicon proof covers
 byte-identical Fab7 and extension binaries, multi-file PyYAML execution,
 concurrent conflicting-dependency isolation, fresh-home installation, and the
-complete `108`-test deterministic suite. Do not treat ext-registry, hosted CI,
-immutable releases, or authenticated host journeys as migrated until the uv
-plan's remaining gates pass.
+complete `108`-test deterministic suite. Hosted macOS and Linux CI passed.
+Fresh GitHub `main` clones also installed native Fab7 and Muslin `0.2.0` into
+both host CLIs in an isolated home.
+
+That is reviewed-branch source proof, not an immutable release or registry
+installation. Do not treat ext-registry, version tags, GitHub release assets,
+release-checksum installation, or authenticated model journeys as migrated
+until the uv plan's remaining gates pass.
 
 The exact implementation evidence and closure limits live in
 [`docs/plans/onboarding.md`](docs/plans/onboarding.md#current-implementation-evidence).

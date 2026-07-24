@@ -4,7 +4,7 @@ type: architecture
 status: accepted
 implementation_status: implemented
 owner: architecture
-last_updated: 2026-07-24
+last_updated: 2026-07-25
 authority_for:
   - repository ownership
   - user-global and project-local filesystem layouts
@@ -419,10 +419,19 @@ Real Claude and Codex CLIs passed isolated local installation, diagnosis,
 execution, partial uninstall, and final removal.
 
 Deterministic tests cover the new source, package, receipt, catalog, rollback,
-and required-but-version-advisory uv contracts. Hosted Linux/macOS CI,
-ext-registry migration, an immutable Muslin release, fresh network installation,
-publication, and authenticated Claude/Codex journeys remain
-unproved and unauthorized. The complete local suite passed `108` tests,
+and required-but-version-advisory uv contracts. Fab7 commit
+`f323c2155f39c3113dc72a36bcf5239a8baa17f6` and Muslin root commit
+`b73f43708bfd52c76c8ba93de7a83ac0d7606d09` are on their public `main`
+branches. Hosted macOS/Linux CI passed, as did a fresh isolated clone and
+reviewed-source installation of Fab7 followed by both-host local-source
+installation, native execution, diagnosis, host discovery, and idempotence for
+Muslin. The network-built extension package SHA-256 was
+`321ae560e09887fc639feb7a29d0f25814bae4f95e871db12e221e0c42d67757`.
+
+Ext-registry migration, immutable version tags and releases,
+release-checksum network installation, publication, and authenticated
+Claude/Codex journeys remain unproved and unauthorized. The complete local
+suite passed `108` tests,
 including fresh-home installer rollback, non-recommended uv acceptance, and
 concurrent extensions with conflicting dependency versions sharing only the
 managed Python and uv cache.

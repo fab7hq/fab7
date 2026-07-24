@@ -7,7 +7,7 @@ publication_authorized: false
 implementation: complete
 publication: not_started
 owner: product-and-engineering
-last_updated: 2026-07-24
+last_updated: 2026-07-25
 target_release: v0.4.0
 authority_for:
   - host uv prerequisite
@@ -467,10 +467,10 @@ variables did not enter the build, and no managed-Python shim appeared outside
 and pinned Python `3.14.6`; native release smoke, shell syntax, Python
 compilation, and working-tree whitespace checks also pass.
 
-This closes repository implementation, not release acceptance. Hosted clean
-cache macOS/Linux CI, ext-registry migration, immutable publication, fresh
-network installation, and authenticated Claude/Codex journeys remain
-unperformed and publication is not authorized.
+This closed repository implementation, not release acceptance. Ext-registry
+migration, immutable publication, release-checksum installation, and
+authenticated Claude/Codex journeys remained unperformed and publication was
+not authorized.
 
 The real sibling Muslin source was then removed from its active path and
 recreated as a fresh repository using native Fab7 `0.4.0` `ext create`.
@@ -484,7 +484,27 @@ the executable reported native Fab7 `0.4.0` plus the bundled dependency.
 Local installation, diagnosis, execution, partial host uninstall, and final
 removal passed with the real Claude and Codex CLIs in an isolated home.
 
-This completes local external Muslin source recreation only. The new
-repository has no release, ext-registry has not been migrated, and no network
-installation, hosted CI, publication, or authenticated model journey was
-performed.
+On 2026-07-25, Fab7 commit
+`f323c2155f39c3113dc72a36bcf5239a8baa17f6` was pushed normally to `main`.
+The reset Muslin `main` was replaced with root commit
+`b73f43708bfd52c76c8ba93de7a83ac0d7606d09` through an exact
+force-with-lease against the former remote commit. Hosted CI run
+[`30113297361`](https://github.com/fab7hq/fab7/actions/runs/30113297361)
+passed all `108` tests on clean macOS and Ubuntu runners.
+
+A fresh isolated sandbox cloned both public `main` branches and confirmed the
+exact commits. Fab7's reviewed-source installer accepted host uv `0.11.32`
+with the `0.11.29` recommendation advisory, installed managed CPython `3.14.6`,
+and produced a native Fab7 `0.4.0` installation with no retained venv or
+dependency tree. The independently cloned Muslin source then installed into
+both real host CLIs through Fab7's local-source path. Diagnosis and execution
+passed; Claude Code `2.1.218` and Codex CLI `0.145.0` both discovered enabled
+Muslin `0.2.0`, and repeated Codex installation returned `already_installed`.
+The target-local package SHA-256 was
+`321ae560e09887fc639feb7a29d0f25814bae4f95e871db12e221e0c42d67757`.
+
+This proves public-branch source installation, not immutable release or
+registry installation. Neither repository has a new version tag or GitHub
+release, ext-registry has not been migrated, and no release-checksum network
+installation or authenticated model journey was performed. Publication
+remains a separate owner decision.

@@ -3,7 +3,7 @@ title: Fab7 Product Roadmap
 type: product
 status: accepted
 owner: product
-last_updated: 2026-07-24
+last_updated: 2026-07-25
 authority_for:
   - completed product capability
   - current exclusions
@@ -217,9 +217,15 @@ recreated as a fresh `0.2.0` uv project using native Fab7 `0.4.0`; root commit
 Byte-identical native packages and the local lifecycle in both real host CLIs
 passed.
 
-Publication remains unauthorized. Hosted macOS/Linux CI, ext-registry
-migration, an immutable Muslin release, fresh network installation, and
-authenticated Claude/Codex journeys remain release gates. The
+Fab7 commit `f323c2155f39c3113dc72a36bcf5239a8baa17f6` and Muslin root
+commit `b73f43708bfd52c76c8ba93de7a83ac0d7606d09` are now on public `main`.
+Hosted macOS/Linux CI passed. Fresh GitHub clones also passed native Fab7
+installation and both-host Muslin installation, discovery, execution,
+diagnosis, and idempotence in an isolated home.
+
+Publication remains unauthorized. Ext-registry migration, immutable version
+tags and releases, release-checksum network installation, and authenticated
+Claude/Codex journeys remain release gates. The
 [`uv migration plan`](../plans/uv-migration.md) owns the complete contract and
 stop condition.
 
