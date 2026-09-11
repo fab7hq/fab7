@@ -88,25 +88,34 @@ version or session ID: the CLI resolves them from the plugin hook's capture.
 1. Run `ringframe deltas render --host codex --capability <id>
    --classification '<json>'` with the classification above. It prints the
    directives that apply to this Ask, one `- <label>: <directive>` line each,
-   under their heading. You never choose, drop, or add rules.
+   under their heading. This is the candidate set: you may leave one out, but
+   you may never add one the CLI did not supply.
 2. Write the prompt in two parts. First, one concise, optimized task brief
    preserving the source intent's artifacts, paths, and constraints. Keep the
    original wording only in `source.txt`; do not prepend or quote it before
-   the optimized brief. Then reproduce the rules block the CLI printed,
-   applying each directive to this task: keep its `Rules:` line, keep every
-   phase heading exactly as printed and in the same order, and keep each
-   directive under the heading it appeared beneath. A heading such as
-   `While researching:` tells the agent when that rule applies, so moving a
-   rule between phases or dropping a heading loses that.
+   the optimized brief. Then a rules block built from what the CLI printed.
+
+   **Choose the directives that bear on this task, and leave out the ones that
+   do not.** The CLI selects by classification alone; you know what the work
+   actually is. A directive about placing orders does not belong in a prompt
+   for a backtest, and writing it as "if execution enters scope" is a sign it
+   should have been left out. Omit a directive when its subject is not part of
+   this work — never because it is inconvenient or would take effort. The CLI
+   records every directive you applied and every one you omitted, so an
+   omission is visible.
+
+   Keep the `Rules:` line and the phase headings of the directives you kept,
+   in the order printed, each directive under the heading it came from. A
+   heading such as `While researching:` tells the agent when its rules apply.
+   Drop a heading only when you kept nothing under it.
 
    Each rule is one line,
    `- <label>: <that directive applied to this task's specifics>`, using the
    `label` values the CLI returned (several labels may share one line when
    one sentence applies them together, provided they sit under the same
    heading). Every label must come from the supplied set; the CLI refuses
-   unknown labels and records which supplied directives you applied or
-   omitted. Do not restate a directive generically or explain a principle.
-   Do not add a command prefix: the CLI adds it.
+   unknown labels. Do not restate a directive generically or explain a
+   principle. Do not add a command prefix: the CLI adds it.
 3. Under the project workspace root (the current working directory), never
    under this skill's directory, write `.fab7/rf/tmp/stage-<nonce>/source.txt`
    with the exact source intent and `.fab7/rf/tmp/stage-<nonce>/composed.txt`
