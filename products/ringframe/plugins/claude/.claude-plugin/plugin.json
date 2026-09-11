@@ -1,6 +1,6 @@
 {
   "name": "rf",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "RingFrame: turn one explicit intent into a confirmed native prompt, evaluate the exact result, record the decision",
   "author": {
     "name": "fab7hq"
