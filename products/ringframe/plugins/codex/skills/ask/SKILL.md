@@ -86,9 +86,11 @@ version or session ID: the CLI resolves them from the plugin hook's capture.
 ## 2. Compose and persist before asking
 
 1. Run `ringframe deltas render --host codex --capability <id>
-   --classification '<json>' --json` with the classification above. The CLI
-   selects the directives that apply to this Ask (`host.entries`,
-   `practice.entries`); you never choose, drop, or add rules.
+   --classification '<json>'` with the classification above. It prints the
+   directives that apply to this Ask, one `- <label>: <directive>` line each,
+   under their heading. You never choose, drop, or add rules. Do not pass
+   `--json`: that form carries the provenance the CLI already records itself,
+   and none of it changes what you write.
 2. Write the prompt in two parts. First, one concise, optimized task brief
    preserving the source intent's artifacts, paths, and constraints. Keep the
    original wording only in `source.txt`; do not prepend or quote it before
