@@ -1,0 +1,6 @@
+# RingFrame's configuration. `ringframe init --global` copies config/ into
+# ~/.fab7/rf/config/; personal edits belong in ~/.fab7/rf/overrides/.
+# The release version is this repository's tag, not a field here.
+schema: ringframe.bundle/1
+product: ringframe
+config_home: rf

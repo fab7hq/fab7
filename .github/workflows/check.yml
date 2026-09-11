@@ -1,0 +1,47 @@
+name: check
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v7
+
+      - name: marketplace manifests are valid and their sources exist
+        run: |
+          python3 - <<'PY'
+          import json, pathlib, sys
+          bad = []
+          for manifest, source in ((".claude-plugin/marketplace.json", lambda e: e["source"]),
+                                   (".agents/plugins/marketplace.json", lambda e: e["source"]["path"])):
+              entries = json.loads(pathlib.Path(manifest).read_text())["plugins"]
+              names = [e["name"] for e in entries]
+              if len(names) != len(set(names)):
+                  bad.append(f"{manifest}: plugin names are not unique: {names}")
+              for e in entries:
+                  if not pathlib.Path(source(e)).is_dir():
+                      bad.append(f"{manifest}: {e['name']} source {source(e)} is missing")
+          print("\n".join(bad) or "manifests OK")
+          sys.exit(1 if bad else 0)
+          PY
+
+      - name: hooks are valid shell and survive malformed input
+        run: |
+          for h in $(find products -name '*.sh'); do
+            bash -n "$h" || exit 1
+            echo 'not json' | bash "$h" >/dev/null 2>&1
+            [ $? -le 1 ] || { echo "$h exited $?"; exit 1; }
+          done
+
+      # The product validates its own configuration: installing it runs every schema and
+      # catalog check the CLI performs, and rendering proves the rules are selectable.
+      - run: uv tool install git+https://github.com/fab7hq/ringframe@main
+      - name: ringframe accepts its configuration and renders rules
+        run: |
+          ringframe init --global --from products/ringframe/config
+          ringframe deltas domains --json
+          for task in research plan implement operate review; do
+            ringframe deltas render --host claude-code --capability native_plan --json \
+              --classification "{\"task\":[\"$task\"],\"result\":\"plan\",\"interaction\":\"approval_gated\",\"horizon\":\"session\",\"effects\":[\"read\"],\"concerns\":[\"operate\",\"tests_only\",\"cli\"]}" \
+              | python3 -c "import json,sys; p=json.load(sys.stdin)['practice']; assert p['selected'], 'no rule selected'; assert not p['dropped_by_budget'], p['dropped_by_budget']"
+          done

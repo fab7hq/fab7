@@ -1,0 +1,6 @@
+interface:
+  display_name: "RingFrame Eval"
+  short_description: "RingFrame eval inside Codex"
+  default_prompt: "Use $rf:eval."
+policy:
+  allow_implicit_invocation: false

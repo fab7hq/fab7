@@ -1,0 +1,15 @@
+{
+  "name": "fab7",
+  "owner": {
+    "name": "fab7hq"
+  },
+  "description": "Fab7 plugins for Claude Code",
+  "plugins": [
+    {
+      "name": "rf",
+      "source": "./products/ringframe/plugins/claude",
+      "description": "RingFrame /rf:ask, /rf:eval, /rf:seal for Claude Code (requires the `ringframe` CLI)",
+      "version": "0.0.1"
+    }
+  ]
+}

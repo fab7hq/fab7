@@ -1,0 +1,20 @@
+{
+  "name": "rf",
+  "version": "0.0.1",
+  "description": "RingFrame: turn one explicit intent into a confirmed native prompt, evaluate the exact result, record the decision",
+  "author": {
+    "name": "fab7hq"
+  },
+  "skills": "./skills/",
+  "hooks": "./hooks.json",
+  "interface": {
+    "displayName": "RingFrame",
+    "shortDescription": "Explicit Ask, Eval, and Seal inside Codex",
+    "longDescription": "Ask compiles one intent into a confirmed prompt for a native Codex capability and hands it to you to submit. Eval checks an exact result against it. Seal records the decision. Requires the ringframe CLI (uv tool install ringframe) and a native request_user_input confirmation tool in the current session.",
+    "developerName": "fab7hq",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": "Use $rf:ask to turn an intent into a confirmed Codex prompt."
+  },
+  "repository": "https://github.com/fab7hq/fab7"
+}

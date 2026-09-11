@@ -1,0 +1,6 @@
+interface:
+  display_name: "RingFrame Seal"
+  short_description: "RingFrame seal inside Codex"
+  default_prompt: "Use $rf:seal."
+policy:
+  allow_implicit_invocation: false
