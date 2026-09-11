@@ -26,7 +26,7 @@ pending `seal create` or claim success from empty output.
 
 ## 1. Read the open work
 
-Run `ringframe eval list --json` and `ringframe ask list --json` in separate
+Run `ringframe eval list --minimal` and `ringframe ask list --minimal` in separate
 calls. Identify the open Asks and the latest completed Eval sharing an open
 Ask, including its verdict and confidence. If there are no open Asks, report
 nothing to close and stop. If either command fails, show the error and stop.
@@ -57,7 +57,7 @@ Do not ask for an acknowledgement or a justification; the decision is theirs.
 ## 3. Create
 
 Run `ringframe seal create --disposition <d> [--eval <eval_id>]
-[--note "<text>"] --json` only after confirmation. The actor is the interactive
+[--note "<text>"] --minimal` only after confirmation. The actor is the interactive
 person; do not pass `--actor` or `--authority` unless the person explicitly
 names a pre-authorized policy. Do not infer policy authority from the verdict.
 
@@ -74,4 +74,4 @@ On refusal, show `refusal_codes` verbatim and stop:
 
 For any other failure, show the error and stop without claiming a receipt.
 Downstream consumers check a receipt with
-`ringframe seal check --seal <seal_id> --json`.
+`ringframe seal check --seal <seal_id> --minimal`.

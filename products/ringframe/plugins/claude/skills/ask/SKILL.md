@@ -38,7 +38,7 @@ Use `Write` for staging; it creates the staging directory itself.
 
 ## 1. Read the profile and route
 
-Run `ringframe profile show --host claude-code --json`. This is the routing
+Run `ringframe profile show --host claude-code --minimal`. This is the routing
 authority: read `routing.guidance`, `routing.precedence`, and each capability's
 `selection`, `effects`, `confirmation`, `activation`, `delivery_mode`,
 `continuation`, and `limitations`. Do not read research files or maintain a
@@ -57,7 +57,7 @@ Use the selected capability's `confirmation.tool`. Check it is available before
 compiling. Missing or rejected native confirmation stops this Ask without
 confirming or continuing; do not substitute ordinary chat or change host settings.
 
-Run `ringframe deltas domains --json`. It lists every installed practice
+Run `ringframe deltas domains --minimal`. It lists every installed practice
 domain with its `description`, its `concerns` vocabulary, and
 `project_opted_in`. The base domain always applies and is never listed in
 `domains`. Add a non-base domain when the intent's subject is within its
@@ -97,9 +97,7 @@ version or session ID: the CLI resolves them from the plugin hook's capture.
 1. Run `ringframe deltas render --host claude-code --capability <id>
    --classification '<json>'` with the classification above. It prints the
    directives that apply to this Ask, one `- <label>: <directive>` line each,
-   under their heading. You never choose, drop, or add rules. Do not pass
-   `--json`: that form carries the provenance the CLI already records itself,
-   and none of it changes what you write.
+   under their heading. You never choose, drop, or add rules.
 2. Write the prompt in two parts. First, one concise, optimized task brief
    preserving the source intent's artifacts, paths, and constraints. Keep the
    original wording only in `source.txt`; do not prepend or quote it before
@@ -119,7 +117,7 @@ version or session ID: the CLI resolves them from the plugin hook's capture.
 4. Only after both files exist, run
    `ringframe ask compile --staged <dir> --title "<short title>"
    --capability <id> --classification '<json>' --route '<json>' --host
-   '{"name":"claude-code","surface":"native-tui"}' --json`.
+   '{"name":"claude-code","surface":"native-tui"}' --minimal`.
    Keep the returned `ask_id`. On a reported input-validation error, correct
    that input without changing the source intent and retry. If the same error
    recurs, the cause is unclear, or the failure is not input validation, show
@@ -144,12 +142,12 @@ is persisted; only the last one is confirmed.
 
 ## 4. Record the answer and deliver
 
-- Proceed: run `ringframe ask confirm --ask <ask_id> --json`. Deliver only
+- Proceed: run `ringframe ask confirm --ask <ask_id> --minimal`. Deliver only
   after that command succeeds.
-- Cancel: run `ringframe ask cancel --ask <ask_id> --reason "<why>" --json`
+- Cancel: run `ringframe ask cancel --ask <ask_id> --reason "<why>" --minimal`
   and stop.
 - No answer (dismissed, timed out, or empty): run
-  `ringframe ask cancel --ask <ask_id> --reason "chooser dismissed" --json`
+  `ringframe ask cancel --ask <ask_id> --reason "chooser dismissed" --minimal`
   and stop. Report cancellation only if the command succeeds. Never interpret
   a missing answer as approval.
 
