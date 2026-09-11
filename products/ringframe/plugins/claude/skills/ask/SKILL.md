@@ -101,14 +101,21 @@ version or session ID: the CLI resolves them from the plugin hook's capture.
 2. Write the prompt in two parts. First, one concise, optimized task brief
    preserving the source intent's artifacts, paths, and constraints. Keep the
    original wording only in `source.txt`; do not prepend or quote it before
-   the optimized brief. Then a line `Rules:` followed by one line per supplied
-   directive you apply:
+   the optimized brief. Then reproduce the rules block the CLI printed,
+   applying each directive to this task: keep its `Rules:` line, keep every
+   phase heading exactly as printed and in the same order, and keep each
+   directive under the heading it appeared beneath. A heading such as
+   `While researching:` tells the agent when that rule applies, so moving a
+   rule between phases or dropping a heading loses that.
+
+   Each rule is one line,
    `- <label>: <that directive applied to this task's specifics>`, using the
    `label` values the CLI returned (several labels may share one line when
-   one sentence applies them together). Every label must come from the
-   supplied set; the CLI refuses unknown labels and records which supplied
-   directives you applied or omitted. Do not restate a directive generically
-   or explain a principle. Do not add a command prefix: the CLI adds it.
+   one sentence applies them together, provided they sit under the same
+   heading). Every label must come from the supplied set; the CLI refuses
+   unknown labels and records which supplied directives you applied or
+   omitted. Do not restate a directive generically or explain a principle.
+   Do not add a command prefix: the CLI adds it.
 3. Under the project workspace root (the current working directory), never
    under this skill's directory, write `.fab7/rf/tmp/stage-<nonce>/source.txt`
    with the exact source intent and `.fab7/rf/tmp/stage-<nonce>/composed.txt`
