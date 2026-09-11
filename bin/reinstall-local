@@ -1,0 +1,53 @@
+#!/bin/sh
+# Reinstall this working tree's plugins into Claude Code and Codex.
+#
+# Both hosts cache an installed plugin by its version, so editing a skill here
+# does not reach an installed plugin until plugin.json changes. When testing
+# locally you do not want to bump a version for every edit, so this removes the
+# installed plugin, the configured marketplace and the cache first, then adds
+# the working tree back. The edit lands at the same version.
+#
+#   ./bin/reinstall-local            both hosts
+#   ./bin/reinstall-local claude     one host
+#   ./bin/reinstall-local codex
+set -eu
+
+root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+market=fab7
+want=${1:-both}
+
+[ -f "$root/.claude-plugin/marketplace.json" ] || { printf '%s\n' "not a marketplace: $root" >&2; exit 1; }
+
+plugins=$(python3 - "$root" <<'PY'
+import json, pathlib, sys
+m = json.loads((pathlib.Path(sys.argv[1]) / ".claude-plugin/marketplace.json").read_text())
+print(" ".join(p["name"] for p in m["plugins"]))
+PY
+)
+
+do_claude() {
+    command -v claude >/dev/null 2>&1 || { printf '%s\n' "claude not on PATH, skipping"; return 0; }
+    for p in $plugins; do claude plugin uninstall "$p@$market" >/dev/null 2>&1 || true; done
+    claude plugin marketplace remove "$market" >/dev/null 2>&1 || true
+    rm -rf "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/plugins/cache/$market"
+    claude plugin marketplace add "$root" >/dev/null
+    for p in $plugins; do claude plugin install "$p@$market" >/dev/null; printf '  claude  %s@%s\n' "$p" "$market"; done
+}
+
+do_codex() {
+    command -v codex >/dev/null 2>&1 || { printf '%s\n' "codex not on PATH, skipping"; return 0; }
+    for p in $plugins; do codex plugin remove "$p@$market" >/dev/null 2>&1 || true; done
+    codex plugin marketplace remove "$market" >/dev/null 2>&1 || true
+    rm -rf "${CODEX_HOME:-$HOME/.codex}/plugins/cache/$market"
+    codex plugin marketplace add "$root" >/dev/null
+    for p in $plugins; do codex plugin add "$p@$market" >/dev/null; printf '  codex   %s@%s\n' "$p" "$market"; done
+}
+
+printf 'Reinstalling from %s\n' "$root"
+case $want in
+    claude) do_claude ;;
+    codex)  do_codex ;;
+    both)   do_claude; do_codex ;;
+    *) printf '%s\n' "usage: reinstall-local [claude|codex|both]" >&2; exit 1 ;;
+esac
+printf '\n%s\n' 'Restart the host: a running session keeps the skill it loaded at startup.'

@@ -28,6 +28,30 @@ RingFrame CLI and nothing else: no plugins, no profiles, no catalogs.
 - Adding a practice domain is a file in `config/deltas/practices/` with a
   `description`. No code change is needed anywhere.
 
+## Testing a change locally
+
+Both hosts cache an installed plugin by its `version`, so editing a skill here
+does not reach an installed plugin until `plugin.json` changes. Do not bump a
+version for every edit; remove the installed plugin, the configured marketplace
+and the cache, then add this tree back:
+
+```sh
+./bin/reinstall-local            # both hosts
+./bin/reinstall-local claude     # one host
+```
+
+Then restart the host. A running session keeps the skill it loaded at startup,
+which is the most common reason an edit appears not to have landed.
+
+Claude Code can also load a plugin straight from the tree for one session,
+which picks up edits with `/reload-plugins` and no reinstall:
+
+```sh
+claude --plugin-dir "$PWD/products/ringframe/plugins/claude"
+```
+
+Bump `plugin.json` and the marketplace entry only when publishing.
+
 ## Before tagging
 
 CI must be green: manifests parse, every `source` path exists, plugin names
