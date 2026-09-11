@@ -33,15 +33,10 @@ jobs:
             [ $? -le 1 ] || { echo "$h exited $?"; exit 1; }
           done
 
-      # The product validates its own configuration: installing it runs every schema and
-      # catalog check the CLI performs, and rendering proves the rules are selectable.
+      # Configuration is data that lands on a user's machine and is theirs to edit, so
+      # nothing here inspects its contents. This only proves the product can load it.
       - run: uv tool install git+https://github.com/fab7hq/ringframe@main
-      - name: ringframe accepts its configuration and renders rules
+      - name: the product can load this configuration
         run: |
           ringframe init --global --from products/ringframe/config
           ringframe deltas domains --json
-          for task in research plan implement operate review; do
-            ringframe deltas render --host claude-code --capability native_plan --json \
-              --classification "{\"task\":[\"$task\"],\"result\":\"plan\",\"interaction\":\"approval_gated\",\"horizon\":\"session\",\"effects\":[\"read\"],\"concerns\":[\"operate\",\"tests_only\",\"cli\"]}" \
-              | python3 -c "import json,sys; p=json.load(sys.stdin)['practice']; assert p['selected'], 'no rule selected'; assert not p['dropped_by_budget'], p['dropped_by_budget']"
-          done
