@@ -26,8 +26,13 @@ pending `seal create` or claim success from empty output.
 
 ## 1. Read the open work
 
-Run `ringframe eval list --minimal` and `ringframe ask list --minimal` in separate
-calls. Identify the open Asks and the latest completed Eval sharing an open
+If the current workspace's Ask list is not already available in context, run
+`ringframe ask list --minimal`.
+
+If its current Eval list is not already available in context, run
+`ringframe eval list --minimal`.
+
+Identify the open Asks and the latest completed Eval sharing an open
 Ask, including its verdict and confidence. If there are no open Asks, report
 nothing to close and stop. If either command fails, show the error and stop.
 
@@ -57,7 +62,7 @@ Do not ask for an acknowledgement or a justification; the decision is theirs.
 ## 3. Create
 
 Run `ringframe seal create --disposition <d> [--eval <eval_id>]
-[--note "<text>"] --minimal` only after confirmation. The actor is the interactive
+[--note "<text>"]` only after confirmation. The actor is the interactive
 person; do not pass `--actor` or `--authority` unless the person explicitly
 names a pre-authorized policy. Do not infer policy authority from the verdict.
 

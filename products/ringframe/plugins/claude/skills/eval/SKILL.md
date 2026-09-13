@@ -55,7 +55,7 @@ report the failure and stop if the required evidence or output is inaccessible.
 
 ## 1. Open
 
-Run `ringframe eval open --minimal` once; keep `eval_id`, `brief_path`, and
+Run `ringframe eval open` once; keep `eval_id`, `brief_path`, and
 `brief.sha256`. The brief lists the open Asks in order, their `prompt_path`
 relative to `.fab7/rf/`, the anchor, subject, changed paths with line counts,
 and counts of unrecorded prompts after each Ask.
@@ -135,7 +135,7 @@ the intent in `basis_notes`.
 After all four outputs are complete, run
 `ringframe eval close --eval <eval_id> --intent @<intent file>
 --judgement @<coverage file> --judgement @<drift file> --judgement
-@<adversary file> --minimal`.
+@<adversary file>`.
 
 On a reported input-validation error, ask the responsible judge to correct
 its file without changing unrelated findings; in fallback, correct your own

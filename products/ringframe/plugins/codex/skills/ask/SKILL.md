@@ -29,7 +29,8 @@ The exact source intent is the text after `$rf:ask` in the person's message.
 
 ## 1. Read the profile and route
 
-Run `ringframe profile show --host codex --minimal`. This is the routing
+If the current host profile is not already available in context, run
+`ringframe profile show --host codex --minimal`. This is the routing
 authority: read `routing.guidance`, `routing.precedence`, and each capability's
 `selection`, `effects`, `confirmation`, `activation`, `delivery_mode`,
 `continuation`, and `limitations`. Do not read research files or maintain a
@@ -48,7 +49,8 @@ Use the selected capability's `confirmation.tool`. Check it is available before
 compiling. Missing or rejected native confirmation stops this Ask without
 confirming or continuing; do not substitute ordinary chat or change host settings.
 
-Run `ringframe deltas domains --minimal`. It lists every installed practice
+If the current workspace's domain list is not already available in context,
+run `ringframe deltas domains --minimal`. It lists every installed practice
 domain with its `description`, its `concerns` vocabulary, and
 `project_opted_in`. The base domain always applies and is never listed in
 `domains`. Add a non-base domain when the intent's subject is within its
@@ -85,8 +87,10 @@ version or session ID: the CLI resolves them from the plugin hook's capture.
 
 ## 2. Compose and persist before asking
 
-1. Run `ringframe deltas render --host codex --capability <id>
-   --classification '<json>'` with the classification above. It prints the
+1. If directives for this host, capability, classification, and current
+   configuration are not already available in context, run
+   `ringframe deltas render --host codex --capability <id>
+   --classification '<json>' --minimal`. It prints the
    directives that apply to this Ask, one `- <label>: <directive>` line each,
    under their heading. This is the candidate set: you may leave one out, but
    you may never add one the CLI did not supply.
@@ -124,7 +128,7 @@ version or session ID: the CLI resolves them from the plugin hook's capture.
 4. Only after both files exist, run
    `ringframe ask compile --staged <dir> --title "<short title>"
    --capability <id> --classification '<json>' --route '<json>' --host
-   '{"name":"codex","surface":"native-tui"}' --minimal`.
+   '{"name":"codex","surface":"native-tui"}'`.
    Keep the returned `ask_id`. On a reported input-validation error, correct
    that input without changing the source intent and retry. If the same error
    recurs, the cause is unclear, or the failure is not input validation, show
@@ -132,8 +136,9 @@ version or session ID: the CLI resolves them from the plugin hook's capture.
 
 ## 3. Confirm with the native tool
 
-Run `ringframe ask copy --ask <ask_id>` to obtain the complete rendered prompt
-verbatim; never retype or summarise it. Call the selected capability's
+If this candidate's exact compiled prompt is not already available in context,
+run `ringframe ask copy --ask <ask_id>` to obtain it verbatim; never retype or
+summarise it. Call the selected capability's
 confirmation tool with one single-select question. Explain the selected
 capability, why it fits, why the alternatives fit less well, and the expected
 continuation and effects. Offer `Proceed (Recommended)`, the most relevant
@@ -149,12 +154,12 @@ is persisted; only the last one is confirmed.
 
 ## 4. Record the answer and deliver
 
-- Proceed: run `ringframe ask confirm --ask <ask_id> --minimal`. Deliver only
+- Proceed: run `ringframe ask confirm --ask <ask_id>`. Deliver only
   after that command succeeds.
-- Cancel: run `ringframe ask cancel --ask <ask_id> --reason "<why>" --minimal`
+- Cancel: run `ringframe ask cancel --ask <ask_id> --reason "<why>"`
   and stop.
 - No answer (dismissed, timed out, or empty): run
-  `ringframe ask cancel --ask <ask_id> --reason "chooser dismissed" --minimal`
+  `ringframe ask cancel --ask <ask_id> --reason "chooser dismissed"`
   and stop. Report cancellation only if the command succeeds. Never interpret
   a missing answer as approval.
 
