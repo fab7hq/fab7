@@ -4,7 +4,7 @@ profile_id: codex
 host: codex
 version_range: null
 surface: native-tui
-invocation_prefix: '/rf:'
+invocation_prefix: '$rf:'
 confirmation:
   tool: request_user_input
   requires_feature: null
