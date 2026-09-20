@@ -5,7 +5,7 @@ description: Turn one explicit intent into a confirmed, persisted prompt and del
 
 You are running RingFrame Ask inside Codex. The person supplies and
 approves the intent; the host owns task execution. Requires the `ringframe` CLI
-on PATH. Native confirmation and delivery follow the profile in section 1.
+on PATH. Native confirmation and delivery follow the profile in section 2.
 
 The exact source intent is the text after `$rf:ask` in the person's message.
 
@@ -27,7 +27,17 @@ The exact source intent is the text after `$rf:ask` in the person's message.
   Show the stored prompt through confirmation and delivery as described below.
   Never claim activation or submission without the corresponding evidence.
 
-## 1. Read the profile and route
+## 1. Check the workspace
+
+Run `ringframe ask preflight` first, before reading anything or classifying
+anything. It refuses a workspace no Ask could finish — no Git repository, or a
+repository with no commit — and that refusal is the same one `ask compile`
+would give at the very end, once the intent had been classified, the prompt
+composed and staged, and the person had waited through all of it. If it
+refuses, show its message and stop. Do not stage, do not compile, and do not
+offer to run `git init` yourself.
+
+## 2. Read the profile and route
 
 If the current host profile is not already available in context, run
 `ringframe profile show --host codex --minimal`. This is the routing
@@ -85,7 +95,7 @@ none applies. Naming a domain that is not installed stops the Ask.
 Use an empty `alternatives` list if no alternative applies. Do not guess a host
 version or session ID: the CLI resolves them from the plugin hook's capture.
 
-## 2. Compose and persist before asking
+## 3. Compose and persist before asking
 
 1. If directives for this host, capability, classification, and current
    configuration are not already available in context, run
@@ -134,7 +144,7 @@ version or session ID: the CLI resolves them from the plugin hook's capture.
    recurs, the cause is unclear, or the failure is not input validation, show
    the error and stop. Never confirm a failed compile.
 
-## 3. Confirm with the native tool
+## 4. Confirm with the native tool
 
 If this candidate's exact compiled prompt is not already available in context,
 run `ringframe ask copy --ask <ask_id>` to obtain it verbatim; never retype or
@@ -152,7 +162,7 @@ A different route or free-text revision means stage and compile a new candidate
 with `--link revises:<previous ask_id>`, then ask again. Every candidate shown
 is persisted; only the last one is confirmed.
 
-## 4. Record the answer and deliver
+## 5. Record the answer and deliver
 
 - Proceed: run `ringframe ask confirm --ask <ask_id>`. Deliver only
   after that command succeeds.
