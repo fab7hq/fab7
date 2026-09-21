@@ -1,6 +1,11 @@
 # RingFrame's configuration. `ringframe init --global` copies config/ into
 # ~/.fab7/rf/config/; personal edits belong in ~/.fab7/rf/overrides/.
 # The release version is this repository's tag, not a field here.
-schema: ringframe.bundle/1
+#
+# `/2` is the Rust era. A 0.0.5 core reads `/1` and refuses this bundle by
+# name, which is how the eras are kept apart (RingFrame ADR-0013). That is
+# deliberate and one-way: a 0.0.5 user cannot sync again, not even for a
+# wording fix, because sync takes the highest tag and has no pin.
+schema: ringframe.bundle/2
 product: ringframe
 config_home: rf
