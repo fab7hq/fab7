@@ -9,7 +9,7 @@
       "name": "rf",
       "source": "./products/ringframe/plugins/claude",
       "description": "RingFrame /rf:ask, /rf:eval, /rf:seal for Claude Code (requires the `ringframe` CLI)",
-      "version": "0.1.0"
+      "version": "0.1.1"
     }
   ]
 }
