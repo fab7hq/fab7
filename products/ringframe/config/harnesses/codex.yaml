@@ -26,6 +26,11 @@ routing:
   - A declared capability is a RingFrame integration contract, not proof that the current host exposes
     it. Follow its delivery mode and limitations; report unavailable tools or rejected commands without
     claiming activation.
+# The composer folds a paste of this many characters or more into a placeholder, and a
+# folded paste is not scanned for slash commands. Measured against the installed host:
+# codex 0.155.1: a paste of 1001 characters or more becomes `[Pasted Content N chars]`.
+# A prompt at or over this length cannot carry its command in the same paste.
+paste_fold_chars: 1001
 capabilities:
 - id: native_plan
   selection: A plan or analysis before implementation, or bounded work with effects when the user has not
@@ -45,6 +50,9 @@ capabilities:
   permission_owner: host
   delivery_mode: human_handoff
   prompt_prefix: '/plan '
+  # switch to Plan mode; it persists for the session
+  prompt_prefix_kind: mode
+  prompt_prefix_active: Plan mode   # shown by the host once the mode is on
   receipt: null
   qualification:
     id: null
@@ -69,6 +77,8 @@ capabilities:
   permission_owner: host
   delivery_mode: human_handoff
   prompt_prefix: '/goal '
+  # the argument is the objective; sent alone it only views the goal
+  prompt_prefix_kind: inline
   max_prompt_chars: 4000
   receipt: null
   qualification:
@@ -122,6 +132,8 @@ capabilities:
   permission_owner: host
   delivery_mode: human_handoff
   prompt_prefix: '/review '
+  # a one-shot action over the current changes
+  prompt_prefix_kind: inline
   receipt: null
   qualification:
     id: null
