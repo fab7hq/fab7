@@ -131,9 +131,12 @@ version or session ID: the CLI resolves them from the plugin hook's capture.
    unknown labels. Do not restate a directive generically or explain a
    principle. Do not add a command prefix: the CLI adds it.
 3. Under the project workspace root (the current working directory), never
-   under this skill's directory, write `.fab7/rf/tmp/stage-<nonce>/source.txt`
-   with the exact source intent and `.fab7/rf/tmp/stage-<nonce>/composed.txt`
-   with only the composed prompt. Persist the candidate before showing the
+   under this skill's directory, write `.fab7/rf/tmp/stage-<name>/source.txt`
+   with the exact source intent and `.fab7/rf/tmp/stage-<name>/composed.txt`
+   with only the composed prompt. Choose `<name>` yourself from the title, a
+   few lowercase words joined by hyphens; it only has to be unlike the other
+   directories already in `tmp/`. Do not run anything to generate it — no
+   uuid, no timestamp, no shell. Persist the candidate before showing the
    chooser so its record exists even if the turn ends early.
 4. Only after both files exist, run
    `ringframe ask compile --staged <dir> --title "<short title>"
