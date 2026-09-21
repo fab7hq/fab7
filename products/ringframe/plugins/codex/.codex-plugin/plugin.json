@@ -10,7 +10,7 @@
   "interface": {
     "displayName": "RingFrame",
     "shortDescription": "Explicit Ask, Eval, and Seal inside Codex",
-    "longDescription": "Ask compiles one intent into a confirmed prompt for a native Codex capability and hands it to you to submit. Eval checks an exact result against it. Seal records the decision. Requires the ringframe CLI (uv tool install ringframe) and a native request_user_input confirmation tool in the current session.",
+    "longDescription": "Ask compiles one intent into a confirmed prompt for a native Codex capability and hands it to you to submit. Eval checks an exact result against it. Seal records the decision. Requires the ringframe CLI and a native request_user_input confirmation tool in the current session.",
     "developerName": "fab7hq",
     "category": "Productivity",
     "capabilities": [],
