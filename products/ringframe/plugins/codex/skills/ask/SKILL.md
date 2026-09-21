@@ -168,10 +168,16 @@ is persisted; only the last one is confirmed.
   after that command succeeds.
 - Cancel: run `ringframe ask cancel --ask <ask_id> --reason "<why>"`
   and stop.
-- No answer (dismissed, timed out, or empty): run
-  `ringframe ask cancel --ask <ask_id> --reason "chooser dismissed"`
-  and stop. Report cancellation only if the command succeeds. Never interpret
-  a missing answer as approval.
+- No answer (dismissed, closed, or the surface's own time limit reached): run
+  `ringframe ask unanswered --ask <ask_id> --reason "<what was seen>"` and stop.
+  **Never interpret a missing answer as approval, and never as a refusal.** The
+  surface returns the same empty result whichever of those happened, so the
+  reason says what was observed — no answer — and not which one it was.
+
+  This does not end the Ask. The candidate stays open and confirmable, so the
+  person can still say yes later, here or from another RingFrame interface.
+  Tell them that in one line, and name the Ask so they can find it. Do not
+  cancel on their behalf and do not ask again in the same turn.
 
 After successful confirmation, use the selected capability's delivery fields:
 
