@@ -31,7 +31,7 @@ Use `Write` for staging; it creates the staging directory itself.
   inputs. Confirmed task execution follows the selected profile and normal
   host permissions.
 - If `ringframe` is not found, stop and tell the person to run
-  `uv tool install ringframe`; never write ledger records by hand.
+  the Fab7 installer; never write ledger records by hand.
 - Never print classification labels, `NEXT_COMMAND`, or compiler protocol.
   Show the stored prompt through confirmation and delivery as described below.
   Never claim activation or submission without the corresponding evidence.

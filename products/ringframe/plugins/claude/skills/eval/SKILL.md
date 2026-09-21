@@ -16,7 +16,7 @@ and gates nothing: the person decides what to do with the result.
 The coordinator uses the shell for `ringframe` only: exactly one plain
 `ringframe …` command per call. No `&&`, `;`, pipes, `2>&1`, `head`, `cd`,
 `which`, or host version probes. Read completed JSON output directly; never
-page or filter it. If the CLI is missing, report `uv tool install ringframe`
+page or filter it. If the CLI is missing, report that the Fab7 installer is needed
 and stop. Never write ledger records by hand.
 
 Judges read files with the host's file-reading tool and use read-only Git

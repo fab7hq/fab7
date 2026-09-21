@@ -16,7 +16,7 @@ file reads through its command tool, use one plain `cat` command with one quoted
 literal file path per call; this also applies to judges and fallback passes.
 No `&&`, `;`, pipes, `2>&1`, `head`, `cd`,
 `which`, or host version probes. Read completed JSON output directly; never
-page or filter it. If the CLI is missing, report `uv tool install ringframe`
+page or filter it. If the CLI is missing, report that the Fab7 installer is needed
 and stop. Never write ledger records by hand.
 
 Judges use those file-reading options and read-only Git

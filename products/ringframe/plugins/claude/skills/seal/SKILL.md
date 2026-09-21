@@ -16,7 +16,7 @@ Arguments: `$ARGUMENTS`.
 
 Requires the `ringframe` CLI and the native `AskUserQuestion` tool in this turn.
 If either is unavailable, explain the missing requirement and stop; for a
-missing CLI, report `uv tool install ringframe`. Do not change host settings
+missing CLI, report that the Fab7 installer is needed. Do not change host settings
 or substitute ordinary chat for native confirmation. If the host rejects the
 confirmation call, the chooser is cancelled or dismissed, or no answer is
 returned, do not create a Seal.
