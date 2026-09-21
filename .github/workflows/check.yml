@@ -5,7 +5,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: astral-sh/setup-uv@v7
 
       - name: marketplace manifests are valid and their sources exist
         run: |
@@ -35,7 +34,23 @@ jobs:
 
       # Configuration is data that lands on a user's machine and is theirs to edit, so
       # nothing here inspects its contents. This only proves the product can load it.
-      - run: uv tool install git+https://github.com/fab7hq/ringframe@main
+      - name: install the core this configuration is for
+        # The released Rust binary, fetched and verified the way a user gets it.
+        # The Python core reads `ringframe.bundle/1` and refuses this bundle by
+        # name, which is the era boundary working rather than a failure.
+        run: |
+          set -eu
+          tag=$(curl -fsSL https://api.github.com/repos/fab7hq/weft/releases/latest |
+              sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | head -n 1)
+          archive="fab7-$tag-x86_64-unknown-linux-musl.tar.gz"
+          base="https://github.com/fab7hq/weft/releases/download/$tag"
+          curl -fsSL -o "$archive" "$base/$archive"
+          curl -fsSL -o "$archive.sha256" "$base/$archive.sha256"
+          sha256sum -c "$archive.sha256"
+          tar -xzf "$archive"
+          sudo install -m 755 ringframe /usr/local/bin/ringframe
+          rm -f "$archive" "$archive.sha256" ringframe weft
+          ringframe --version
       - name: the product can load this configuration
         run: |
           ringframe init --global --from products/ringframe/config
