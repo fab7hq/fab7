@@ -14,7 +14,7 @@ entries:
     why: >-
       Plan mode continues into implementation under host permissions; the
       model can stop at the plan or skip its own checks.
-    matrix_ref: https://github.com/fab7hq/ringframe/blob/main/docs/commands/ask.md#claude-code
+    matrix_ref: https://github.com/fab7hq/fab7/blob/main/products/ringframe/docs/commands/ask.md#claude-code
     evidence: ringframe-compiler-value-q09 (effect on one task of three; not qualified)
   - id: claude-code.native_plan.continue_after_approval
     label: Continue after approval
@@ -26,7 +26,7 @@ entries:
     why: >-
       ExitPlanMode approval hands control back; a plan-only stop is a common
       end state.
-    matrix_ref: https://github.com/fab7hq/ringframe/blob/main/docs/commands/ask.md#claude-code
+    matrix_ref: https://github.com/fab7hq/fab7/blob/main/products/ringframe/docs/commands/ask.md#claude-code
     evidence: null
   - id: claude-code.native_plan.checks_first
     label: Checks first
@@ -38,5 +38,5 @@ entries:
     why: >-
       The plan is reviewed by a person before effects; checks named up front
       make the review concrete.
-    matrix_ref: https://github.com/fab7hq/ringframe/blob/main/docs/commands/ask.md#claude-code
+    matrix_ref: https://github.com/fab7hq/fab7/blob/main/products/ringframe/docs/commands/ask.md#claude-code
     evidence: ringframe-compiler-value-q09 (never emitted by the prose compiler; unmeasured)

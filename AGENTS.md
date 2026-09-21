@@ -9,9 +9,14 @@ is unavailable.
 
 ## What this repository is
 
-The marketplace for Fab7 plugins, and the source of every product's
-configuration. It contains no application code. `fab7hq/ringframe` holds the
-RingFrame CLI and nothing else: no plugins, no profiles, no catalogs.
+The marketplace for Fab7 plugins, the source of every product's
+configuration, and the documentation for both. It contains no application
+code. `fab7hq/weft` holds the RingFrame and Weft binaries and nothing else:
+no plugins, no profiles, no catalogs.
+
+Documentation lives here rather than beside the code because it describes
+configuration and plugins, and this repository is synced rather than built —
+a wording fix must not cost a binary release.
 
 ## Rules
 
