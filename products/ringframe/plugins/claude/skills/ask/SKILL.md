@@ -50,9 +50,11 @@ offer to run `git init` yourself.
 
 If the current host profile is not already available in context, run
 `ringframe profile show --host claude-code --minimal`. This is the routing
-authority: read `routing.guidance`, `routing.precedence`, and each capability's
-`selection`, `effects`, `confirmation`, `activation`, `delivery_mode`,
-`continuation`, and `limitations`. Do not read research files or maintain a
+authority: read `routing.guidance`, `routing.precedence`, `plans`, and each
+capability's `selection`, `effects`, `confirmation`, `activation`,
+`delivery_mode`, `continuation`, and `limitations`. `plans` lists the plans
+this project already holds, which is the fact that decides whether an intent
+is asking for a plan or for one to be built. Do not read research files or maintain a
 separate list of capabilities in the skill.
 
 Classify the source intent's task, desired result, interaction, horizon, and
@@ -89,8 +91,10 @@ route explanation; lists stay lists and strings stay strings.
 ```
 
 `task` items come from `question research clarify plan implement diagnose review
-operate document`; `result` is one of `answer plan workspace_change evidence
-continuing_objective`; `interaction` is `interactive` or `approval_gated`;
+operate document`; `result` is what this turn delivers, one of `answer plan
+workspace_change evidence continuing_objective` — `plan` when it ends with a
+written plan, even though writing one changes files, and `workspace_change`
+when the code or configuration itself changes; `interaction` is `interactive` or `approval_gated`;
 `horizon` is `one_turn`, `session`, or `persistent`; `effects` items come from
 `read write execute external_effect`. Optional `domains` is a list of
 installed non-base practice domain names, and optional `concerns` is a list of
