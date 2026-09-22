@@ -31,7 +31,9 @@ routing:
     terminal condition, so this Ask builds it, classified as task implement with result
     workspace_change, preferring the continuing objective, and naming the plan rather than
     restating what it already says, since a route with a character budget cannot carry the same
-    constraints twice. Only `plans` answers this. A plan named in conversation, or implied by
+    constraints twice. The terminal condition is the plan finished, not its first step, so the
+    Ask covers the whole sequence and its done-criteria; scope it to one step only when the
+    source intent itself asks for that step. Only `plans` answers this. A plan named in conversation, or implied by
     scaffolding already in the workspace, is not one this project holds.
   - A declared capability is a RingFrame integration contract, not proof that the current host exposes
     it. Follow its delivery mode and limitations; report unavailable tools or rejected commands without

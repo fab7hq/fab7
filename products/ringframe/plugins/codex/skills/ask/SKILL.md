@@ -228,7 +228,9 @@ After successful confirmation, use the selected capability's delivery fields:
 - `native_dispatch` with an `activation.tool`: call that tool, then follow
   the profile's continuation with the confirmed prompt as the brief. Claim
   activation only from its result and the profile's receipt mechanism; never
-  invent a receipt. If activation fails, record
+  invent a receipt. The receipt mechanism records the delivery, so on success
+  record nothing yourself; `ask delivery` takes no state for one that worked.
+  If activation fails, record
   `ringframe ask delivery --ask <ask_id> --state delivery_failed --reason "<error>"`,
   then run `ringframe ask delivery --ask <ask_id> --handoff` and show its output
   verbatim. Stop if recording the failure fails.
