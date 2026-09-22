@@ -52,10 +52,26 @@ If the current host profile is not already available in context, run
 `ringframe profile show --host claude-code --minimal`. This is the routing
 authority: read `routing.guidance`, `routing.precedence`, `plans`, and each
 capability's `selection`, `effects`, `confirmation`, `activation`,
-`delivery_mode`, `continuation`, and `limitations`. `plans` lists the plans
-this project already holds, which is the fact that decides whether an intent
-is asking for a plan or for one to be built. Do not read research files or maintain a
-separate list of capabilities in the skill.
+`delivery_mode`, `continuation`, and `limitations`. Do not read research files
+or maintain a separate list of capabilities in the skill.
+
+When the intent is to build something, settle this before comparing
+capabilities: **does this project already hold a plan for the subject?**
+`plans` lists them by slug. Match on the subject rather than the wording —
+"the crypto trading agent", "plans/crypto-trading-agent" and
+"crypto-trading-agent plan" all name the same slug.
+
+- **Listed.** The plan is the terminal condition, so this Ask builds it. Name
+  the plan's path in the brief and let it be read; do not restate what it
+  already says.
+- **Not listed.** This Ask writes the plan, and stops there. Classify it as
+  task plan with result plan, whatever the source intent calls the change.
+  Building is the next Ask, once there are files to read.
+
+Only `plans` answers this. A plan you were told about earlier, one implied by
+scaffolding already in the workspace, or one from anywhere in this
+conversation is not a plan this project holds, and the Ask that was supposed
+to build it would have nothing to read.
 
 Classify the source intent's task, desired result, interaction, horizon, and
 effects. Compare the returned capabilities using their selection guidance and
