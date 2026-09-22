@@ -150,16 +150,29 @@ version or session ID: the CLI resolves them from the plugin hook's capture.
 ## 4. Confirm with the native tool
 
 If this candidate's exact compiled prompt is not already available in context,
-run `ringframe ask copy --ask <ask_id>` to obtain it verbatim; never retype or
-summarise it. Call the selected capability's
-confirmation tool with one single-select question. Explain the selected
+run `ringframe ask copy --ask <ask_id>` to obtain it verbatim; never retype
+it, and never let a summary stand in for it where it is delivered or
+recorded. Call the selected capability's confirmation tool with one
+single-select question. Explain the selected
 capability, why it fits, why the alternatives fit less well, and the expected
 continuation and effects. Offer `Proceed (Recommended)`, the most relevant
 alternative returned by the profile if one applies, and `Cancel`.
 
-For `request_user_input`, use question `id: "route"` and header `Ask route`.
-Include the complete rendered prompt in the question text. Say the person may
-type a revision or select another route.
+For `request_user_input`, use question `id: "route"` and header `Ask route`,
+and put the summary below in the question text. Say the person may type a
+revision or select another route.
+
+The confirmation surface shows a summary of the compiled prompt, not the
+prompt itself. It does not scroll, and it cuts a long prompt off without
+saying so, so a whole prompt pasted there is a prompt the person cannot
+read. Summarise it as the task brief, then the label of each rule you kept,
+one per line under the heading it came from, and end with where the whole
+thing is:
+
+```
+Full wording: .fab7/rf/asks/<ask_id>/prompt.txt — in Weft, [P] WORDING
+```
+
 
 A different route or free-text revision means stage and compile a new candidate
 with `--link revises:<previous ask_id>`, then ask again. Every candidate shown
