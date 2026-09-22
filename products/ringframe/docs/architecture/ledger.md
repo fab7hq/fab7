@@ -59,11 +59,10 @@ One limit worth stating plainly: digests prove a file has not changed *by
 accident*. They do not prove nobody with write access to your disk changed it
 on purpose.
 
-## Checking and tidying
+## Checking
 
 ```sh
 ringframe ledger verify --json
-ringframe sessions prune --older-than 7d
 ```
 
 `verify` looks for a truncated last line, bad JSON, missing or altered files,

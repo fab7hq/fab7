@@ -116,10 +116,9 @@ session carries on as normal — you just lose that piece of evidence.
 
 ```sh
 ringframe ask list --json
-ringframe ask show --ask <ask_id> --json
 ringframe ask copy --ask <ask_id>
 ```
 
-`ask copy` prints the exact prompt, ready to paste. `ask show` without an ID
-finds the one you mean from context; if that is ambiguous it asks rather than
-guessing, and it will never pick a record just because it is the newest.
+`ask copy` prints the exact prompt, ready to paste. `ask list` gives every
+Ask, oldest first, with the id each one needs — RingFrame never asks you to
+recall one, and a client that shows you the list is how you pick.

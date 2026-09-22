@@ -300,7 +300,6 @@ Run these inside the project you want to inspect:
 
 ```sh
 ringframe deltas domains --json
-ringframe deltas list --effective --json
 ringframe profile show --host claude-code --json
 ringframe deltas render --host claude-code --capability native_plan \
   --classification '{"task":["plan"],"result":"plan","interaction":"approval_gated","horizon":"session","effects":["read"]}'

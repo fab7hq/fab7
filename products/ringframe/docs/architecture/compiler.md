@@ -73,7 +73,6 @@ budgets, and worked examples.
 
 ```sh
 ringframe deltas domains --json
-ringframe deltas list --effective --json
 ringframe deltas render --host codex --capability native_plan \
   --classification '{"task":["implement"],"result":"workspace_change","interaction":"approval_gated","horizon":"session","effects":["write"],"concerns":["api_surface"]}'
 ```
