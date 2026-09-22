@@ -122,6 +122,12 @@ version or session ID: the CLI resolves them from the plugin hook's capture.
    records every directive you applied and every one you omitted, so an
    omission is visible.
 
+   When the capability declares `max_prompt_chars`, the whole prompt including
+   its command prefix must fit inside it. Cut directives until it does, the
+   ones furthest from this task first. The CLI refuses a prompt over the limit,
+   and the host refuses it again at submission, so a prompt that does not fit
+   is work nobody can run.
+
    Keep the `Rules:` line and the phase headings of the directives you kept,
    in the order printed, each directive under the heading it came from. A
    heading such as `While researching:` tells the agent when its rules apply.
