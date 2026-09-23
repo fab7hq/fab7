@@ -20,6 +20,13 @@ jobs:
               for e in entries:
                   if not pathlib.Path(source(e)).is_dir():
                       bad.append(f"{manifest}: {e['name']} source {source(e)} is missing")
+          versions = {json.loads(pathlib.Path(f).read_text())["version"] for f in
+                      ("products/ringframe/plugins/claude/.claude-plugin/plugin.json",
+                       "products/ringframe/plugins/codex/.codex-plugin/plugin.json")}
+          versions |= {e["version"] for e in json.loads(pathlib.Path(".claude-plugin/marketplace.json")
+                                                         .read_text())["plugins"] if e["name"] == "rf"}
+          if len(versions) != 1:
+              bad.append(f"the rf plugins carry different versions: {sorted(versions)}")
           print("\n".join(bad) or "manifests OK")
           sys.exit(1 if bad else 0)
           PY

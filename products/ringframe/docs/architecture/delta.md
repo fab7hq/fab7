@@ -22,7 +22,8 @@ Neither kind can give your agent a new ability. That is the profile's job, in
 
 Nothing ships inside the CLI. `ringframe init --global` downloads rules from the
 [Fab7 marketplace](https://github.com/fab7hq/fab7); `ringframe sync` is the same
-command and is how you update later.
+command and is how you update later. `ringframe sync --check` only says whether
+a newer release is out, and writes nothing.
 
 Neither runs on its own, so your prompts never change underneath you.
 
