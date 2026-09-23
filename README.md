@@ -5,8 +5,8 @@ The marketplace for Fab7 plugins. Add it once, install any Fab7 product from it.
 ## Claude Code
 
 ```sh
-/plugin marketplace add fab7hq/fab7
-/plugin install <plugin>@fab7
+claude plugin marketplace add fab7hq/fab7
+claude plugin install <plugin>@fab7
 ```
 
 ## Codex
