@@ -56,10 +56,13 @@ Then work normally.
 authorises Codex to spawn the reviewers, and it is needed even when sub-agent
 tools are already on. `$rf:eval` by itself is not enough.
 
-Four judges: one works out what was actually promised, three check coverage,
-drift, and what is being glossed over. You get what is missing, what changed
-that nobody asked for, and how much they agreed. It reads the diff; it does not
-run your tests.
+An agent maps the diff, then four judges: one works out what was actually
+promised, three check coverage, drift, and what is being glossed over. You get
+what is missing, what changed that nobody asked for, and how much they agreed.
+It reads the diff; it does not run your tests. Give any of them a model and an
+effort (`$rf:eval use native sub-agents drift=gpt-6-sol/high`), or gather here
+and debate elsewhere (`$rf:eval gather`): see
+[stages, models and efforts](../commands/eval.md#stages-models-and-efforts).
 
 **Seal** asks you to confirm, then closes the open Asks: `accepted`, `rejected`,
 `deferred`, or `abandoned`, with a note if you want one. You can Seal with or

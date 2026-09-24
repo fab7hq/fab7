@@ -6,7 +6,7 @@
 - Install and sign in to [Claude Code](https://code.claude.com/docs/en/setup).
 - Make sure `ringframe` is on the PATH that Claude Code uses.
 - Allow the plugin the tools it needs: asking you questions, reading and writing
-  files, running `ringframe`, and spawning agents. Eval uses four of them.
+  files, running `ringframe`, and spawning agents. Eval uses five of them.
 
 ## Install the plugin
 
@@ -41,10 +41,13 @@ You never have to name a route. Say what you want.
 
 Then work normally — implement, revise, argue with your agent.
 
-**Eval** looks at everything still open and asks four judges: one works out
-what was actually promised, three check coverage, drift, and what is being
-glossed over. You get what is missing, what changed that nobody asked for, and
-how much they agreed.
+**Eval** looks at everything still open: an agent maps the diff, then four
+judges — one works out what was actually promised, three check coverage, drift,
+and what is being glossed over. You get what is missing, what changed that
+nobody asked for, and how much they agreed. Give any of them a model and an
+effort (`/rf:eval adversary=claude-opus-5-5/high`), or run the debate in
+another harness (`/rf:eval debate <eval_id>`): see
+[stages, models and efforts](../commands/eval.md#stages-models-and-efforts).
 
 It reads the diff. It does not run your tests.
 

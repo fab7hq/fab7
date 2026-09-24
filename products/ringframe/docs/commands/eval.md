@@ -55,8 +55,14 @@ otherwise the working tree as it stands:
 
 `eval open` writes a brief: which Asks are open, the start and end points, how
 many files changed, any earlier Eval covering the same Asks, and the known
-limitations. If an Eval is already open over those same Asks, you continue with
-that one rather than starting a second.
+limitations. Beside it, Git writes `changes.patch`: the exact diff, untracked
+files included, which every judge reads instead of hunting for it. If an Eval is
+already open over those same Asks, you continue with that one rather than
+starting a second.
+
+A **context** agent reads the patch and writes a short map of what changed in
+each file. It votes on nothing; judges read it first and cite the patch or the
+files, never the map.
 
 Then four judges, and they have different jobs:
 
@@ -116,19 +122,61 @@ $rf:eval use native sub-agents
 Those words cannot create a tool that is not there, or force your host to spawn
 anything. Your host owns that.
 
+## Stages, models and efforts
+
+An Eval runs in two stages that hand over through files, so each stage can run
+in a different harness without seeing the other's conversation:
+
+| Stage | What runs | What it leaves |
+| --- | --- | --- |
+| **gather** | `eval open` (the brief, and `changes.patch` from Git) and the context agent | `context.md`, published with `ringframe eval context` |
+| **debate** | the intent judge and the three assessors | the verdict |
+
+Plain `/rf:eval` runs both in one harness. To split them, gather in one and
+debate in the other, by the Eval ID the first prints:
+
+```text
+$rf:eval gather                  # Codex: open, map the change, print the Eval ID
+/rf:eval debate evl_01M…         # Claude Code: judge that Eval from its files
+```
+
+Each role — `context`, `intent`, `coverage`, `drift`, `adversary` — can be given
+a model and an effort as `role=model/effort`, after the stage if there is one:
+
+```text
+/rf:eval drift=claude-sonnet-5/high adversary=claude-opus-5-5/high
+$rf:eval gather context=gpt-6-luna/low
+/rf:eval debate evl_01M… adversary=/xhigh
+```
+
+Either side may be empty: `adversary=/xhigh` names only an effort. **Whatever you
+leave out runs on your harness's default** — on Claude Code,
+`CLAUDE_CODE_SUBAGENT_MODEL` or the session's model, and the session's effort;
+on Codex, the `[agents]` defaults in its `config.toml`. RingFrame checks no model
+name: a wrong one fails when the harness spawns the agent, and the record says
+which judge reported running on a different model.
+
+In [Weft](https://github.com/fab7hq/weft) you do not type any of this. Weft
+keeps your choices in `~/.fab7/weft/eval.json` and the project's route, and
+`[E]VAL` types them — one stage per keypress when the two stages run in
+different harnesses.
+
 ## What is recorded
 
-`evals/<eval_id>/` holds the brief, the intent, each judgement, and the final
-record — votes, what was missing, what was unexplained, the limitations, and
-what changed since the last Eval of the same Asks.
+`evals/<eval_id>/` holds the brief, `changes.patch`, the context map when there
+is one, the intent, each judgement, and the final record — votes, what was
+missing, what was unexplained, the limitations, what changed since the last Eval
+of the same Asks, and the model and effort each role was asked to run on.
 
 That comparison matches items by ID first, then by wording, then by overlap.
 It is a best effort at "is this the same obligation, reworded", not a proof.
 
 ```sh
-ringframe eval open
+ringframe eval open --agents '{"context":{"effort":"low"}}'
+ringframe eval context --eval <eval_id> --map @map.md --host codex
 ringframe eval close --eval <eval_id> --intent @intent.json \
-  --judgement @coverage.json --judgement @drift.json --judgement @adversary.json
+  --judgement @coverage.json --judgement @drift.json --judgement @adversary.json \
+  --agents '{"adversary":{"model":"claude-opus-5-5","effort":"high"}}'
 ringframe eval list --json
 ```
 
