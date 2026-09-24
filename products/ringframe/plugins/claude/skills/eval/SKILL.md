@@ -34,7 +34,9 @@ Roles are `context`, `intent`, `coverage`, `drift`, `adversary`. In
 either side may be empty (`drift=/high`). Pass a named role's values into the
 `Agent` call's `model` and `effort` fields, and leave out whatever is not named,
 so the harness default applies. Never guess a model or an effort. Report a word
-naming any other role and ignore it.
+naming any other role and ignore it. Words
+without `=` after the stage (such as "use native sub-agents") are the person's
+own and change neither the stage nor the roles.
 
 ## Eval boundaries and native tools
 
