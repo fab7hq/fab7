@@ -12,24 +12,34 @@ and gates nothing: the person decides what to do with the result.
 
 The invocation's arguments are the text after `$rf:eval` in the person's message.
 
-They may start with a stage, then name a model and effort per role:
+They may start with RingFrame's overrides, then a stage, then name a model and
+effort per role:
 
 ```text
-$rf:eval [gather | debate <eval_id>] [role=model/effort ...]
+$rf:eval [--override '<json>'] [gather | debate <eval_id>] [role=model/effort ...]
 ```
 
+- **`--override '<json>'`:** RingFrame configuration, typed by Weft or the
+  person, not a word about this Eval. Add it, unchanged, to `ringframe eval
+  open`. Never write one yourself or edit it.
 - **No stage:** do everything below in this harness.
 - **`gather`:** open, write the change map, publish it, report the Eval ID, stop.
 - **`debate <eval_id>`:** skip open and the map; judge that Eval from its files.
 
 Roles are `context`, `intent`, `coverage`, `drift`, `adversary`. In
 `drift=claude-sonnet-5/high` the model comes before `/` and the effort after;
-either side may be empty (`drift=/high`). Pass a named role's values into
-`spawn_agent`'s `model` and `reasoning_effort` fields, and leave out whatever is
-not named, so the harness default applies. Never guess a model or an effort.
-Report a word naming any other role and ignore it. Words
-without `=` after the stage (such as "use native sub-agents") are the person's
-own and change neither the stage nor the roles.
+either side may be empty (`drift=/high`). Report a word naming any other role
+and ignore it. Words without `=` after the stage (such as "use native
+sub-agents") are the person's own and change neither the stage nor the roles.
+
+Before the first spawn, read `config.toml` in this skill's directory, beside
+this `SKILL.md` once. Its `[roles]` table holds this plugin's tiers, `<role> =
+{ model = "…", effort = "…" }`. A role's model and its effort, each on its own,
+are the first of: the invocation's word; that file; nothing, in which case
+leave it out of the `spawn_agent` call's `model` and `reasoning_effort` fields
+so the harness default applies. If the file is missing or unreadable, say so
+once in the report and use only the invocation's words. Never guess a model or
+an effort. "A role's values" below means these resolved values.
 
 ## Eval boundaries and native tools
 
@@ -94,16 +104,17 @@ named Eval. It must be `opened`, not `completed`, and `gathered`; otherwise
 report which and stop. Keep its `brief.path` (relative to `.fab7/rf/`) and
 `brief.sha256`, read the brief, and continue at §2.
 
-Otherwise run `ringframe eval open` once, adding `--agents
+Otherwise run `ringframe eval open` once, with the invocation's `--override`
+when it has one, adding `--agents
 '{"context":{"model":"<model>","effort":"<effort>"}}'` with only the keys the
-invocation named for `context` (no flag when it named none). Keep `eval_id`,
-`brief_path`, `brief.sha256`, and `changes_patch`: the exact anchor-to-subject
-diff, untracked files included. The brief lists the open Asks in order, their
-`prompt_path` relative to `.fab7/rf/`, the anchor, subject, changed paths with
-line counts, and counts of unrecorded prompts after each Ask. `facts` lists the
-shell commands the harness saw succeed or fail while an Ask was open: `id`,
-`command`, `outcome`, and `fresh`: whether it ran against the subject being
-judged.
+context sub-agent will be spawned with, whatever their source (no flag when
+there are none). Keep `eval_id`, `brief_path`, `brief.sha256`, and
+`changes_patch`: the exact anchor-to-subject diff, untracked files included.
+The brief lists the open Asks in order, their `prompt_path` relative to
+`.fab7/rf/`, the anchor, subject, changed paths with line counts, and counts of
+unrecorded prompts after each Ask. `facts` lists the shell commands the harness
+saw succeed or fail while an Ask was open: `id`, `command`, `outcome`, and
+`fresh`: whether it ran against the subject being judged.
 
 - Exit 2 `eval.no_open_ask`: report "nothing to evaluate: no open Ask" and stop.
 - Exit 3 `eval.anchor_unknown`: report it and stop; the person can supply
@@ -204,12 +215,11 @@ not evidence. Cite only fact IDs from the brief; the CLI refuses any other.
 
 ## 4. Close
 
-After all four outputs are complete, run
-`ringframe eval close --eval <eval_id> --intent @<intent file>
---judgement @<coverage file> --judgement @<drift file> --judgement
-@<adversary file>`, adding `--agents '<json>'` with the keys the invocation
-named for `intent`, `coverage`, `drift` and `adversary`
-(`{"drift":{"effort":"high"}}`); no flag when it named none.
+After all four outputs are complete, run `ringframe eval close --eval <eval_id>
+--intent @<intent file> --judgement @<coverage file> --judgement @<drift file>
+--judgement @<adversary file>`, adding `--agents '<json>'` with the keys
+`intent`, `coverage`, `drift` and `adversary` were spawned with, whatever their
+source (`{"drift":{"effort":"high"}}`); no flag when there are none.
 
 On a reported input-validation error, ask the responsible judge to correct
 its file without changing unrelated findings; in fallback, correct your own

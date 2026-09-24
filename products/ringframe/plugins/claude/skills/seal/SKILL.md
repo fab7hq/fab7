@@ -12,6 +12,11 @@ nothing, and no Eval verdict blocks it.
 
 Arguments: `$ARGUMENTS`.
 
+An argument `--override '<json>'` is RingFrame configuration, typed by Weft or
+the person, for the commands that read configuration. Seal runs none of them:
+leave it out of every command, and do not read it as the disposition or the
+note.
+
 ## Seal boundaries and native confirmation
 
 Requires the `ringframe` CLI and the native `AskUserQuestion` tool in this turn.

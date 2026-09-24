@@ -1,0 +1,9 @@
+# RingFrame Eval: model and effort per role, for Codex.
+# Shipped with the plugin and replaced on update; change tiers in Weft
+# (~/.fab7/weft/config.toml) or with role=model/effort words.
+[roles]
+context   = { model = "gpt-6-luna", effort = "low" }
+intent    = { model = "gpt-6-sol", effort = "medium" }
+coverage  = { model = "gpt-6-sol", effort = "medium" }
+drift     = { model = "gpt-6-sol", effort = "high" }
+adversary = { model = "gpt-6-sol", effort = "xhigh" }

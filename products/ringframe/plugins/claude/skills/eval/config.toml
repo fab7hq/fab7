@@ -1,0 +1,9 @@
+# RingFrame Eval: model and effort per role, for Claude Code.
+# Shipped with the plugin and replaced on update; change tiers in Weft
+# (~/.fab7/weft/config.toml) or with role=model/effort words.
+[roles]
+context   = { model = "claude-sonnet-5", effort = "low" }
+intent    = { model = "claude-sonnet-5", effort = "medium" }
+coverage  = { model = "claude-sonnet-5", effort = "medium" }
+drift     = { model = "claude-sonnet-5", effort = "high" }
+adversary = { model = "claude-opus-5-5", effort = "high" }

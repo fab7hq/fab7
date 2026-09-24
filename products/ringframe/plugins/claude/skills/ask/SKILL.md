@@ -18,6 +18,16 @@ $ARGUMENTS
 
 Use `Write` for staging; it creates the staging directory itself.
 
+## RingFrame overrides
+
+A source intent that begins `--override '<json>'` starts with RingFrame
+configuration, not intent: Weft types one when its `config.toml` overrides
+RingFrame, and a person may too. Add that `--override '<json>'`, unchanged, to
+every `ringframe profile show`, `ringframe deltas domains`, `ringframe deltas
+render` and `ringframe ask compile` this Ask runs. Never write one yourself or
+edit it. The intent is the text after it, which may begin with a follow-up
+marker; `source.txt` still holds the exact source intent, override included.
+
 ## Ask boundaries
 
 - Before confirmation, use tools only to read the profile and directives, stage
@@ -113,14 +123,15 @@ confirming or continuing; do not substitute ordinary chat or change host setting
 If the current workspace's domain list is not already available in context,
 run `ringframe deltas domains --minimal`. It lists every installed practice
 domain with its `description`, its `concerns` vocabulary, and
-`project_opted_in`. The base domain always applies and is never listed in
-`domains`. Add a non-base domain when the intent's subject is within its
+`project_opted_in` (an override layer names it). The base domain always
+applies and is never listed in `domains`. Add a non-base domain when the
+intent's subject is within its
 description or its work touches its concerns; when `project_opted_in` is true,
 add it unless the intent is clearly outside it. Omit `domains` when no
 specialist applies. If concerns are relevant, classify them from the union of
 the selected domains' vocabularies in that same output; otherwise omit
-concerns. The CLI reads the synced, personal and project delta files; later
-layers win.
+concerns. The CLI reads the synced delta files, then any `--override` layers;
+later layers win.
 
 Use these JSON shapes for `--classification` and `--route`. Replace example
 values and angle-bracket placeholders with this intent's classification and
