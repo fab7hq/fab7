@@ -3,7 +3,7 @@ name: ask
 description: Turn one explicit intent into a confirmed, persisted prompt and deliver it through the selected native capability.
 argument-hint: <intent>
 disable-model-invocation: true
-allowed-tools: AskUserQuestion EnterPlanMode Write Bash(ringframe *)
+allowed-tools: AskUserQuestion EnterPlanMode Write Read(.fab7/rf/**) Bash(ringframe *)
 ---
 
 You are running RingFrame Ask inside Claude Code. The person supplies and
@@ -23,6 +23,7 @@ Use `Write` for staging; it creates the staging directory itself.
 - Before confirmation, use tools only to read the profile and directives, stage
   and compile the candidate, read its rendered prompt, and show native
   confirmation. Do not inspect project files, research, or begin the work.
+  The one exception is the record a follow-up names (section 1).
 - Preserve the source intent exactly. Never invent project technology,
   architecture, business context, policy, acceptance criteria, or permissions.
 - For Ask preparation and ledger commands, run exactly one plain `ringframe …`
@@ -45,6 +46,29 @@ would give at the very end, once the intent had been classified, the prompt
 composed and staged, and the person had waited through all of it. If it
 refuses, show its message and stop. Do not stage, do not compile, and do not
 offer to run `git init` yourself.
+
+### A follow-up
+
+A source intent that begins `[follow-up <id>]` is a follow-up: Weft's
+`[F] FOLLOW UP` types it, and a person may too. The id names the work it
+follows, and the agent composing this Ask may never have seen that work, so
+read it from the record:
+
+- `ask_…`: `.fab7/rf/asks/<id>/source.txt` and `.fab7/rf/asks/<id>/prompt.txt`,
+  what was asked and what was sent.
+- `evl_…`: `.fab7/rf/evals/<id>/eval.md`, what the last Eval found.
+
+Read only those files. If the one named is missing, say so and stop.
+
+The request is the text after the marker. Compose the brief from it and from
+what the record says; do not restate the earlier prompt whole. `source.txt`
+still holds the exact source intent, marker included.
+
+Link it at compile: `--link remediates:<evl_id>` when the request is about that
+Eval's findings — fixing what it found, or settling what it could not judge;
+otherwise `--link follows:<id>`. A new feature on judged work follows the Eval;
+it does not remediate it. Name the link in the confirmation summary, one line
+above the brief: `Remediates evl_…` or `Follows ask_…`.
 
 ## 2. Read the profile and route
 
@@ -177,6 +201,7 @@ version or session ID: the CLI resolves them from the plugin hook's capture.
    `ringframe ask compile --staged <dir> --title "<short title>"
    --capability <id> --classification '<json>' --route '<json>' --host
    '{"name":"claude-code","surface":"native-tui"}'`.
+   For a follow-up, add its `--link` (section 1).
    Keep the returned `ask_id`. On a reported input-validation error, correct
    that input without changing the source intent and retry. If the same error
    recurs, the cause is unclear, or the failure is not input validation, show
@@ -210,8 +235,9 @@ Full wording: .fab7/rf/asks/<ask_id>/prompt.txt — in Weft, [P] WORDING
 
 
 A different route or free-text revision means stage and compile a new candidate
-with `--link revises:<previous ask_id>`, then ask again. Every candidate shown
-is persisted; only the last one is confirmed.
+with `--link revises:<previous ask_id>`, and a follow-up's own link again,
+then ask again. Every candidate shown is persisted; only the last one is
+confirmed.
 
 ## 5. Record the answer and deliver
 

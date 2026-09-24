@@ -58,7 +58,9 @@ report the failure and stop if the required evidence or output is inaccessible.
 Run `ringframe eval open` once; keep `eval_id`, `brief_path`, and
 `brief.sha256`. The brief lists the open Asks in order, their `prompt_path`
 relative to `.fab7/rf/`, the anchor, subject, changed paths with line counts,
-and counts of unrecorded prompts after each Ask.
+and counts of unrecorded prompts after each Ask. `facts` lists the shell commands
+the harness saw succeed or fail while an Ask was open: `id`, `command`,
+`outcome`, and `fresh`: whether it ran against the subject being judged.
 
 - Exit 2 `eval.no_open_ask`: report "nothing to evaluate: no open Ask" and stop.
 - Exit 3 `eval.anchor_unknown`: report it and stop; the person can supply
@@ -87,11 +89,14 @@ Write `.fab7/rf/tmp/eval-<eval_id>-intent.json` using this shape. Replace
 placeholders and example values with the actual evidence; each `status` is
 one of `active`, `revised`, or `withdrawn`. Include `by_ask_id` for revisions
 and withdrawals. Use the reported model identity when available; do not guess it.
+When an obligation is the result of a command ("`npm test` passes"), set that
+item's `check` to the command, verbatim from the Ask; omit `check` otherwise.
 
 ```json
 {"schema":"ringframe.eval-intent/1","brief_sha256":"<brief.sha256>",
  "judge":{"host":"claude-code","model":"<model id>","angle":"intent","independence":"sub_agent"},
- "items":[{"id":"i1","text":"<one obligation>","ask_id":"<source Ask ID>","status":"active","note":"<relevant context>"}]}
+ "items":[{"id":"i1","text":"<one obligation>","ask_id":"<source Ask ID>","status":"active","note":"<relevant context>"},
+          {"id":"i2","text":"<npm test passes>","ask_id":"<source Ask ID>","status":"active","note":"","check":"npm test"}]}
 ```
 
 ## 3. Assessors: three independent sub-agents
@@ -110,7 +115,8 @@ Each writes `.fab7/rf/tmp/eval-<eval_id>-<angle>.json` using this shape:
 ```json
 {"schema":"ringframe.eval-judgement/1","brief_sha256":"<brief.sha256>",
  "judge":{"host":"claude-code","model":"<model id>","angle":"coverage","independence":"sub_agent"},
- "votes":[{"item":"i1","vote":"yes","reason":"<file evidence for this vote>"}],
+ "votes":[{"item":"i1","vote":"yes","reason":"<file evidence for this vote>"},
+          {"item":"i2","vote":"yes","reason":"<what the fact shows>","facts_cited":["<fct_… id>"]}],
  "drift":[{"path":"<changed path>","finding":"<evidence>","classification":"required"}],
  "basis_notes":[],"commands_run":[]}
 ```
@@ -121,6 +127,12 @@ angle, classifies every changed path as `required`, `consequence`, or
 `unexplained`; the CLI refuses missing path classifications. Record actual
 Git commands in `commands_run` (empty only if none ran), and ambiguities about
 the intent in `basis_notes`.
+
+Judges still run no project command. For an item with `check`, vote `yes` only
+on a fresh `succeeded` fact whose command runs it, and name that fact in the
+vote's `facts_cited`; the CLI counts any other `yes` on it as `unknown`. A fresh
+`failed` fact is evidence for `no`. A stale fact ran against other work and is
+not evidence. Cite only fact IDs from the brief; the CLI refuses any other.
 
 - `coverage`: is each active item met by the change? Vote `yes` only with
   file evidence; `unknown` when the repository cannot establish it.
