@@ -12,11 +12,11 @@ There are two kinds, and they answer different questions:
 | --- | --- | --- |
 | Answer | "However you do this, remember X." | "While in Plan mode, remember X." |
 | Chosen by | what the task *is*, and optionally the route it took | which route the Ask took |
-| Live in | `deltas/practices/<domain>.yaml` | `deltas/<host>.yaml` |
+| Live in | `deltas/practices/<domain>.toml` | `deltas/<host>.toml` |
 | Example | *Write the failing test first.* | *Verify the paths you name exist.* |
 
 Neither kind can give your agent a new ability. That is the profile's job, in
-`harnesses/<host>.yaml`, and you do not normally edit it.
+`harnesses/<host>.toml`, and you do not normally edit it.
 
 ## Where rules come from
 
@@ -29,23 +29,48 @@ Neither runs on its own, so your prompts never change underneath you.
 
 ```
 ~/.fab7/rf/config/       downloaded — sync overwrites this, so do not edit it
-  harnesses/<host>.yaml    what each agent can do
-  deltas/<host>.yaml       rules for one route
-  deltas/practices/<domain>.yaml   rules for a kind of work
+  harnesses/<host>.toml    what each agent can do
+  deltas/<host>.toml       rules for one route
+  deltas/practices/<domain>.toml   rules for a kind of work
   .revision                which release this came from
-~/.fab7/rf/overrides/    yours — sync never touches this
-  deltas/<same shape>
-<project>/.fab7/rf/deltas/<same shape>    this project's
 ```
+
+Every configuration file is TOML. **Your changes come from Weft**, in
+`~/.fab7/weft/config.toml`: the `[ringframe]` table for everywhere you work,
+and `[projects."<path>".ringframe]` for one project. Weft types both into every
+`/rf:` command it sends as `--override '<json>'`, and RingFrame applies them
+over the downloaded rules.
 
 **Three layers, and the later one wins:** downloaded, then yours, then this
 project's.
 
-So: to change a rule everywhere you work, edit it under `overrides/`. To change
-it for one project only, edit it in that project. Never edit `config/` — the
-next sync will throw your change away.
+Under `[ringframe]`, a `deltas` table is keyed by the file's path under
+`deltas/`, without `.toml`, and holds that file's keys:
+
+```toml
+[ringframe.deltas."practices/software-development"]
+render = { core_cap = 6 }
+
+[projects."/Users/me/work/thing".ringframe.deltas."practices/software-development"]
+entries = [{ id = "practice.yagni", enabled = false }]
+```
+
+Never edit `config/` — the next sync will throw your change away. RingFrame
+reads no override folder; one left from an earlier release is reported and not
+read, and its content belongs in Weft's `config.toml`.
 
 You only write the fields you are changing. Everything else is inherited.
+
+Without Weft, type the same value yourself: `--override` takes a list of named
+layers, applied in order, on `profile show`, `deltas domains`, `deltas render`,
+`ask compile` and `eval open`, and each `/rf:` skill passes a leading one on:
+
+```sh
+ringframe deltas domains --json --override '[{"layer":"mine","ringframe":{"deltas":{"practices/software-development":{"entries":[{"id":"practice.yagni","enabled":false}]}}}}]'
+```
+
+A layer's name is where the CLI says a rule came from. A value it cannot read
+stops the command and says what is wrong.
 
 `ringframe init --global --from <dir>` installs from a folder instead of
 downloading, for machines with no network. Every prompt records which release
@@ -58,25 +83,25 @@ mentions:
 
 | What your file has | What happens |
 | --- | --- |
-| nothing, or only comments | You get everything from the layer below. |
+| nothing | You get everything from the layer below. |
 | a rule with an `id` that already exists | Your fields replace those fields. The rest is inherited. |
 | a rule with a new `id` | It is added, after the inherited ones. |
-| `enabled: false` on a rule | The rule stays configured but stops appearing in prompts. |
-| `entries: []` | Every rule in this file is cleared. |
+| `enabled = false` on a rule | The rule stays configured but stops appearing in prompts. |
+| `entries = []` | Every rule in this file is cleared. |
 | any other list or single value | It replaces the one below outright. |
 
 Keep ids unique and do not rename them — a receipt written last month refers to
-them. Emptying your file again restores what you inherited. To clear a list use
-`[]`; YAML `null` is not an empty list.
+them. Removing your table again restores what you inherited. To clear a list
+use `[]`.
 
 For example, reword KISS and switch YAGNI off, for one project:
 
-```yaml
-entries:
-  - id: practice.kiss
-    text: Keep changes small and direct.
-  - id: practice.yagni
-    enabled: false
+```toml
+[projects."/Users/me/work/thing".ringframe.deltas."practices/software-development"]
+entries = [
+  { id = "practice.kiss", text = "Keep changes small and direct." },
+  { id = "practice.yagni", enabled = false },
+]
 ```
 
 ## Writing a practice rule
@@ -84,33 +109,32 @@ entries:
 Here is a whole file. Yours only needs the parts you are changing — the header
 is inherited.
 
-```yaml
-schema: ringframe.deltas/1
-scope: practice
-domain: software-development
-render:
-  heading: 'Rules:'
-  core_cap: 5
-concerns: [api_surface, refactor, tests_only]
-entries:
-  - id: practice.task_workflow
-    label: Task workflow
-    status: attributed
-    tier: core
-    priority: 10
-    applies_to:
-      task: [plan, implement]
-    text: >-
-      For each implementation task, analyze the existing code and acceptance
-      criteria; write a failing test, implement the smallest passing change,
-      and refactor; then review the diff and resolve findings before advancing.
-      In a plan, describe this sequence for each task without executing it.
-      In a continuing goal, repeat it until the stated completion criteria
-      are met. Use appropriate checks for non-code tasks.
+```toml
+schema = "ringframe.deltas/1"
+scope = "practice"
+domain = "software-development"
+render = { heading = "Rules:", core_cap = 5 }
+concerns = ["api_surface", "refactor", "tests_only"]
+
+[[entries]]
+id = "practice.task_workflow"
+label = "Task workflow"
+status = "attributed"
+tier = "core"
+priority = 10
+applies_to = { task = ["plan", "implement"] }
+text = """\
+For each implementation task, analyze the existing code and acceptance \
+criteria; write a failing test, implement the smallest passing change, \
+and refactor; then review the diff and resolve findings before advancing. \
+In a plan, describe this sequence for each task without executing it. \
+In a continuing goal, repeat it until the stated completion criteria \
+are met. Use appropriate checks for non-code tasks."""
 ```
 
-To add that rule to one project, copy just the `entries` part into the
-project's file, alongside any other changes you are making.
+To add that rule to one project, copy just the entry into the project's
+`[projects."<path>".ringframe.deltas."practices/software-development"]`
+table, alongside any other changes you are making.
 
 **The three fields every rule needs:**
 
@@ -128,7 +152,7 @@ project's file, alongside any other changes you are making.
 | `tier` | `core` = always applies. `situational` (the default) = only when a concern matches. `reference` = never rendered. |
 | `priority` | Lower goes first. Default `100`. |
 | `concerns` | What this rule is about. **A situational rule with no concerns can never be picked.** |
-| `enabled: false` | Turn it off without deleting it. |
+| `enabled = false` | Turn it off without deleting it. |
 | `status` | `attributed` (the default) and `qualified` are used; `candidate` and `retired` are not. |
 | `requires.host_capability` | Only `subagents` is understood: skip this rule when the agent has no sub-agents. |
 
@@ -157,19 +181,19 @@ Across lists, all of them must.** Leave a list out and it places no restriction.
 | `effects` | the classification | `read`, `write`, `execute`, `external_effect`, `workspace_read`, `workspace_write`, `external_read` |
 | `capability` | the **route** | whichever your profile declares — `native_plan`, `native_goal`, `native_direct`, `native_review` |
 
-So `task: [plan, implement]` means plan **or** implement. Add
-`result: [continuing_objective]` and now it must be one of those *and* a
+So `task = ["plan", "implement"]` means plan **or** implement. Add
+`result = ["continuing_objective"]` and now it must be one of those *and* a
 continuing objective.
 
 **`task` is what you want; `capability` is how it is being sent, and they are
 not the same.** Ask "implement the thing" and it may route through Plan mode to
 plan it first — the route says `native_plan` while the task says what the work
 is ultimately for. A rule that must hold whenever Plan mode is producing a plan
-should therefore key on `capability: [native_plan]`, not on `task: [plan]`,
+should therefore key on `capability = ["native_plan"]`, not on `task = ["plan"]`,
 which only fires when a plan is the thing you asked for.
 
-There is no `task: goal` — a long-running objective is `result:
-continuing_objective`.
+There is no `task = "goal"` — a long-running objective is `result =
+"continuing_objective"`.
 
 Situational rules need one more thing: a matching **concern**. The `concerns`
 list at the top of the file is the whole vocabulary Ask may use. If you add your
@@ -201,7 +225,7 @@ Ask.
 
 **Your rule can lose to the cap.** A new project rule competes with the
 inherited core rules: with a cap of five and five inherited rules already at
-priority `100`, yours is dropped. Give it `priority: 10` and it goes first —
+priority `100`, yours is dropped. Give it `priority = 10` and it goes first —
 pushing out the last inherited one instead.
 
 If a rule you wrote is not appearing, check `dropped_by_budget` in the render
@@ -232,9 +256,9 @@ this project opted in. Ask reads exactly that, then adds a specialist domain
 when your intent is about that subject or touches its concerns — leaning
 towards one the project opted into.
 
-**To opt a project in**, create
-`<project>/.fab7/rf/deltas/practices/<domain>.yaml` with its header. That is all
-opting in means: a nudge, not a switch. Ask still leaves a specialist domain out
+**To opt a project in**, name the domain in an override layer: in Weft,
+`[projects."<path>".ringframe.deltas."practices/<domain>"]`, with its
+`domain` key. That is all opting in means: a nudge, not a switch. Ask still leaves a specialist domain out
 when your request is clearly unrelated.
 
 Each domain gets its own `core_cap`, and the `Rules:` block is base rules first,
@@ -247,12 +271,13 @@ dropped.
 
 ### Adding a domain
 
-One file in `deltas/practices/<domain>.yaml`, either in the marketplace or in
-your own `overrides/`. It needs:
+One file in the marketplace's `deltas/practices/<domain>.toml`, or the same keys
+under `[ringframe.deltas."practices/<domain>"]` in Weft's `config.toml`. It
+needs:
 
-- a `domain:` key matching the file name
-- a `description:` — one line on what work it covers, which is how Ask decides
-- a `concerns:` list, which is that domain's whole vocabulary
+- a `domain` key matching the file name
+- a `description` — one line on what work it covers, which is how Ask decides
+- a `concerns` list, which is that domain's whole vocabulary
 
 No code changes anywhere. `deltas domains` will find it.
 
@@ -263,23 +288,24 @@ and long prompts get skimmed.
 
 A host rule attaches to one route, by name. No task filters, no concerns.
 
-```yaml
-schema: ringframe.deltas/1
-scope: host
-host: claude-code
-entries:
-  - id: claude-code.native_goal.task_workflow
-    label: Task workflow
-    status: candidate
-    capability: native_goal
-    text: >-
-      For each task, analyze the code, implement using TDD, and review the
-      change before advancing toward the goal's completion criteria.
-    matrix_ref: https://code.claude.com/docs/en/goal
+```toml
+schema = "ringframe.deltas/1"
+scope = "host"
+host = "claude-code"
+
+[[entries]]
+id = "claude-code.native_goal.task_workflow"
+label = "Task workflow"
+status = "candidate"
+capability = "native_goal"
+text = """\
+For each task, analyze the code, implement using TDD, and review the \
+change before advancing toward the goal's completion criteria."""
+matrix_ref = "https://code.claude.com/docs/en/goal"
 ```
 
 Each one needs `id`, `capability`, `text`, `matrix_ref`, and `status`. Use
-`host: codex` and Codex route names for a Codex file.
+`host = "codex"` and Codex route names for a Codex file.
 
 **The `capability` must be a route the profile actually has.** Check with
 `ringframe profile show` — you cannot invent one here. That is the division
@@ -306,9 +332,9 @@ ringframe deltas render --host claude-code --capability native_plan \
   --classification '{"task":["plan"],"result":"plan","interaction":"approval_gated","horizon":"session","effects":["read"]}'
 ```
 
-`deltas list --effective` shows every merged rule and which layer it came from.
 `deltas render` shows what an Ask like that would actually get; add `--json` for
-the full picture, including what was dropped for length. These only preview —
+the full picture, including each layer it merged, by name, and what was
+dropped for length. These only preview —
 nothing is launched, nothing is recorded.
 
 **When a rule does not do what you expected:**

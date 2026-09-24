@@ -12,7 +12,7 @@ Rules:
 ```
 
 Two parts, and they come from different places. **The brief is written by your
-agent**, from your words. **The rules are chosen by the CLI**, from YAML files.
+agent**, from your words. **The rules are chosen by the CLI**, from TOML files.
 Your agent never picks which rules apply, and the CLI never writes prose.
 
 Your original wording is kept untouched in `source.txt`. It is not pasted in
@@ -63,8 +63,11 @@ rule correctly — that is prose, and no check can settle it.
 Three layers, merged by rule id, later winning:
 
 1. `~/.fab7/rf/config/` — what you synced from the marketplace
-2. `~/.fab7/rf/overrides/` — your personal changes
-3. `<project>/.fab7/rf/deltas/` — this project's changes
+2. your changes, from the `[ringframe]` table of Weft's `~/.fab7/weft/config.toml`
+3. this project's changes, from its `[projects."<path>".ringframe]` table
+
+Weft passes 2 and 3 to every `/rf:` command as `--override '<json>'`; without
+Weft you can type one yourself.
 
 [Rules](delta.md) covers the file formats, how merging works, priorities,
 budgets, and worked examples.

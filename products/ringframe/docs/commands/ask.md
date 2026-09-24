@@ -93,7 +93,7 @@ hands you the prompt instead.
 
 Direct execution just continues in the same turn, so there is nothing to
 receipt. The
-[profile](https://github.com/fab7hq/fab7/blob/main/products/ringframe/config/harnesses/claude-code.yaml)
+[profile](https://github.com/fab7hq/fab7/blob/main/products/ringframe/config/harnesses/claude-code.toml)
 also has a Goal route you submit yourself.
 
 ### Codex
@@ -104,7 +104,7 @@ stops without confirming; no answer cancels it. See
 [Codex setup](../usage/codex.md#prerequisites).
 
 On Codex you submit the prompt yourself. The
-[profile](https://github.com/fab7hq/fab7/blob/main/products/ringframe/config/harnesses/codex.yaml)
+[profile](https://github.com/fab7hq/fab7/blob/main/products/ringframe/config/harnesses/codex.toml)
 hands off for Plan, Goal, and Review; the CLI adds the `/plan `, `/goal `, or
 `/review ` prefix, with a 4,000-character cap on Goal. You get the path to
 `prompt.txt`, and when you submit it the prompt hook can record the match.

@@ -10,7 +10,7 @@ repo. Eval only looks at changes inside the project it was run in.
 
 `ringframe init` sets up a project. It creates `.fab7/rf/`, makes it
 owner-only, and makes it ignore itself so your records never land in a commit.
-It also creates one empty rules file you can fill in later.
+It holds no configuration: a project's rules come from Weft ([Rules](delta.md)).
 
 `ringframe init --global` is a different thing: it sets up your machine, not a
 project. See [Rules](delta.md) for what it installs and where.
@@ -31,7 +31,6 @@ Paths are relative to `.fab7/rf/`.
 | `evals/<id>/judgement-<n>.json` | One judge's votes |
 | `evals/<id>/record.json` | The verdict, with agreement |
 | `seals/<id>.json` | Your decision, as a receipt |
-| `deltas/` | Rules you set for this project ([Rules](delta.md)) |
 | `authorizations/<actor>.json` | Optional: who may act on your behalf |
 | `sessions/<host>/<id>/` | What the host's hooks captured. Safe to prune |
 | `lock`, `tmp/` | Working files. `tmp/` may survive an interrupted run |

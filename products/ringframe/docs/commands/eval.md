@@ -150,16 +150,24 @@ $rf:eval gather context=gpt-6-luna/low
 ```
 
 Either side may be empty: `adversary=/xhigh` names only an effort. **Whatever you
-leave out runs on your harness's default** — on Claude Code,
-`CLAUDE_CODE_SUBAGENT_MODEL` or the session's model, and the session's effort;
-on Codex, the `[agents]` defaults in its `config.toml`. RingFrame checks no model
+leave out runs on the plugin's tiers**: each plugin ships
+`skills/eval/config.toml` with a model and effort per role for its harness
+([Claude Code](https://github.com/fab7hq/fab7/blob/main/products/ringframe/plugins/claude/skills/eval/config.toml),
+[Codex](https://github.com/fab7hq/fab7/blob/main/products/ringframe/plugins/codex/skills/eval/config.toml)).
+A role's model and its effort are each the first of your word, that file, and
+the harness's default — on Claude Code, `CLAUDE_CODE_SUBAGENT_MODEL` or the
+session's model, and the session's effort; on Codex, the `[agents]` defaults in
+its own `config.toml`. The plugin's file is replaced on every update, so do not
+edit it: change tiers in Weft or with the words. RingFrame checks no model
 name: a wrong one fails when the harness spawns the agent, and the record says
 which judge reported running on a different model.
 
 In [Weft](https://github.com/fab7hq/weft) you do not type any of this. Weft
-keeps your choices in `~/.fab7/weft/eval.json` and the project's route, and
-`[E]VAL` types them — one stage per keypress when the two stages run in
-different harnesses.
+keeps your choices in `[eval.gather]` and `[eval.debate]` of
+`~/.fab7/weft/config.toml`, and `[E]VAL` types them — one stage per keypress
+when the two stages run in different harnesses. It also types any RingFrame
+overrides from that file's `[ringframe]` table as `--override '<json>'`, right
+after `/rf:eval`.
 
 ## What is recorded
 
