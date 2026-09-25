@@ -16,7 +16,7 @@ every check you named has run."""
 why = """\
 Plan mode continues into implementation under host permissions; the model \
 can stop at the plan or skip its own checks."""
-matrix_ref = "https://github.com/fab7hq/fab7/blob/main/products/ringframe/docs/commands/ask.md#claude-code"
+matrix_ref = "https://docs.getfab7.com/ringframe/harnesses/claude-code#ask"
 evidence = "ringframe-compiler-value-q09 (effect on one task of three; not qualified)"
 
 [[entries]]
@@ -28,7 +28,7 @@ text = """\
 After the plan is approved, continue to the requested artifacts in this \
 session instead of stopping at the plan."""
 why = "ExitPlanMode approval hands control back; a plan-only stop is a common end state."
-matrix_ref = "https://github.com/fab7hq/fab7/blob/main/products/ringframe/docs/commands/ask.md#claude-code"
+matrix_ref = "https://docs.getfab7.com/ringframe/harnesses/claude-code#ask"
 
 [[entries]]
 id = "claude-code.native_plan.checks_first"
@@ -39,5 +39,5 @@ text = "Name the runnable checks that will show the work is done before the impl
 why = """\
 The plan is reviewed by a person before effects; checks named up front make \
 the review concrete."""
-matrix_ref = "https://github.com/fab7hq/fab7/blob/main/products/ringframe/docs/commands/ask.md#claude-code"
+matrix_ref = "https://docs.getfab7.com/ringframe/harnesses/claude-code#ask"
 evidence = "ringframe-compiler-value-q09 (never emitted by the prose compiler; unmeasured)"

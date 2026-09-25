@@ -20,9 +20,10 @@ codex plugin add <plugin>@fab7
 
 | Plugin | Product | Hosts | Setup |
 | --- | --- | --- | --- |
-| `rf` | [RingFrame](products/ringframe/docs/product.md) — Ask, Eval, and Seal inside your coding agent | Claude Code, Codex | [install the CLI](https://github.com/fab7hq/weft#install) |
+| `rf` | [RingFrame](https://docs.getfab7.com/ringframe/) — Ask, Eval, and Seal inside your coding agent | Claude Code, Codex | [Install](https://docs.getfab7.com/fab7/), then [set up your harness](https://docs.getfab7.com/ringframe/harnesses/) |
 
-Each product is documented under `products/<name>/docs/`.
+Every product is documented at [docs.getfab7.com](https://docs.getfab7.com), from
+[fab7hq/docs](https://github.com/fab7hq/docs).
 
 ## Releases
 

@@ -12,7 +12,7 @@ text = """\
 End the plan with the exact checks the implementer must run; the person \
 reviews and leaves Plan mode themselves."""
 why = "/plan is user-entered and read-only; there is no model transition out of it."
-matrix_ref = "https://github.com/fab7hq/fab7/blob/main/products/ringframe/docs/commands/ask.md#codex"
+matrix_ref = "https://docs.getfab7.com/ringframe/harnesses/codex#ask"
 
 [[entries]]
 id = "codex.native_goal.item_loop"
@@ -25,7 +25,7 @@ implementation against the item; implement test-first; review the change."""
 why = """\
 A persistent objective needs an iteration shape; the owner's loop is \
 analyze, TDD, code review. Outcome judgement belongs to rf:eval."""
-matrix_ref = "https://github.com/fab7hq/fab7/blob/main/products/ringframe/docs/commands/ask.md#codex"
+matrix_ref = "https://docs.getfab7.com/ringframe/harnesses/codex#ask"
 
 [[entries]]
 id = "codex.native_goal.terminal_condition"
@@ -36,4 +36,4 @@ text = "Done when every item has been through the loop; then stop and report wha
 why = """\
 /goal keeps the objective attached until cleared; without a terminal \
 condition it never ends."""
-matrix_ref = "https://github.com/fab7hq/fab7/blob/main/products/ringframe/docs/commands/ask.md#codex"
+matrix_ref = "https://docs.getfab7.com/ringframe/harnesses/codex#ask"
