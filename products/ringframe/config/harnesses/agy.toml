@@ -30,9 +30,8 @@ default = ".gemini/antigravity-cli"
 
 [plugin]   # argv, as Weft's readiness and sync views run them; it has no marketplace commands
 list = ["plugin", "list"]
-install = ["plugin", "install", "rf@fab7"]
-# Reinstalling replaces the managed directory exactly (changelog 1.2.0).
-update = ["plugin", "install", "rf@fab7"]
+# No install or update: `plugin install rf@fab7` is known not to work, and there is
+# no source to install from yet. The plugin is put in place by hand until there is.
 
 [routing]
 precedence = ["native_goal", "native_plan", "native_direct"]
