@@ -1,5 +1,5 @@
 #!/bin/sh
-# Reinstall this working tree's plugins into Claude Code and Codex.
+# Reinstall this working tree's plugins into Claude Code, Codex and Antigravity.
 #
 # Both hosts cache an installed plugin by its version, so editing a skill here
 # does not reach an installed plugin until plugin.json changes. When testing
@@ -7,14 +7,15 @@
 # installed plugin, the configured marketplace and the cache first, then adds
 # the working tree back. The edit lands at the same version.
 #
-#   ./bin/reinstall-local            both hosts
+#   ./bin/reinstall-local            every host (`both` still means that)
 #   ./bin/reinstall-local claude     one host
 #   ./bin/reinstall-local codex
+#   ./bin/reinstall-local agy
 set -eu
 
 root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 market=fab7
-want=${1:-both}
+want=${1:-all}
 
 [ -f "$root/.claude-plugin/marketplace.json" ] || { printf '%s\n' "not a marketplace: $root" >&2; exit 1; }
 
@@ -43,11 +44,25 @@ do_codex() {
     for p in $plugins; do codex plugin add "$p@$market" >/dev/null; printf '  codex   %s@%s\n' "$p" "$market"; done
 }
 
+do_agy() {
+    # Antigravity has no marketplace to add: `agy plugin install` takes a
+    # directory, and names the plugin after it, so it is staged as `rf`.
+    command -v agy >/dev/null 2>&1 || { printf '%s\n' "agy not on PATH, skipping"; return 0; }
+    [ -d "$root/products/ringframe/plugins/agy" ] || { printf '%s\n' "no agy plugin here, skipping"; return 0; }
+    stage=$(mktemp -d)
+    cp -R "$root/products/ringframe/plugins/agy" "$stage/rf"
+    agy plugin uninstall rf >/dev/null 2>&1 || true
+    agy plugin install "$stage/rf" >/dev/null
+    rm -rf "$stage"
+    printf '  agy     rf (from %s)\n' "products/ringframe/plugins/agy"
+}
+
 printf 'Reinstalling from %s\n' "$root"
 case $want in
     claude) do_claude ;;
     codex)  do_codex ;;
-    both)   do_claude; do_codex ;;
-    *) printf '%s\n' "usage: reinstall-local [claude|codex|both]" >&2; exit 1 ;;
+    agy)    do_agy ;;
+    all | both) do_claude; do_codex; do_agy ;;
+    *) printf '%s\n' "usage: reinstall-local [claude|codex|agy|all]" >&2; exit 1 ;;
 esac
 printf '\n%s\n' 'Restart the host: a running session keeps the skill it loaded at startup.'

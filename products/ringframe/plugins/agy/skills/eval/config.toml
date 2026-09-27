@@ -1,0 +1,7 @@
+# RingFrame Eval: model and effort per role, for Antigravity.
+# Shipped with the plugin and replaced on update; change tiers in Weft
+# (~/.fab7/weft/config.toml) or with role=model/effort words.
+# No tiers are shipped yet: which models Antigravity's subagents take has not
+# been observed, so every role runs on the session's own model until a person
+# names one.
+[roles]

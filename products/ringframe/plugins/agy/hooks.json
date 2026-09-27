@@ -1,0 +1,38 @@
+{
+  "rf-state": {
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "./hooks/record-turn.sh working"
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "./hooks/record-turn.sh turn_ended"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "ask_question",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./hooks/record-turn.sh waiting allow"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "ask_question",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./hooks/record-turn.sh working"
+          }
+        ]
+      }
+    ]
+  }
+}
