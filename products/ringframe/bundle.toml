@@ -1,7 +1,7 @@
 # RingFrame's configuration. `ringframe init --global` copies config/ into
 # ~/.fab7/rf/config/, and `ringframe sync` replaces it; never edit the copy.
-# Overrides arrive with `--override`, which Weft builds from the [ringframe]
-# table of ~/.fab7/weft/config.toml.
+# Overrides arrive with `--override`, from a person or a tool that runs
+# RingFrame.
 # The release version is this repository's tag, not a field here.
 #
 # `/2` is the Rust era. A 0.0.5 core reads `/1` and refuses this bundle by

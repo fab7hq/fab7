@@ -4,7 +4,7 @@
 # blocks or alters the turn: prints the result Antigravity expects, silently
 # without the CLI. `--allow` first is for a hook that must decide: PreToolUse,
 # whose reply without a decision Antigravity reads as a deny (1.2.12,
-# ringframe-weft-waiting-q01); ask_question needs no permission, so allowing it
+# measured); ask_question needs no permission, so allowing it
 # changes nothing but lets it be shown.
 reply='{}'
 if [ "$1" = --allow ]; then

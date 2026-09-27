@@ -26,8 +26,8 @@ effort per role:
 /rf:eval [--override '<json>'] [gather | debate <eval_id>] [role=model/effort ...]
 ```
 
-- **`--override '<json>'`:** RingFrame configuration, typed by Weft or the
-  person, not a word about this Eval. Add it, unchanged, to `ringframe eval
+- **`--override '<json>'`:** RingFrame configuration, typed by a tool that runs
+  RingFrame or the person, not a word about this Eval. Add it, unchanged, to `ringframe eval
   open`. Never write one yourself or edit it.
 - **No stage:** do everything below in this harness.
 - **`gather`:** open, write the change map, publish it, report the Eval ID, stop.

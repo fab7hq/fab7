@@ -9,8 +9,8 @@ nothing, and no Eval verdict blocks it.
 
 Arguments are the text after `/rf:seal` in the person's message.
 
-An argument `--override '<json>'` is RingFrame configuration, typed by Weft or
-the person, for the commands that read configuration. Seal runs none of them:
+An argument `--override '<json>'` is RingFrame configuration, typed by a tool that
+runs RingFrame or the person, for the commands that read configuration. Seal runs none of them:
 leave it out of every command, and do not read it as the disposition or the
 note.
 

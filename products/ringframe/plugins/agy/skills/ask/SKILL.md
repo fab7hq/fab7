@@ -12,8 +12,8 @@ The exact source intent is the text after `/rf:ask` in the person's message.
 ## RingFrame overrides
 
 A source intent that begins `--override '<json>'` starts with RingFrame
-configuration, not intent: Weft types one when its `config.toml` overrides
-RingFrame, and a person may too. Add that `--override '<json>'`, unchanged, to
+configuration, not intent: a tool that runs RingFrame types one when its own
+configuration overrides RingFrame's, and a person may too. Add that `--override '<json>'`, unchanged, to
 every `ringframe profile show`, `ringframe deltas domains`, `ringframe deltas
 render` and `ringframe ask compile` this Ask runs. Never write one yourself or
 edit it. The intent is the text after it, which may begin with a follow-up
@@ -64,8 +64,8 @@ directory for the compile.
 
 ### A follow-up
 
-A source intent that begins `[follow-up <id>]` is a follow-up: Weft's
-`[F] FOLLOW UP` types it, and a person may too. The id names the work it
+A source intent that begins `[follow-up <id>]` is a follow-up: a tool that
+runs RingFrame types it, and a person may too. The id names the work it
 follows, and the agent composing this Ask may never have seen that work, so
 read it from the record:
 
@@ -242,7 +242,7 @@ one per line under the heading it came from, and end with where the whole
 thing is:
 
 ```
-Full wording: .fab7/rf/asks/<ask_id>/prompt.txt — in Weft, [P] WORDING
+Full wording: .fab7/rf/asks/<ask_id>/prompt.txt
 ```
 
 
