@@ -45,17 +45,6 @@
         ]
       }
     ],
-    "Notification": [
-      {
-        "matcher": "permission_prompt|elicitation_dialog",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/record-turn.sh waiting"
-          }
-        ]
-      }
-    ],
     "PostToolUse": [
       {
         "matcher": "EnterPlanMode",
