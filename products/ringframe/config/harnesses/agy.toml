@@ -11,27 +11,14 @@ confirmation = { tool = "ask_question" }
 subagents = true
 fallback = "human_handoff"
 
-# Everything else Weft and the ringframe CLI need to know about this harness,
-# and the only place either reads it (RingFrame ADR-0018). No text to match on
-# its screen: an agent's state comes from the plugin's hooks.
+# What the ringframe CLI reads about this harness. How to start it, resume it and
+# set its plugin up is not RingFrame's: those are in the harness's own file for
+# the tool that runs it. No text to match on its screen: an agent's state comes
+# from the plugin's hooks.
+# The name a person reads, in the handoff the CLI writes.
 title = "Antigravity"
-program = "agy"
 # Every hook payload carries it (shipped docs); there is no session_id.
 session_field = "conversationId"
-# How a recorded conversation is opened again; the id is appended.
-resume = ["--conversation"]
-# No `transcript` key is documented for the TUI.
-# Turbo mode, when Weft's config.toml turns it on: every tool permission approved
-# without asking.
-turbo = ["--dangerously-skip-permissions"]
-
-[config]   # no variable moves it (none documented); where it keeps its configuration
-default = ".gemini/antigravity-cli"
-
-[plugin]   # argv, as Weft's readiness and sync views run them; it has no marketplace commands
-list = ["plugin", "list"]
-# No install or update: `plugin install rf@fab7` is known not to work, and there is
-# no source to install from yet. The plugin is put in place by hand until there is.
 
 [routing]
 precedence = ["native_goal", "native_plan", "native_direct"]
