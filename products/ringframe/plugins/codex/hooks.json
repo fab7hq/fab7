@@ -9,7 +9,7 @@
           },
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}\"/hooks/record-turn.sh working"
+            "command": "\"${PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host codex --event working"
           }
         ]
       }
@@ -20,7 +20,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}\"/hooks/record-turn.sh waiting"
+            "command": "\"${PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host codex --event waiting"
           }
         ]
       }
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}\"/hooks/record-turn.sh waiting"
+            "command": "\"${PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host codex --event waiting"
           }
         ]
       }
@@ -40,7 +40,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}\"/hooks/record-turn.sh working"
+            "command": "\"${PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host codex --event working"
           }
         ]
       }
@@ -50,7 +50,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}\"/hooks/record-turn.sh turn_ended"
+            "command": "\"${PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host codex --event turn_ended"
           }
         ]
       }

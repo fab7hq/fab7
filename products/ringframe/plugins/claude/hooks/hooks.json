@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/record-turn.sh ready"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host claude-code --event ready"
           }
         ]
       }
@@ -19,7 +19,7 @@
           },
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/record-turn.sh working"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host claude-code --event working"
           }
         ]
       }
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/record-turn.sh waiting"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host claude-code --event waiting"
           }
         ]
       }
@@ -40,7 +40,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/record-turn.sh waiting"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host claude-code --event waiting"
           }
         ]
       }
@@ -51,7 +51,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/record-delivery.sh"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/rf-hook.sh ask delivery --from-hook --host claude-code"
           }
         ]
       },
@@ -60,7 +60,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/record-fact.sh succeeded"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/rf-hook.sh fact --from-hook --host claude-code --outcome succeeded"
           }
         ]
       },
@@ -68,7 +68,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/record-turn.sh working"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host claude-code --event working"
           }
         ]
       }
@@ -79,7 +79,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/record-fact.sh failed"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/rf-hook.sh fact --from-hook --host claude-code --outcome failed"
           }
         ]
       },
@@ -87,7 +87,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/record-turn.sh working"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host claude-code --event working"
           }
         ]
       }
@@ -97,7 +97,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/record-turn.sh turn_ended"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host claude-code --event turn_ended"
           }
         ]
       }
