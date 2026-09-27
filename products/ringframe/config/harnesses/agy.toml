@@ -19,6 +19,9 @@ fallback = "human_handoff"
 title = "Antigravity"
 # Every hook payload carries it (shipped docs); there is no session_id.
 session_field = "conversationId"
+# Its hooks run from the plugin's own directory and name no cwd: the workspace is the
+# first of this list.
+workspace_field = "workspacePaths"
 
 [routing]
 precedence = ["native_goal", "native_plan", "native_direct"]
