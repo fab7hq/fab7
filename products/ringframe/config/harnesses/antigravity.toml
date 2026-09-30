@@ -60,7 +60,7 @@ plan, whatever the source intent calls the change, and building is the next \
 Ask once there are files to read. When it is listed, the plan is the \
 terminal condition, so this Ask builds it, classified as task implement with \
 result workspace_change, preferring the continuing objective, and naming the \
-plan rather than restating what it already says, since a route with a \
+plan by the path `plans` gives, rather than restating what it already says, since a route with a \
 character budget cannot carry the same constraints twice. The terminal \
 condition is the plan finished, not its first step, so the Ask covers the \
 whole sequence and its done-criteria; scope it to one step only when the \
@@ -80,7 +80,10 @@ A continuing objective with a user-supplied terminal condition, where work \
 should continue until that condition is met. Infer this from the intended \
 continuation, without requiring the word goal. Do not select for a plan-only \
 or review-only request."""
-sources = ["research/knowledge-base/harnesses/antigravity/capability.md"]
+sources = [
+  "research/knowledge-base/harnesses/antigravity/capability.md",
+  "https://antigravity.google/docs/slash-commands/",
+]
 purpose = "Antigravity long-running goal, entered by the person with /goal"
 activation = {}
 confirmation = { tool = "ask_question" }
@@ -96,6 +99,7 @@ qualification = {}
 limitations = [
   "/goal is user-entered on Antigravity; completion is the model's own marker",
   "no prompt hook exists, so a submission is attributed, never observed",
+  "forced continuation ends only on the complete or the cancelled marker",
 ]
 
 [[capabilities]]
@@ -104,11 +108,17 @@ selection = """\
 A plan or analysis before implementation, or bounded work with effects when \
 the user has not requested immediate execution. Do not prefer this general \
 default over a fitting continuing objective or dedicated review."""
-sources = ["research/knowledge-base/harnesses/antigravity/capability.md"]
+sources = [
+  "research/knowledge-base/harnesses/antigravity/capability.md",
+  "https://antigravity.google/docs/slash-commands/",
+]
 purpose = "Antigravity plan: a plan artifact and the person's approval before code changes"
 activation = {}
 confirmation = { tool = "ask_question" }
-continuation = "the person submits the prompt; the agent stops for review of its plan artifact"
+continuation = """\
+the person submits the prompt; the agent drafts an implementation plan \
+artifact and stops for review; approving or commenting on it moves the agent \
+into execution"""
 effects = ["workspace_read", "workspace_write"]
 permission_owner = "host"
 delivery_mode = "human_handoff"

@@ -96,13 +96,15 @@ or maintain a separate list of capabilities in the skill.
 
 When the intent is to build something, settle this before comparing
 capabilities: **does this project already hold a plan for the subject?**
-`plans` lists them by slug. Match on the subject rather than the wording —
+`plans` lists each by `slug`, `path` and `title` (the plan's first heading).
+Match on the subject rather than the wording, the title helping —
 "the crypto trading agent", "plans/crypto-trading-agent" and
 "crypto-trading-agent plan" all name the same slug.
 
 - **Listed.** The plan is the terminal condition, so this Ask builds it. Name
-  the plan's path in the brief and let it be read; do not restate what it
-  already says.
+  the plan by its `path` in the brief (`plans/<slug>/plan.md`, never the slug or
+  a description alone: the CLI refuses a goal whose rules work a plan without
+  it) and let it be read; do not restate what it already says.
 - **Not listed.** This Ask writes the plan, and stops there. Classify it as
   task plan with result plan, whatever the source intent calls the change.
   Building is the next Ask, once there are files to read.
@@ -178,8 +180,13 @@ version or session ID: the CLI resolves them from the plugin hook's capture.
    original wording only in `source.txt`; do not prepend or quote it before
    the optimized brief. Then a rules block built from what the CLI printed.
 
-   **Choose the directives that bear on this task, and leave out the ones that
-   do not.** The CLI selects by classification alone; you know what the work
+   **Rules under `For this route:` are the host's: keep every one**, worded
+   for this task. They say what this turn delivers, when it stops and what it
+   shows, which is how the host works rather than a judgement about the task,
+   and the CLI refuses a prompt that leaves one out.
+
+   **Choose among the rest the directives that bear on this task, and leave
+   out the ones that do not.** The CLI selects by classification alone; you know what the work
    actually is. A directive about placing orders does not belong in a prompt
    for a backtest, and writing it as "if execution enters scope" is a sign it
    should have been left out. Omit a directive when its subject is not part of
@@ -189,7 +196,8 @@ version or session ID: the CLI resolves them from the plugin hook's capture.
 
    When the capability declares `max_prompt_chars`, the whole prompt including
    its command prefix must fit inside it. Cut directives until it does, the
-   ones furthest from this task first. The CLI refuses a prompt over the limit,
+   ones furthest from this task first, and never a rule under
+   `For this route:`. The CLI refuses a prompt over the limit,
    and the host refuses it again at submission, so a prompt that does not fit
    is work nobody can run.
 

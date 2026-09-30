@@ -22,6 +22,9 @@ list = ["plugin", "list"]
 # its plugin.json. A second install replaces it exactly, so it is also the update.
 install = ["plugin", "install", "https://github.com/fab7hq/fab7/tree/main/products/ringframe/plugins/antigravity"]
 update = ["plugin", "install", "https://github.com/fab7hq/fab7/tree/main/products/ringframe/plugins/antigravity"]
+# Taking it out again, for a local reinstall. It keeps no cache: an install
+# replaces the plugin exactly.
+uninstall = ["plugin", "uninstall", "rf"]
 
 [plugin.listing]   # how what `list` answers reads: where it has them, what names one, and what says one is off
 installed = ["imports"]

@@ -5,10 +5,7 @@ domain = "software-development"
 description = """\
 Building and changing software: design, implementation, refactoring, tests, \
 debugging, review, dependencies, and running what you shipped."""
-# Six, because planning carries one structural rule (where the plan goes)
-# on top of the five principles. Raised with practice.plan_as_files so that
-# adding it displaced nothing.
-render = { heading = "Rules:", core_cap = 6 }
+render = { heading = "Rules:", core_cap = 5 }
 source = "https://lawsofsoftwareengineering.com/"
 concerns = [
   "api_surface",
@@ -97,24 +94,6 @@ text = """\
 Make names, signatures, defaults, and behaviour match what a reader of the \
 surrounding code would expect; when a choice would surprise, prefer the \
 conventional one."""
-
-[[entries]]
-id = "practice.plan_as_files"
-label = "Plan As Files"
-principle = "A stage ends by committing an artifact the next stage can read"
-# Both, and both are needed. The route is what sets this rule apart
-# under its own heading; the result is what keeps it off ordinary
-# bounded work, which takes the same route and would otherwise be told
-# to write a plan and stop.
-applies_to = { capability = ["native_plan"], result = ["plan"] }
-tier = "core"
-text = """\
-Write the plan into the repository, not only into the conversation: \
-plans/<slug>/ with one file per decision under adr/, one per contract under \
-spec/, and plan.md holding the sequence and what done means for each step. \
-Stop when it is written; do not begin building it. The next request reads \
-those files and implements them, and the review reads the diff against them, \
-so a plan left in the session can be checked by nobody."""
 
 # ================= architecture laws
 

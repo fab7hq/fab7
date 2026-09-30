@@ -35,14 +35,17 @@ a wording fix must not cost a binary release.
 
 ## Testing a change locally
 
-Both hosts cache an installed plugin by its `version`, so editing a skill here
-does not reach an installed plugin until `plugin.json` changes. Do not bump a
-version for every edit; remove the installed plugin, the configured marketplace
-and the cache, then add this tree back:
+Claude Code and Codex cache an installed plugin by its `version`, so editing a
+skill here does not reach an installed plugin until `plugin.json` changes. Do
+not bump a version for every edit. Weft's `bin/reinstall-local` (in the `weft`
+checkout beside this one) takes each harness's plugin, marketplace and cache
+out and adds this tree back, by the commands each harness file in
+`products/weft/harnesses/` names:
 
 ```sh
-./bin/reinstall-local            # both hosts
-./bin/reinstall-local claude     # one host
+../weft/bin/reinstall-local plugins            # every harness, plugins only
+../weft/bin/reinstall-local plugins codex      # one harness, as its file is named
+../weft/bin/reinstall-local                    # Weft's binaries and configuration too
 ```
 
 Then restart the host. A running session keeps the skill it loaded at startup,

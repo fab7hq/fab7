@@ -58,7 +58,7 @@ plan, whatever the source intent calls the change, and building is the next \
 Ask once there are files to read. When it is listed, the plan is the \
 terminal condition, so this Ask builds it, classified as task implement with \
 result workspace_change, preferring the continuing objective, and naming the \
-plan rather than restating what it already says, since a route with a \
+plan by the path `plans` gives, rather than restating what it already says, since a route with a \
 character budget cannot carry the same constraints twice. The terminal \
 condition is the plan finished, not its first step, so the Ask covers the \
 whole sequence and its done-criteria; scope it to one step only when the \
@@ -142,8 +142,9 @@ purpose = "Claude Code persistent goal, entered by the person with /goal"
 activation = {}
 confirmation = { tool = "AskUserQuestion" }
 continuation = """\
-the person submits the prompt; Claude Code keeps the objective attached to \
-the session"""
+the person submits the prompt; setting the goal starts a turn with it as the \
+directive; after every turn a separate small model judges the condition from \
+the conversation (not met: another turn; met or impossible: the goal clears)"""
 effects = ["per source intent"]
 permission_owner = "host"
 delivery_mode = "human_handoff"
@@ -159,4 +160,9 @@ limitations = [
   "This profile maps Goal to user submission in the TUI",
   "Goal requires workspace trust and hooks permitted by effective host settings",
   "submission is observed only through the host prompt hook",
+  "the evaluator reads only the conversation: it runs no command and opens no file",
+  """\
+a goal does not change the permission mode: in Manual mode tool prompts still \
+stop it, and unattended turns need auto mode""",
+  "several turns with no tool use stop the loop with the goal still set",
 ]
