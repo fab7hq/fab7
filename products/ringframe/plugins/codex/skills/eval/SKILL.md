@@ -1,242 +1,133 @@
 ---
 name: eval
-description: Judge the work against every open Ask with independent sub-agents; record a verdict with its confidence. Asks nothing.
+description: Judge the work against every open Ask with small, checked judging tasks RingFrame hands out; record a verdict with its confidence. Asks nothing.
 ---
 
-You are running RingFrame Eval inside Codex. Eval judges the work done
-so far against every open Ask in this workspace and records a verdict with
-confidence. It asks the person nothing, runs none of the project's commands,
-and gates nothing: the person decides what to do with the result.
+You are running RingFrame Eval inside Codex. RingFrame reads the change, hands
+out small judging tasks, checks every citation a judge gives against its
+source, and writes the report. You only dispatch: you spawn the tasks
+RingFrame gives you and wait for them. You read no patch, brief, window,
+document, task file or judgement, and you judge nothing yourself. Eval asks
+the person nothing, runs none of the project's commands, and gates nothing.
 
-## Stage and roles
+## Invocation
 
-The invocation's arguments are the text after `$rf:eval` in the person's message.
-
-They may start with RingFrame's overrides, then a stage, then name a model and
-effort per role:
+The invocation's arguments are the text after `$rf:eval` in the person's
+message.
 
 ```text
 $rf:eval [--override '<json>'] [gather | debate <eval_id>] [role=model/effort ...]
 ```
 
-- **`--override '<json>'`:** RingFrame configuration, typed by a tool that runs
-  RingFrame or the person, not a word about this Eval. Add it, unchanged, to `ringframe eval
-  open`. Never write one yourself or edit it.
-- **No stage:** do everything below in this harness.
-- **`gather`:** open, write the change map, publish it, report the Eval ID, stop.
-- **`debate <eval_id>`:** skip open and the map; judge that Eval from its files.
+- **`--override '<json>'`:** RingFrame configuration, typed by a tool that
+  runs RingFrame or the person. Add it, unchanged, to `ringframe eval open`.
+  Never write one yourself or edit it.
+- **`gather`:** open the Eval and stop. RingFrame gathers the change as the
+  Eval opens, once, for every task that follows in any harness; report the
+  Eval ID and that its debate runs anywhere with `$rf:eval debate <eval_id>`.
+- **`debate <eval_id>`**, or **`continue <eval_id>`:** do not open; run that
+  Eval's tasks here, from what was gathered.
+- **Roles** are `map`, `reduce` and `confirm`. In `confirm=gpt-6-sol/high` the
+  model comes before `/` and the effort after; either side may be empty
+  (`map=/low`). The earlier names still work: `trace=` and `drift=` mean
+  `map=`, `coverage=` means `reduce=`, `adversary=` means `confirm=`;
+  `intent=` and `context=` name roles that no longer run: say so once and
+  ignore them, as any other role word. Other words are the person's and
+  change nothing here.
 
-Roles are `context`, `intent`, `coverage`, `drift`, `adversary`. In
-`drift=claude-sonnet-5/high` the model comes before `/` and the effort after;
-either side may be empty (`drift=/high`). Report a word naming any other role
-and ignore it. Words without `=` after the stage (such as "use native
-sub-agents") are the person's own and change neither the stage nor the roles.
+Before opening, read `config.toml` in this skill's directory, beside this `SKILL.md`, once: its `[eval] parallel` is how many tasks
+may run at once (4 when the file is missing or unreadable; say so once in the
+report). Each role's model and effort are in this plugin's agent definitions,
+`rf-map`, `rf-reduce` and `rf-confirm`, in the `agents` folder two folders above this skill's directory, as an absolute path: RingFrame reads them
+when you pass that folder as `--agents-from <folder>`; do not read them
+yourself. The invocation's role words win over them, key by key: pass those
+as `--agents '<json>'`, with only the keys the words set. Never guess a model
+or an effort.
 
-Before the first spawn, read `config.toml` in this skill's directory, beside
-this `SKILL.md` once. Its `[roles]` table holds this plugin's tiers, `<role> =
-{ model = "…", effort = "…" }`. A role's model and its effort, each on its own,
-are the first of: the invocation's word; that file; nothing, in which case
-leave it out of the `spawn_agent` call's `model` and `reasoning_effort` fields
-so the harness default applies. If the file is missing or unreadable, say so
-once in the report and use only the invocation's words. Never guess a model or
-an effort. "A role's values" below means these resolved values.
+## Commands
 
-## Eval boundaries and native tools
-
-The coordinator runs exactly one plain `ringframe …` command per CLI call.
-Read evidence with a native file-reading tool when available. If Codex exposes
-file reads through its command tool, use one plain `cat` command with one quoted
-literal file path per call; this also applies to judges and fallback passes.
-No `&&`, `;`, pipes, `2>&1`, `head`, `cd`,
-`which`, or host version probes. Read completed JSON output directly; never
-page or filter it. If the CLI is missing, report that the Fab7 installer is needed
-and stop. Never write ledger records by hand.
-
-Judges use those file-reading options and read-only Git
-commands (`git diff`, `git show`, `git log`), one plain `git …` command per
-shell call. Keep project files read-only and write only assigned outputs under
-`.fab7/rf/tmp/` in the project workspace, never under the skill directory.
-Sub-agents do not write the ledger, do not edit project files, and do not run the
-project's build or tests. Apply the same restrictions during fallback passes.
-
-Delegation is part of this skill: use five native sub-agents, one context
-agent, then one intent judge, then three assessors (the debate stage uses only
-the last four). Give each child its task, the exact output schema,
-input paths, and a separate assigned output path. Do not supply your own
-verdict or another assessor's findings. While the intent judge works, inspect
-the brief and prepare the assessor tasks; while assessors work, prepare the
-close command without reading their drafts.
-
-Use the exposed native sub-agent tool, such as `collaboration.spawn_agent`,
-with the host's supported completion and follow-up tools. Invoke delegation
-tools directly when required by their schema, not inside a shell or code-mode
-wrapper. Give each judge a task name unique to this Eval. When the tool exposes
-`fork_turns`, set it to `"none"` and put the complete judge instructions in
-`message`: each judge needs a fresh context, without the coordinator's history.
-Keep the four judges in separate agent contexts.
-
-Collect completed command and agent results before interpreting them. A
-pending result, empty initial output, or scheduling delay is not evidence
-that delegation is unavailable. Wait for the intent output before launching
-assessors, and for all assessor outputs before closing.
-
-In Codex code mode, emit the entire awaited command result with `text(...)`,
-including status and session ID. If `functions.exec` yields a cell ID, use
-`functions.wait`; if `exec_command` returns a running `session_id`, poll with
-`write_stdin` and empty input until it exits. Retain each output. Use the
-native agent completion tools for children; a spawn acknowledgement is not
-a completed judgement.
-
-Only if the native agent tool is absent or explicitly reports unavailability,
-run the passes yourself sequentially from fresh readings of the files; the
-named models and efforts then do not apply, and the report says so.
-Mark every output `"independence":"shared_context"`, record the reason in the
-intent judge's `limitation` field and assessors' `basis_notes`, and disclose it
-in the report. Do not mix abandoned child drafts into fallback outputs. If
-children are still running, stop them before reusing their output paths.
-A file/tool permission denial is not grounds to bypass host permissions;
-report the failure and stop if the required evidence or output is inaccessible.
+Run exactly one plain `ringframe …` command per call. No `&&`, `;`, pipes,
+`2>&1`, `head`, `cd`, `which`, or host version probes. Read completed JSON
+output directly. If the CLI is missing, report that the Fab7 installer is
+needed and stop. Never write ledger records, task files or task outputs, and
+never run `ringframe eval submit`: the judges do.
 
 ## 1. Open
 
-**Debate stage:** do not open. Run `ringframe eval list --minimal` and find the
-named Eval. It must be `opened`, not `completed`, and `gathered`; otherwise
-report which and stop. Keep its `brief.path` (relative to `.fab7/rf/`) and
-`brief.sha256`, read the brief, and continue at §2.
+Skip this for `debate` or `continue`, but resolve the roles the same way; for
+`gather`, stop after it. Run `ringframe eval open --host codex --agents-from <folder>` once, with the
+invocation's `--override` when it has one, adding `--agents '<json>'` with the
+invocation's role words only, for example `--agents '{"confirm":{"model":"gpt-6-sol","effort":"high"}}'`; no
+`--agents` flag when it has none. Keep `eval_id`.
 
-Otherwise run `ringframe eval open` once, with the invocation's `--override`
-when it has one, adding `--agents
-'{"context":{"model":"<model>","effort":"<effort>"}}'` with only the keys the
-context sub-agent will be spawned with, whatever their source (no flag when
-there are none). Keep `eval_id`, `brief_path`, `brief.sha256`, and
-`changes_patch`: the exact anchor-to-subject diff, untracked files included.
-The brief lists the open Asks in order, their `prompt_path` relative to
-`.fab7/rf/`, the anchor, subject, changed paths with line counts, and counts of
-unrecorded prompts after each Ask. `facts` lists the shell commands the harness
-saw succeed or fail while an Ask was open: `id`, `command`, `outcome`, and
-`fresh`: whether it ran against the subject being judged.
-
-- Exit 2 `eval.no_open_ask`: report "nothing to evaluate: no open Ask" and stop.
+- Exit 2 `eval.no_open_ask`: report "nothing to evaluate: no open Ask" and
+  stop.
 - Exit 3 `eval.anchor_unknown`: report it and stop; the person can supply
   `--anchor <commit>` next time.
-- Exit 2 `eval.already_open`: continue with the ID in `detail` and its brief
-  at `.fab7/rf/evals/<eval_id>/brief.json`. Reuse the original brief digest
-  from that Eval's open result; if it is unavailable, report that limitation
-  and stop instead of guessing a digest or reopening.
-- Other failures: show the error and stop. Polling a running command does not
-  rerun `eval open`.
+- Exit 2 `eval.already_open`: continue with the Eval ID in `detail`.
+- Other failures: show the error and stop.
 
-## 1b. Context: one sub-agent (not in the debate stage)
+## 2. Dispatch until done
 
-Spawn one sub-agent with the `context` role's values. It reads the brief and
-`changes.patch` and writes `.fab7/rf/tmp/eval-<eval_id>-context.md`: one
-heading per changed path, in the brief's order, and one to three lines under
-each on what changed. Facts only: no votes, no obligations, no judgement of
-whether a change was asked for.
+Repeat:
 
-Then run `ringframe eval context --eval <eval_id> --map
-@.fab7/rf/tmp/eval-<eval_id>-context.md --host codex`. It publishes the
-map as `.fab7/rf/evals/<eval_id>/context.md`.
+1. Run `ringframe eval next --eval <eval_id> --parallel <parallel> --host codex`, adding
+   the same `--agents-from <folder>` and `--agents '<json>'` as §1: for an
+   Eval opened elsewhere, it is how this harness's tiers reach its tasks.
+   Add `--returned <task id>` once for every sub-agent that has finished since
+   the last `next`, whatever it replied, and for every one that could not
+   start: RingFrame hands a task that came back without an accepted output
+   out again at once.
+2. When its `state` is `done`, go to §3.
+3. Spawn one sub-agent for every entry of `tasks`, all of them together: the
+   exposed native sub-agent tool, such as `spawn_agent`, once per task,
+   invoked directly and not inside a shell or code-mode wrapper, all in one
+   turn: the task's `prompt`, verbatim and nothing else, as the whole message;
+   no forked history (`fork_context` false, or `fork_turns` `"none"`); the
+   task id as the task name where the tool takes one; `model` and
+   `reasoning_effort` the task's `model` and `effort` when it has them
+   (RingFrame read them from the agent definitions, under the person's
+   words); never `agent_type`: Codex loads no agent from a plugin. If the tool refuses the model or the effort, spawn that task
+   again without the refused field. This skill is the explicit request to
+   spawn sub-agents that Codex asks for.
+4. Wait until one of your sub-agents replies (such as with `wait_agent`),
+   not all of them: RingFrame has more tasks ready as each finishes. A reply
+   is a sub-agent's **final** message, one line that starts with its task id:
+   `<task id> accepted` or `<task id> failed: <reason>`. A wait that ends on
+   any other message (a plan, a status), or times out, is not a reply: that
+   sub-agent is still working, so wait again. Read nothing else and check
+   nothing. Where the host has a tool to close a finished sub-agent (such as
+   `close_agent`), close each finished one.
+5. Go back to 1, naming with `--returned` only the sub-agents that have
+   replied since the last `next`, each once. A task named while its judge is
+   still working is handed out again, and a second time fails it.
+   The others are still out and still count: pass `--parallel` as it is, and
+   RingFrame hands out only what fits beside them. When `tasks` is empty and
+   the state is `running`, wait for the next reply, then run `next` again.
 
-**Gather stage:** stop here. Report the Eval ID and that its debate can run in
-any harness with `/rf:eval debate <eval_id>` (`$rf:eval` on Codex).
+A spawn refused because too many agents or threads are open (such as "agent
+thread limit reached") is not the tool being unavailable: keep that task,
+wait until one of your running sub-agents has replied, and spawn it then.
+Only a sub-agent tool that is absent or disabled stops the Eval.
 
-## 2. Intent: one sub-agent
+A spawn acknowledgement is not a reply. A sub-agent that could not start, or
+ended without its line, has still finished: name its task with `--returned`
+in the next `next`, as for any other. Never wait for a task's time to run
+out. If the sub-agent tool is absent or reports it is unavailable,
+report that this harness cannot run the Eval's judges now, give the command
+`$rf:eval debate <eval_id>` for another harness, and stop. Never do a task
+yourself.
 
-Spawn the intent judge with the `intent` role's values, and give it
-`brief_path` and `brief.sha256`. It reads the brief and
-each Ask's prompt in order, then writes the effective intent as numbered items,
-one obligation each, in the Asks' own words. Unconfirmed Asks are context, not
-obligations; never add an obligation no confirmed Ask states.
+## 3. Report
 
-When a later Ask changes an obligation, mark the earlier item `revised` and
-add the new text as a new `active` item, or mark it `withdrawn`. Name the later
-Ask in `by_ask_id`. If `previous_evals` is present, read the latest one's
-`intent.json` first; preserve IDs and wording of unchanged obligations so the
-delta can match them. Add, revise, or withdraw only what later Asks require.
-
-Write `.fab7/rf/tmp/eval-<eval_id>-intent.json` using this shape. Replace
-placeholders and example values with the actual evidence; each `status` is
-one of `active`, `revised`, or `withdrawn`. Include `by_ask_id` for revisions
-and withdrawals. Use the reported model identity when available; do not guess it.
-When an obligation is the result of a command ("`npm test` passes"), set that
-item's `check` to the command, verbatim from the Ask; omit `check` otherwise.
-
-```json
-{"schema":"ringframe.eval-intent/1","brief_sha256":"<brief.sha256>",
- "judge":{"host":"codex","model":"<model id>","angle":"intent","independence":"sub_agent"},
- "items":[{"id":"i1","text":"<one obligation>","ask_id":"<source Ask ID>","status":"active","note":"<relevant context>"},
-          {"id":"i2","text":"<npm test passes>","ask_id":"<source Ask ID>","status":"active","note":"","check":"npm test"}]}
-```
-
-## 3. Assessors: three independent sub-agents
-
-Launch `coverage`, `drift`, and `adversary` together when host capacity permits;
-otherwise schedule separate agents as capacity becomes available. Spawn each
-with its own role's values. Each receives `brief_path`, `brief.sha256`, the
-completed intent file path, and its angle. Each reads the brief, the intent,
-the change map at `.fab7/rf/evals/<eval_id>/context.md`, then the patch at the
-path the brief's `changes_patch` names (relative to `.fab7/rf/`). Use
-`git show` and file reads only to confirm what the patch shows; for a committed
-subject read file content from that commit. The map is a reading aid: a vote's
-reason cites the patch or a file, never the map.
-
-Each writes `.fab7/rf/tmp/eval-<eval_id>-<angle>.json` using this shape:
-
-```json
-{"schema":"ringframe.eval-judgement/1","brief_sha256":"<brief.sha256>",
- "judge":{"host":"codex","model":"<model id>","angle":"coverage","independence":"sub_agent"},
- "votes":[{"item":"i1","vote":"yes","reason":"<file evidence for this vote>"},
-          {"item":"i2","vote":"yes","reason":"<what the fact shows>","facts_cited":["<fct_… id>"]}],
- "drift":[{"path":"<changed path>","finding":"<evidence>","classification":"required"}],
- "basis_notes":[],"commands_run":[]}
-```
-
-Replace example values with the judge's angle and evidence. Every `active`
-item gets exactly one `yes`, `no`, or `unknown` vote. Every judge, whatever its
-angle, classifies every changed path as `required`, `consequence`, or
-`unexplained`; the CLI refuses missing path classifications. Record actual
-Git commands in `commands_run` (empty only if none ran), and ambiguities about
-the intent in `basis_notes`.
-
-Judges still run no project command. For an item with `check`, vote `yes` only
-on a fresh `succeeded` fact whose command runs it, and name that fact in the
-vote's `facts_cited`; the CLI counts any other `yes` on it as `unknown`. A fresh
-`failed` fact is evidence for `no`. A stale fact ran against other work and is
-not evidence. Cite only fact IDs from the brief; the CLI refuses any other.
-
-- `coverage`: is each active item met by the change? Vote `yes` only with
-  file evidence; `unknown` when the repository cannot establish it.
-- `drift`: lead with the paths: is each change required by an item, a reasonable
-  consequence of one, or unexplained by any Ask? Vote the items too.
-- `adversary`: look for missing cases, wrong behaviour, and untested claims.
-  Vote `no` when you can point at a failure, `yes` when the evidence supports
-  the obligation after scrutiny, and `unknown` when you cannot establish it.
-
-## 4. Close
-
-After all four outputs are complete, run `ringframe eval close --eval <eval_id>
---intent @<intent file> --judgement @<coverage file> --judgement @<drift file>
---judgement @<adversary file>`, adding `--agents '<json>'` with the keys
-`intent`, `coverage`, `drift` and `adversary` were spawned with, whatever their
-source (`{"drift":{"effort":"high"}}`); no flag when there are none.
-
-On a reported input-validation error, ask the responsible judge to correct
-its file without changing unrelated findings; in fallback, correct your own
-file. Retry after the correction. If the same error recurs, its cause is
-unclear, or it is not input validation, show the error and stop. Do not invent
-votes or report an Eval as completed when closing failed.
-
-## 5. Report
-
-Start with the recorded `verdict` and `confidence`; confidence measures judge
-agreement, not the probability of correctness. Show the item table (text,
-majority, agreement, three votes), omission items, and commission paths with
-agreement beside the unrecorded-prompt count that may explain them. Include
-`delta` when present, limitations, `eval_id`, and the record path
-`.fab7/rf/evals/<eval_id>/record.json`.
+Run `ringframe eval show --eval <eval_id> --summary` once and show its output
+to the person exactly as printed: the report's head, what each section holds,
+and where the whole report is, which RingFrame writes from the record. Do not
+print the whole report. Add nothing to it, reorder nothing, and compose no table, summary or
+list of your own; do not read `record.json` to build one. If the command
+fails, show its error and the path `.fab7/rf/evals/<eval_id>/eval.md`.
 
 Never soften `drifted` or `incomplete`, never present the verdict as certain,
-and never ask the person anything. Fixing is native work or a new
-`$rf:ask`, followed by `$rf:eval`; `$rf:seal` closes the work
-whenever the person decides.
+and never ask the person anything. Fixing is native work or a new `$rf:ask`,
+followed by `$rf:eval`; `$rf:seal` closes the work whenever the person
+decides.

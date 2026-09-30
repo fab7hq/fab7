@@ -58,7 +58,7 @@ current working directory), never under this skill's directory, write
 `<name>` yourself from what was asked, a few lowercase words joined by
 hyphens; it only has to be unlike the other directories already in `tmp/`.
 Do not run anything to generate it. Then run
-`ringframe ask request --staged <dir> --host '{"name":"agy","surface":"native-tui"}'`.
+`ringframe ask request --staged <dir> --host '{"name":"antigravity","surface":"native-tui"}'`.
 If it fails, go on: the compile below still records the Ask. Use this same
 directory for the compile.
 
@@ -88,7 +88,7 @@ above the brief: `Remediates evl_…` or `Follows ask_…`.
 ## 2. Read the profile and route
 
 If the current host profile is not already available in context, run
-`ringframe profile show --host agy --minimal`. This is the routing
+`ringframe profile show --host antigravity --minimal`. This is the routing
 authority: read `routing.guidance`, `routing.precedence`, `plans`, and each
 capability's `selection`, `effects`, `confirmation`, `activation`,
 `delivery_mode`, `continuation`, and `limitations`. Do not read research files
@@ -168,7 +168,7 @@ version or session ID: the CLI resolves them from the plugin hook's capture.
 
 1. If directives for this host, capability, classification, and current
    configuration are not already available in context, run
-   `ringframe deltas render --host agy --capability <id>
+   `ringframe deltas render --host antigravity --capability <id>
    --classification '<json>' --minimal`. It prints the
    directives that apply to this Ask, one `- <label>: <directive>` line each,
    under their heading. This is the candidate set: you may leave one out, but
@@ -212,7 +212,7 @@ version or session ID: the CLI resolves them from the plugin hook's capture.
 4. Only after both files exist, run
    `ringframe ask compile --staged <dir> --title "<short title>"
    --capability <id> --classification '<json>' --route '<json>' --host
-   '{"name":"agy","surface":"native-tui"}'`.
+   '{"name":"antigravity","surface":"native-tui"}'`.
    For a follow-up, add its `--link` (section 1).
    Keep the returned `ask_id`. On a reported input-validation error, correct
    that input without changing the source intent and retry. If the same error

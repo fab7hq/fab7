@@ -1,9 +1,9 @@
-# RingFrame host profile: agy (authored configuration; identity = sha256 of canonical JSON)
+# RingFrame host profile: antigravity (authored configuration; identity = sha256 of canonical JSON)
 # Antigravity CLI. What is known of it, and how well, is in the knowledge base:
 # research/knowledge-base/harnesses/antigravity/capability.md (agy 1.2.8).
 schema = "ringframe.profile/1"
-profile_id = "agy"
-host = "agy"
+profile_id = "antigravity"
+host = "antigravity"
 surface = "native-tui"
 invocation_prefix = "/rf:"   # plugin skills are /<plugin>:<skill>
 confirmation = { tool = "ask_question" }
@@ -17,6 +17,9 @@ fallback = "human_handoff"
 # from the plugin's hooks.
 # The name a person reads, in the handoff the CLI writes.
 title = "Antigravity"
+# The folder names this harness's files go by in a repository (its plugin
+# folder): how an Eval links a step that names the harness to its files.
+path_names = ["antigravity"]
 # Every hook payload carries it (shipped docs); there is no session_id.
 session_field = "conversationId"
 # Its hooks run from the plugin's own directory and name no cwd: the workspace is the

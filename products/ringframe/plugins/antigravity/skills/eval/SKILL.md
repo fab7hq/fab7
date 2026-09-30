@@ -1,12 +1,9 @@
 ---
 name: eval
 description: Judge the work against every open Ask with small, checked judging tasks RingFrame hands out; record a verdict with its confidence. Asks nothing.
-argument-hint: [gather | debate <eval_id>] [role=model/effort ...]
-disable-model-invocation: true
-allowed-tools: Agent Bash(ringframe *)
 ---
 
-You are running RingFrame Eval inside Claude Code. RingFrame reads the change,
+You are running RingFrame Eval inside Antigravity. RingFrame reads the change,
 hands out small judging tasks, checks every citation a judge gives against its
 source, and writes the report. You only dispatch: you spawn the tasks
 RingFrame gives you and wait for them. You read no patch, brief, window,
@@ -15,11 +12,8 @@ the person nothing, runs none of the project's commands, and gates nothing.
 
 ## Invocation
 
-The invocation's arguments are:
-
-<eval-arguments>
-$ARGUMENTS
-</eval-arguments>
+The invocation's arguments are the text after `/rf:eval` in the person's
+message.
 
 ```text
 /rf:eval [--override '<json>'] [gather | debate <eval_id>] [role=model/effort ...]
@@ -33,7 +27,7 @@ $ARGUMENTS
   Eval ID and that its debate runs anywhere with `/rf:eval debate <eval_id>`.
 - **`debate <eval_id>`**, or **`continue <eval_id>`:** do not open; run that
   Eval's tasks here, from what was gathered.
-- **Roles** are `map`, `reduce` and `confirm`. In `confirm=opus/high` the
+- **Roles** are `map`, `reduce` and `confirm`. In `confirm=pro/high` the
   model comes before `/` and the effort after; either side may be empty
   (`map=/low`). The earlier names still work: `trace=` and `drift=` mean
   `map=`, `coverage=` means `reduce=`, `adversary=` means `confirm=`;
@@ -41,10 +35,10 @@ $ARGUMENTS
   ignore them, as any other role word. Other words are the person's and
   change nothing here.
 
-Before opening, read `${CLAUDE_SKILL_DIR}/config.toml` once: its `[eval] parallel` is how many tasks
+Before opening, read `config.toml` in this skill's directory, beside this `SKILL.md`, once: its `[eval] parallel` is how many tasks
 may run at once (4 when the file is missing or unreadable; say so once in the
 report). Each role's model and effort are in this plugin's agent definitions,
-`rf-map`, `rf-reduce` and `rf-confirm`, in `${CLAUDE_SKILL_DIR}/../../agents`: RingFrame reads them
+`rf-map`, `rf-reduce` and `rf-confirm`, in the `agents` folder two folders above this skill's directory, as an absolute path: RingFrame reads them
 when you pass that folder as `--agents-from <folder>`; do not read them
 yourself. The invocation's role words win over them, key by key: pass those
 as `--agents '<json>'`, with only the keys the words set. Never guess a model
@@ -61,9 +55,9 @@ never run `ringframe eval submit`: the judges do.
 ## 1. Open
 
 Skip this for `debate` or `continue`, but resolve the roles the same way; for
-`gather`, stop after it. Run `ringframe eval open --host claude-code --agents-from <folder>` once, with the
+`gather`, stop after it. Run `ringframe eval open --host antigravity --agents-from <folder>` once, with the
 invocation's `--override` when it has one, adding `--agents '<json>'` with the
-invocation's role words only, for example `--agents '{"confirm":{"model":"opus","effort":"high"}}'`; no
+invocation's role words only, for example `--agents '{"confirm":{"model":"pro"}}'`; no
 `--agents` flag when it has none. Keep `eval_id`.
 
 - Exit 2 `eval.no_open_ask`: report "nothing to evaluate: no open Ask" and
@@ -77,7 +71,7 @@ invocation's role words only, for example `--agents '{"confirm":{"model":"opus",
 
 Repeat:
 
-1. Run `ringframe eval next --eval <eval_id> --parallel <parallel> --host claude-code`, adding
+1. Run `ringframe eval next --eval <eval_id> --parallel <parallel> --host antigravity`, adding
    the same `--agents-from <folder>` and `--agents '<json>'` as §1: for an
    Eval opened elsewhere, it is how this harness's tiers reach its tasks.
    Add `--returned <task id>` once for every sub-agent that has finished since
@@ -86,20 +80,25 @@ Repeat:
    out again at once.
 2. When its `state` is `done`, go to §3.
 3. Spawn one sub-agent for every entry of `tasks`, all of them together: one
-   `Agent` call per task, all in one message, in the foreground when the tool
-   lets you choose: `subagent_type` the task's `agent`, one of this plugin's
-   `rf-map`, `rf-reduce` and `rf-confirm` (listed among your agent types,
-   perhaps as `rf:rf-map`); `prompt` the
-   task's `prompt`, verbatim and nothing else; `model` the task's `model` when
-   it has one, as an alias: `sonnet`, `opus`, `haiku` or `fable` (the tool
-   refuses a full model ID, so pass `claude-opus-5-5` as `opus`); a
-   `description` naming the task id. The task's `effort` is
-   already in its task file; pass it nowhere.
-4. Wait until every sub-agent you spawned has replied. A reply is one line,
-   `<task id> accepted` or `<task id> failed: <reason>`; read nothing else and
-   check nothing. The `Agent` result is the reply.
-5. Go back to 1. When `tasks` is empty and the state is `running`, other tasks
-   are still out: wait for your sub-agents, then run `next` again.
+   `invoke_subagent` call with one `Subagents` entry per task: `TypeName` the
+   task's `agent`, one of this plugin's `rf-map`, `rf-reduce` and `rf-confirm`
+   (listed among your subagents, perhaps as `rf:rf-map`); `Role`
+   `RingFrame <role> judge`, with the task's `role`;
+   `Prompt` the task's `prompt`, verbatim and nothing else; `Workspace`
+   `inherit`; and `Model` the task's `model` when it is a tier (`inherit`,
+   `flash_lite`, `flash`, `pro`; the tool refuses anything else, so leave
+   `Model` out for any other value). A sub-agent
+   reports back when it finishes: wait for that report, and do not poll.
+4. Wait for the first sub-agent's report, not all of them: RingFrame has more
+   tasks ready as each finishes. A reply is a sub-agent's **final** report,
+   one line that starts with its task id: `<task id> accepted` or
+   `<task id> failed: <reason>`. Any other message is not a reply: that
+   sub-agent is still working. Read nothing else and check nothing.
+5. Go back to 1, naming with `--returned` only the sub-agents that have
+   reported since the last `next`, each once.
+   The others are still out and still count: pass `--parallel` as it is, and
+   RingFrame hands out only what fits beside them. When `tasks` is empty and
+   the state is `running`, wait for the next report, then run `next` again.
 
 A spawn acknowledgement is not a reply. A sub-agent that could not start, or
 ended without its line, has still finished: name its task with `--returned`

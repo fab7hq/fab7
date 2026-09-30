@@ -1,9 +1,9 @@
-# RingFrame Eval: model and effort per role, for Codex.
-# Shipped with the plugin and replaced on update; change tiers with an
-# `--override` or with role=model/effort words.
-[roles]
-context   = { model = "gpt-6-luna", effort = "low" }
-intent    = { model = "gpt-6-sol", effort = "medium" }
-coverage  = { model = "gpt-6-sol", effort = "medium" }
-drift     = { model = "gpt-6-sol", effort = "high" }
-adversary = { model = "gpt-6-sol", effort = "xhigh" }
+# RingFrame Eval, for Codex. Shipped with the plugin and replaced on update.
+# Each role's model and effort are its agent definition's, in this plugin's
+# agents/ folder (rf-map, rf-reduce, rf-confirm); change a tier there, or for
+# one Eval with role=model/effort words.
+[eval]
+# Tasks out at once. Codex 0.158.0 ran three sub-agents at once and refused a
+# fourth ("agent thread limit reached"); finished ones did not count. Raise it
+# only with Codex's own limit (`agents.max_concurrent_threads_per_session`).
+parallel = 3

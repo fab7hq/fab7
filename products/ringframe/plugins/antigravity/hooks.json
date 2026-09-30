@@ -3,13 +3,13 @@
     "PreInvocation": [
       {
         "type": "command",
-        "command": "./hooks/rf-hook.sh sessions turn --from-hook --host agy --event working"
+        "command": "./hooks/rf-hook.sh sessions turn --from-hook --host antigravity --event working"
       }
     ],
     "Stop": [
       {
         "type": "command",
-        "command": "./hooks/rf-hook.sh sessions turn --from-hook --host agy --event turn_ended"
+        "command": "./hooks/rf-hook.sh sessions turn --from-hook --host antigravity --event turn_ended"
       }
     ],
     "PreToolUse": [
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "./hooks/rf-hook.sh --allow sessions turn --from-hook --host agy --event waiting"
+            "command": "./hooks/rf-hook.sh --allow sessions turn --from-hook --host antigravity --event waiting"
           }
         ]
       }
@@ -29,7 +29,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "./hooks/rf-hook.sh sessions turn --from-hook --host agy --event working"
+            "command": "./hooks/rf-hook.sh sessions turn --from-hook --host antigravity --event working"
           }
         ]
       }

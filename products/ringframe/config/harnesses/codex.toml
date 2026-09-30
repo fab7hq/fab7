@@ -19,6 +19,9 @@ fallback = "human_handoff"
 # from the plugin's hooks.
 # The name a person reads, in the handoff the CLI writes.
 title = "Codex"
+# The folder names this harness's files go by in a repository (its plugin
+# folder): how an Eval links a step that names the harness to its files.
+path_names = ["codex"]
 # The hook payload's session id.
 session_field = "session_id"
 

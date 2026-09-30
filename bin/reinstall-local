@@ -10,7 +10,7 @@
 #   ./bin/reinstall-local            every host (`both` still means that)
 #   ./bin/reinstall-local claude     one host
 #   ./bin/reinstall-local codex
-#   ./bin/reinstall-local agy
+#   ./bin/reinstall-local antigravity
 set -eu
 
 root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
@@ -44,25 +44,25 @@ do_codex() {
     for p in $plugins; do codex plugin add "$p@$market" >/dev/null; printf '  codex   %s@%s\n' "$p" "$market"; done
 }
 
-do_agy() {
+do_antigravity() {
     # Antigravity has no marketplace to add: `agy plugin install` takes a
     # directory, and names the plugin after it, so it is staged as `rf`.
     command -v agy >/dev/null 2>&1 || { printf '%s\n' "agy not on PATH, skipping"; return 0; }
-    [ -d "$root/products/ringframe/plugins/agy" ] || { printf '%s\n' "no agy plugin here, skipping"; return 0; }
+    [ -d "$root/products/ringframe/plugins/antigravity" ] || { printf '%s\n' "no antigravity plugin here, skipping"; return 0; }
     stage=$(mktemp -d)
-    cp -R "$root/products/ringframe/plugins/agy" "$stage/rf"
+    cp -R "$root/products/ringframe/plugins/antigravity" "$stage/rf"
     agy plugin uninstall rf >/dev/null 2>&1 || true
     agy plugin install "$stage/rf" >/dev/null
     rm -rf "$stage"
-    printf '  agy     rf (from %s)\n' "products/ringframe/plugins/agy"
+    printf '  antigravity rf (from %s)\n' "products/ringframe/plugins/antigravity"
 }
 
 printf 'Reinstalling from %s\n' "$root"
 case $want in
     claude) do_claude ;;
     codex)  do_codex ;;
-    agy)    do_agy ;;
-    all | both) do_claude; do_codex; do_agy ;;
-    *) printf '%s\n' "usage: reinstall-local [claude|codex|agy|all]" >&2; exit 1 ;;
+    antigravity) do_antigravity ;;
+    all | both) do_claude; do_codex; do_antigravity ;;
+    *) printf '%s\n' "usage: reinstall-local [claude|codex|antigravity|all]" >&2; exit 1 ;;
 esac
 printf '\n%s\n' 'Restart the host: a running session keeps the skill it loaded at startup.'
