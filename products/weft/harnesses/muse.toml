@@ -20,16 +20,17 @@ turbo = ["--yolo"]
 default = ".config/muse"
 
 [plugin]   # the argv for each, as Weft's readiness and RingFrame views run them
-# Muse reads the fab7 marketplace from Codex's manifest, where RingFrame's Muse
-# plugin is the entry `rf-muse` (`rf` there is Codex's). Its hooks run once
-# approved: Muse asks at its next start, or `muse plugins approve rf-muse`.
+# Muse reads the fab7 marketplace from Codex's manifest, and installs `rf` from
+# the same folder Codex does, by the native manifest Muse finds there
+# (.muse-plugin/plugin.json). Its hooks run once approved: Muse asks at its next
+# start, or `muse plugins approve rf`.
 list = ["plugins", "list", "--json"]
 add_marketplace = ["plugins", "marketplace", "add", "fab7", "fab7hq/fab7"]
-install = ["plugins", "install", "rf-muse@fab7"]
+install = ["plugins", "install", "rf@fab7"]
 update_marketplace = ["plugins", "marketplace", "update", "fab7"]
-update = ["plugins", "update", "rf-muse"]
+update = ["plugins", "update", "rf"]
 # Taking it out again, for a local reinstall.
-uninstall = ["plugins", "remove", "rf-muse"]
+uninstall = ["plugins", "remove", "rf"]
 remove_marketplace = ["plugins", "marketplace", "remove", "fab7"]
 
 [plugin.listing]   # installed plugins under `plugins`, each named by its `plugin.id`, and `active`
@@ -37,4 +38,4 @@ installed = ["plugins"]
 available = []
 name = "plugin.id"
 on = ["active"]
-want = ["rf-muse"]
+want = ["rf"]

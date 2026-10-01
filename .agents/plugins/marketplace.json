@@ -15,18 +15,6 @@
         "authentication": "ON_USE"
       },
       "category": "development"
-    },
-    {
-      "name": "rf-muse",
-      "source": {
-        "source": "local",
-        "path": "./products/ringframe/plugins/muse"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_USE"
-      },
-      "category": "development"
     }
   ]
 }
