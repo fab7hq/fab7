@@ -1,0 +1,15 @@
+{
+  "name": "fab7",
+  "owner": {
+    "name": "fab7hq"
+  },
+  "description": "Fab7 plugins for Grok Build",
+  "plugins": [
+    {
+      "name": "rf",
+      "source": "./products/ringframe/plugins/grok",
+      "description": "RingFrame /rf-ask, /rf-eval, /rf-seal for Grok Build (requires the `ringframe` CLI)",
+      "version": "0.1.3"
+    }
+  ]
+}

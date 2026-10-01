@@ -1,0 +1,124 @@
+# RingFrame host profile: grok (authored configuration; identity = sha256 of canonical JSON)
+# Grok Build CLI (`grok`, xAI). What is known of it, and how well, is in the knowledge base:
+# research/knowledge-base/harnesses/grok/capability.md (grok 1.0.46). Candidate: no Ask has been qualified here.
+schema = "ringframe.profile/1"
+profile_id = "grok"
+host = "grok"
+surface = "native-tui"
+invocation_prefix = "/rf-"   # plugin skills are typed by their bare name: /rf-ask, /rf-eval, /rf-seal
+confirmation = { tool = "ask_user_question" }
+# No paste_fold_chars: not measured on this host, so nothing is assumed.
+subagents = true
+fallback = "human_handoff"
+
+# What the ringframe CLI reads about this harness. How to start it, resume it and
+# set its plugin up is not RingFrame's: those are in the harness's own file for
+# the tool that runs it. No text to match on its screen: an agent's state comes
+# from the plugin's hooks.
+# The name a person reads, in the handoff the CLI writes.
+title = "Grok Build"
+# The folder names this harness's files go by in a repository (its plugin
+# folder): how an Eval links a step that names the harness to its files.
+path_names = ["grok"]
+# Every hook payload carries Claude Code's snake_case fields beside its own
+# camelCase ones (`session_id` and `sessionId`; observed on grok 1.0.46).
+session_field = "session_id"
+
+[routing]
+precedence = ["native_plan", "native_direct"]
+guidance = [
+  """\
+Infer the intended outcome, required continuation, and effects from the \
+source intent; users do not need to name a native command.""",
+  """\
+Honor an explicit supported capability choice and preserve planning-only or \
+review-only scope. Never invent a completion condition or additional \
+permissions.""",
+  """\
+Compare capability selection guidance; use precedence when multiple \
+capabilities fit. Continuing objectives take precedence over the general \
+planning default for work with effects.""",
+  """\
+Large scope, the word fully, or write effects alone do not imply persistent \
+continuation. Explain material uncertainty in route gaps and let the user \
+revise the proposed route.""",
+  """\
+When work needs a plan before it can be built, the Ask that produces the \
+plan delivers the plan itself. Classify it as task plan with result plan, \
+even when the source intent names the change the plan is for. Building is a \
+later Ask that reads what was written. Classification happens before a \
+capability is chosen, so decide this from the work rather than from the \
+route; one Ask classified as both draws rules for work that turn will not \
+do.""",
+  """\
+Before routing work that builds something, look for the subject in `plans`, \
+matching on the subject rather than the wording. When it is not listed, this \
+Ask writes the plan and stops there, classified as task plan with result \
+plan, whatever the source intent calls the change, and building is the next \
+Ask once there are files to read. When it is listed, the plan is the \
+terminal condition, so this Ask builds it, classified as task implement with \
+result workspace_change, preferring the continuing objective, and naming the \
+plan by the path `plans` gives, rather than restating what it already says, since a route with a \
+character budget cannot carry the same constraints twice. The terminal \
+condition is the plan finished, not its first step, so the Ask covers the \
+whole sequence and its done-criteria; scope it to one step only when the \
+source intent itself asks for that step. Only `plans` answers this. A plan \
+named in conversation, or implied by scaffolding already in the workspace, \
+is not one this project holds.""",
+  """\
+A declared capability is a RingFrame integration contract, not proof that \
+the current host exposes it. Follow its delivery mode and limitations; \
+report unavailable tools or rejected commands without claiming activation.""",
+]
+
+[[capabilities]]
+id = "native_plan"
+selection = """\
+A plan or analysis before implementation, or bounded work with effects when \
+the user has not requested immediate execution. Do not prefer this general \
+default over a fitting continuing objective or dedicated review."""
+sources = [
+  "research/knowledge-base/harnesses/grok/capability.md",
+  "https://docs.x.ai/build/modes-and-commands",
+]
+purpose = "read-only exploration and a reviewable plan before effects"
+activation = { mechanism = "capability_activate", tool = "enter_plan_mode" }
+confirmation = { tool = "ask_user_question" }
+continuation = """\
+Grok's Plan mode edits only the session's plan file until the person approves \
+it (exit_plan_mode); approval continues to implementation under host \
+permissions"""
+effects = ["workspace_read", "workspace_write"]
+permission_owner = "host"
+delivery_mode = "native_dispatch"
+receipt = { captured_by = "hook:PostToolUse", tool = "enter_plan_mode" }
+qualification = {}
+limitations = [
+  "the plan file lives in Grok's session folder (~/.grok/sessions), not the workspace",
+  "native acceptance is not execution or completion",
+  "enter_plan_mode was called by the model headless; its receipt hook is not qualified",
+]
+
+[[capabilities]]
+id = "native_direct"
+selection = """\
+An answer, read-only investigation, or review without a fitting dedicated \
+capability; also work the user explicitly asks to execute immediately or \
+without planning. Effects listed in requires_explicit_request_for_effects \
+require that explicit source intent."""
+sources = ["research/knowledge-base/harnesses/grok/capability.md"]
+purpose = "continue immediately under normal permissions"
+activation = {}
+confirmation = { tool = "ask_user_question" }
+continuation = "same turn"
+effects = ["per source intent"]
+permission_owner = "host"
+delivery_mode = "native_dispatch"
+qualification = {}
+limitations = ["no delivery receipt exists for same-turn continuation"]
+requires_explicit_request_for_effects = [
+  "write",
+  "execute",
+  "external_effect",
+  "workspace_write",
+]
