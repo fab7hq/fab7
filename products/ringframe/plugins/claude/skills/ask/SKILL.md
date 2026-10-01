@@ -50,12 +50,14 @@ marker; `source.txt` still holds the exact source intent, override included.
 ## 1. Check the workspace
 
 Run `ringframe ask preflight` first, before reading anything or classifying
-anything. It refuses a workspace no Ask could finish — no Git repository, or a
-repository with no commit — and that refusal is the same one `ask compile`
+anything. It refuses a workspace no Ask could finish — no Git repository, a
+repository with no commit, or one where RingFrame was never set up (`ringframe
+init` has not been run) — and that refusal is the same one `ask compile`
 would give at the very end, once the intent had been classified, the prompt
 composed and staged, and the person had waited through all of it. If it
 refuses, show its message and stop. Do not stage, do not compile, and do not
-offer to run `git init` yourself.
+offer to run `git init` or `ringframe init` yourself: setting up a repository
+for RingFrame is the person's to do, at its root.
 
 ### A follow-up
 

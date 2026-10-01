@@ -58,6 +58,10 @@ output directly. If the CLI is missing, report that the Fab7 installer is
 needed and stop. Never write ledger records, task files or task outputs, and
 never run `ringframe eval submit`: the judges do.
 
+A repository where `ringframe init` was never run has no RingFrame
+workspace, and every `ringframe` command here says so: show that message and
+stop. Setting the repository up is the person's to do, at its root.
+
 ## 1. Open
 
 Skip this for `debate` or `continue`, but resolve the roles the same way; for

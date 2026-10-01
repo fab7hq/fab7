@@ -29,6 +29,10 @@ probes. Read the completed JSON output directly; never page or filter it.
 Collect a running command's final result before proceeding; never rerun a
 pending `seal create` or claim success from empty output.
 
+A repository where `ringframe init` was never run has no RingFrame
+workspace, and every `ringframe` command here says so: show that message and
+stop. Setting the repository up is the person's to do, at its root.
+
 ## 1. Read the open work
 
 If the current workspace's Ask list is not already available in context, run
