@@ -38,7 +38,7 @@ message.
 Before opening, read `config.toml` in this skill's directory, beside this `SKILL.md`, once: its `[eval] parallel` is how many tasks
 may run at once (4 when the file is missing or unreadable; say so once in the
 report). Each role's model and effort are in this plugin's agent definitions,
-`rf-map`, `rf-reduce` and `rf-confirm`, in the `rf-agents` folder of Muse's configuration home (`~/.config/muse/rf-agents`, two folders above this skill's directory), as an absolute path: RingFrame reads them
+`rf-map`, `rf-reduce` and `rf-confirm`, in the `agents` folder two folders above this skill's directory, as an absolute path: RingFrame reads them
 when you pass that folder as `--agents-from <folder>`; do not read them
 yourself. The invocation's role words win over them, key by key: pass those
 as `--agents '<json>'`, with only the keys the words set. Never guess a model

@@ -19,16 +19,22 @@ turbo = ["--yolo"]
 # value as the folder).
 default = ".config/muse"
 
-[plugin]   # argv, as Weft's readiness and RingFrame views run them
-# `muse plugins` answers only with MUSE_EXPERIMENTAL_PLUGINS=1 in the
-# environment, which these argv cannot carry, so RingFrame's skills are
-# installed with `muse skills install` and its hooks merged into the settings
-# by the person; Weft has no command to run for either. It reads Muse as set up
-# once all three skills are there.
-list = ["skills", "list", "--source", "user", "--json"]
+[plugin]   # the argv for each, as Weft's readiness and RingFrame views run them
+# Muse reads the fab7 marketplace from Codex's manifest, where RingFrame's Muse
+# plugin is the entry `rf-muse` (`rf` there is Codex's). Its hooks run once
+# approved: Muse asks at its next start, or `muse plugins approve rf-muse`.
+list = ["plugins", "list", "--json"]
+add_marketplace = ["plugins", "marketplace", "add", "fab7", "fab7hq/fab7"]
+install = ["plugins", "install", "rf-muse@fab7"]
+update_marketplace = ["plugins", "marketplace", "update", "fab7"]
+update = ["plugins", "update", "rf-muse"]
+# Taking it out again, for a local reinstall.
+uninstall = ["plugins", "remove", "rf-muse"]
+remove_marketplace = ["plugins", "marketplace", "remove", "fab7"]
 
-[plugin.listing]   # how what `list` answers reads: skills under `skills`, named by `id`
-installed = ["skills"]
+[plugin.listing]   # installed plugins under `plugins`, each named by its `plugin.id`, and `active`
+installed = ["plugins"]
 available = []
-name = "id"
-want = ["rf-ask", "rf-eval", "rf-seal"]
+name = "plugin.id"
+on = ["active"]
+want = ["rf-muse"]

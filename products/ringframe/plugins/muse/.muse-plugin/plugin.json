@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "name": "rf-muse",
+  "displayName": "RingFrame",
+  "version": "0.1.3",
+  "description": "RingFrame: turn one explicit intent into a confirmed native prompt, evaluate the exact result, record the decision",
+  "compat": {
+    "source": "native",
+    "manifestDir": ".muse-plugin"
+  },
+  "capabilities": {
+    "skills": [
+      {
+        "id": "rf-ask",
+        "path": "skills/rf-ask/SKILL.md",
+        "enabledDefault": true
+      },
+      {
+        "id": "rf-eval",
+        "path": "skills/rf-eval/SKILL.md",
+        "enabledDefault": true
+      },
+      {
+        "id": "rf-seal",
+        "path": "skills/rf-seal/SKILL.md",
+        "enabledDefault": true
+      }
+    ],
+    "commands": [],
+    "hooks": [
+      {
+        "id": "ready",
+        "event": "SessionStart",
+        "command": [
+          "sh",
+          "hooks/ready.sh"
+        ],
+        "timeoutMs": 10000
+      },
+      {
+        "id": "capture-prompt",
+        "event": "UserPromptSubmit",
+        "command": [
+          "sh",
+          "hooks/capture-prompt.sh"
+        ],
+        "timeoutMs": 10000
+      },
+      {
+        "id": "prompt-working",
+        "event": "UserPromptSubmit",
+        "command": [
+          "sh",
+          "hooks/prompt-working.sh"
+        ],
+        "timeoutMs": 10000
+      },
+      {
+        "id": "question-waiting",
+        "event": "PreToolUse",
+        "command": [
+          "sh",
+          "hooks/question-waiting.sh"
+        ],
+        "timeoutMs": 10000
+      },
+      {
+        "id": "permission-waiting",
+        "event": "PermissionRequest",
+        "command": [
+          "sh",
+          "hooks/permission-waiting.sh"
+        ],
+        "timeoutMs": 10000
+      },
+      {
+        "id": "tool-working",
+        "event": "PostToolUse",
+        "command": [
+          "sh",
+          "hooks/tool-working.sh"
+        ],
+        "timeoutMs": 10000
+      },
+      {
+        "id": "turn-ended",
+        "event": "Stop",
+        "command": [
+          "sh",
+          "hooks/turn-ended.sh"
+        ],
+        "timeoutMs": 10000
+      }
+    ],
+    "mcpServers": [],
+    "reminders": []
+  }
+}
