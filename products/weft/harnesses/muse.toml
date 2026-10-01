@@ -1,0 +1,34 @@
+# Weft harness file: Muse Code. What Weft needs to start this harness, pick a
+# session back up and set its plugin up, and nothing RingFrame reads: RingFrame's
+# own facts about it are in its profile. Shipped by fab7; `install.sh` and
+# `weft update` copy it into ~/.fab7/weft/harnesses/, replaced on every update.
+# Never edit the copy.
+title = "Muse Code"
+# Not yet tested as fully as the others: Weft says beta beside it in its setup view.
+beta = true
+program = "muse"
+# How a recorded session is opened again; the id is appended.
+resume = ["resume"]
+# No `transcript`: it prints inline, so the terminal keeps its history.
+# Turbo mode, when Weft's config.toml turns it on: no approval and no sandbox,
+# and the workspace trusted for the run.
+turbo = ["--yolo"]
+
+[config]   # where it keeps its configuration: XDG_CONFIG_HOME/muse, else this. No
+# variable names the folder itself, so none is given (Weft reads a variable's
+# value as the folder).
+default = ".config/muse"
+
+[plugin]   # argv, as Weft's readiness and RingFrame views run them
+# `muse plugins` answers only with MUSE_EXPERIMENTAL_PLUGINS=1 in the
+# environment, which these argv cannot carry, so RingFrame's skills are
+# installed with `muse skills install` and its hooks merged into the settings
+# by the person; Weft has no command to run for either. It reads Muse as set up
+# once all three skills are there.
+list = ["skills", "list", "--source", "user", "--json"]
+
+[plugin.listing]   # how what `list` answers reads: skills under `skills`, named by `id`
+installed = ["skills"]
+available = []
+name = "id"
+want = ["rf-ask", "rf-eval", "rf-seal"]

@@ -1,0 +1,69 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ringframe sessions turn --from-hook --host muse --event ready >/dev/null 2>&1 || true"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ringframe sessions capture --host muse --host-version \"$(muse --version 2>/dev/null)\" >/dev/null 2>&1 || true"
+          },
+          {
+            "type": "command",
+            "command": "ringframe sessions turn --from-hook --host muse --event working >/dev/null 2>&1 || true"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "request_user_input",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ringframe sessions turn --from-hook --host muse --event waiting >/dev/null 2>&1 || true"
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ringframe sessions turn --from-hook --host muse --event waiting >/dev/null 2>&1 || true"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ringframe sessions turn --from-hook --host muse --event working >/dev/null 2>&1 || true"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "ringframe sessions turn --from-hook --host muse --event turn_ended >/dev/null 2>&1 || true"
+          }
+        ]
+      }
+    ]
+  }
+}
