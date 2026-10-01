@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "ringframe sessions turn --from-hook --host cursor --event ready >/dev/null 2>&1; printf '{}'"
+      }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "ringframe sessions capture --host cursor --host-version \"$CURSOR_VERSION\" >/dev/null 2>&1; printf '{}'"
+      },
+      {
+        "command": "ringframe sessions turn --from-hook --host cursor --event working >/dev/null 2>&1; printf '{}'"
+      }
+    ],
+    "preToolUse": [
+      {
+        "matcher": "AskQuestion",
+        "command": "ringframe sessions turn --from-hook --host cursor --event waiting >/dev/null 2>&1; printf '{}'"
+      }
+    ],
+    "postToolUse": [
+      {
+        "matcher": "Shell",
+        "command": "ringframe fact --from-hook --host cursor --outcome succeeded >/dev/null 2>&1; printf '{}'"
+      },
+      {
+        "command": "ringframe sessions turn --from-hook --host cursor --event working >/dev/null 2>&1; printf '{}'"
+      }
+    ],
+    "postToolUseFailure": [
+      {
+        "matcher": "Shell",
+        "command": "ringframe fact --from-hook --host cursor --outcome failed >/dev/null 2>&1; printf '{}'"
+      },
+      {
+        "command": "ringframe sessions turn --from-hook --host cursor --event working >/dev/null 2>&1; printf '{}'"
+      }
+    ],
+    "stop": [
+      {
+        "command": "ringframe sessions turn --from-hook --host cursor --event turn_ended >/dev/null 2>&1; printf '{}'"
+      }
+    ]
+  }
+}
