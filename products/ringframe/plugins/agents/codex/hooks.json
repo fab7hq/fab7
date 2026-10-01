@@ -5,11 +5,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}\"/hooks/capture-prompt.sh"
+            "command": "\"${PLUGIN_ROOT}\"/codex/hooks/capture-prompt.sh"
           },
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host codex --event working"
+            "command": "\"${PLUGIN_ROOT}\"/codex/hooks/rf-hook.sh sessions turn --from-hook --host codex --event working"
           }
         ]
       }
@@ -20,7 +20,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host codex --event waiting"
+            "command": "\"${PLUGIN_ROOT}\"/codex/hooks/rf-hook.sh sessions turn --from-hook --host codex --event waiting"
           }
         ]
       }
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host codex --event waiting"
+            "command": "\"${PLUGIN_ROOT}\"/codex/hooks/rf-hook.sh sessions turn --from-hook --host codex --event waiting"
           }
         ]
       }
@@ -40,7 +40,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host codex --event working"
+            "command": "\"${PLUGIN_ROOT}\"/codex/hooks/rf-hook.sh sessions turn --from-hook --host codex --event working"
           }
         ]
       }
@@ -50,7 +50,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host codex --event turn_ended"
+            "command": "\"${PLUGIN_ROOT}\"/codex/hooks/rf-hook.sh sessions turn --from-hook --host codex --event turn_ended"
           }
         ]
       }

@@ -8,7 +8,7 @@
       "name": "rf",
       "source": {
         "source": "local",
-        "path": "./products/ringframe/plugins/codex"
+        "path": "./products/ringframe/plugins/agents"
       },
       "policy": {
         "installation": "AVAILABLE",

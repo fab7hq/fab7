@@ -20,10 +20,10 @@ turbo = ["--yolo"]
 default = ".config/muse"
 
 [plugin]   # the argv for each, as Weft's readiness and RingFrame views run them
-# Muse reads the fab7 marketplace from Codex's manifest, and installs `rf` from
-# the same folder Codex does, by the native manifest Muse finds there
-# (.muse-plugin/plugin.json). Its hooks run once approved: Muse asks at its next
-# start, or `muse plugins approve rf`.
+# Muse reads the fab7 marketplace from the manifest it shares with Codex
+# (.agents/plugins/marketplace.json), whose `rf` is products/ringframe/plugins/agents:
+# Muse installs it by its own manifest there, .muse-plugin/plugin.json, into muse/.
+# Its hooks run once approved: Muse asks at its next start, or `muse plugins approve rf`.
 list = ["plugins", "list", "--json"]
 add_marketplace = ["plugins", "marketplace", "add", "fab7", "fab7hq/fab7"]
 install = ["plugins", "install", "rf@fab7"]

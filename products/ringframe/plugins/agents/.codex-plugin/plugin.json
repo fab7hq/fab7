@@ -5,8 +5,8 @@
   "author": {
     "name": "fab7hq"
   },
-  "skills": "./skills/",
-  "hooks": "./hooks.json",
+  "skills": "./codex/skills/",
+  "hooks": "./codex/hooks.json",
   "interface": {
     "displayName": "RingFrame",
     "shortDescription": "Explicit Ask, Eval, and Seal inside Codex",
