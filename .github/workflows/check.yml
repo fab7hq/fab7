@@ -27,7 +27,8 @@ jobs:
                        "products/ringframe/plugins/agents/.codex-plugin/plugin.json",
                        "products/ringframe/plugins/agents/.muse-plugin/plugin.json",
                        "products/ringframe/plugins/cursor/.cursor-plugin/plugin.json",
-                       "products/ringframe/plugins/grok/.grok-plugin/plugin.json")}
+                       "products/ringframe/plugins/grok/.grok-plugin/plugin.json",
+                       "products/ringframe/plugins/antigravity/plugin.json")}
           versions |= {e["version"] for e in json.loads(pathlib.Path(".claude-plugin/marketplace.json")
                                                          .read_text())["plugins"] if e["name"] == "rf"}
           if len(versions) != 1:

@@ -31,6 +31,10 @@ default = ".cursor"
 list = ["plugin", "marketplace", "list", "--format", "json"]
 add_marketplace = ["plugin", "marketplace", "add", "https://github.com/fab7hq/fab7"]
 update_marketplace = ["plugin", "marketplace", "update", "fab7"]
+# Its listing names marketplaces, so the version is the installed plugin's own:
+# Cursor keeps it under plugins/cache/<marketplace>/<plugin>/<commit>/ (agent
+# 2026.09.28), and the newest commit's folder is the one in use.
+manifest = "plugins/cache/fab7/rf/*/.cursor-plugin/plugin.json"
 
 [plugin.listing]   # how what `list` answers reads: a bare array of marketplaces, named by `name`
 installed = ["."]

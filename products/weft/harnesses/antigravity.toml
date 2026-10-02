@@ -25,6 +25,9 @@ update = ["plugin", "install", "https://github.com/fab7hq/fab7/tree/main/product
 # Taking it out again, for a local reinstall. It keeps no cache: an install
 # replaces the plugin exactly.
 uninstall = ["plugin", "uninstall", "rf"]
+# Its listing gives no version: the installed plugin's own plugin.json does,
+# under ~/.gemini/config/plugins (agy 1.2.12), beside the configuration home.
+manifest = "../config/plugins/rf/plugin.json"
 
 [plugin.listing]   # how what `list` answers reads: where it has them, what names one, and what says one is off
 installed = ["imports"]
