@@ -1,9 +1,18 @@
-# Weft tool file: cloudflared, Cloudflare's tunnel, which Weft's Remote runs
-# (Weft ADR-0021, ADR-0023). How Weft installs it when the person says yes, and
-# nothing else: the tunnel itself needs no settings. Shipped by fab7;
-# `install.sh` and `weft update` copy it into ~/.fab7/weft/tools/, replaced on
-# every update. Never edit the copy.
+# Weft tool file: Cloudflare Tunnel, a tunnel adapter for Weft's Remote (Weft
+# ADR-0021, ADR-0023, ADR-0024). Everything Weft knows about this provider:
+# how to start it, how to read its address, and how to install it when the
+# person says yes. TryCloudflare's quick tunnel needs no account and no
+# settings. Shipped by fab7; `install.sh` and `weft update` copy it into
+# ~/.fab7/weft/tools/, replaced on every update. Never edit the copy.
+kind = "tunnel"
+title = "Cloudflare Tunnel"
 program = "cloudflared"
+# What follows the program to start it; {port} is Weft's loopback port.
+run = ["tunnel", "--no-autoupdate", "--url", "http://127.0.0.1:{port}"]
+# Its address is the first https:// URL in its output whose host ends so.
+address = ".trycloudflare.com"
+# Said wherever Remote is on: what this tunnel can see.
+note = "traffic is decrypted at Cloudflare's edge"
 
 # When `brew` is on PATH, the person's own package manager installs it, and
 # keeps it updated.
