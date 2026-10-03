@@ -1,0 +1,24 @@
+# Weft tool file: cloudflared, Cloudflare's tunnel, which Weft's Remote runs
+# (Weft ADR-0021, ADR-0023). How Weft installs it when the person says yes, and
+# nothing else: the tunnel itself needs no settings. Shipped by fab7;
+# `install.sh` and `weft update` copy it into ~/.fab7/weft/tools/, replaced on
+# every update. Never edit the copy.
+program = "cloudflared"
+
+# When `brew` is on PATH, the person's own package manager installs it, and
+# keeps it updated.
+[install.brew]
+argv = ["brew", "install", "cloudflared"]
+
+# Otherwise Cloudflare's latest release on GitHub, as Weft installs itself,
+# into ~/.fab7/weft/bin. Each machine's asset; a .tgz holds the program at its
+# top. The asset must match GitHub's digest for it, and the program the
+# checksum Cloudflare lists for that asset in the release's notes.
+[install.download]
+repo = "cloudflare/cloudflared"
+
+[install.download.assets]
+darwin-arm64 = "cloudflared-darwin-arm64.tgz"
+darwin-amd64 = "cloudflared-darwin-amd64.tgz"
+linux-amd64 = "cloudflared-linux-amd64"
+linux-arm64 = "cloudflared-linux-arm64"
