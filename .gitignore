@@ -1,0 +1,8 @@
+# Secrets and local tool output never belong here: this repository is data
+# that lands on users' machines.
+.env*
+*.pem
+*.key
+.DS_Store
+.playwright-mcp/
+.fab7/
