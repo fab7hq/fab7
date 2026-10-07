@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "name": "rf",
   "displayName": "RingFrame",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "RingFrame: turn one explicit intent into a confirmed native prompt, evaluate the exact result, record the decision",
   "compat": {
     "source": "native",
