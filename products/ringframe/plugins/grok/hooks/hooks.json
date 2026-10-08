@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${GROK_PLUGIN_ROOT}/hooks/rf-hook.sh sessions turn --from-hook --host grok --event ready"
+            "command": "\"${GROK_PLUGIN_ROOT}\"/hooks/weft-signal grok SessionStart"
           }
         ]
       }
@@ -15,11 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${GROK_PLUGIN_ROOT}/hooks/capture-prompt.sh"
-          },
-          {
-            "type": "command",
-            "command": "${GROK_PLUGIN_ROOT}/hooks/rf-hook.sh sessions turn --from-hook --host grok --event working"
+            "command": "\"${GROK_PLUGIN_ROOT}\"/hooks/weft-signal grok UserPromptSubmit"
           }
         ]
       }
@@ -30,54 +26,27 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${GROK_PLUGIN_ROOT}/hooks/rf-hook.sh sessions turn --from-hook --host grok --event waiting"
+            "command": "\"${GROK_PLUGIN_ROOT}\"/hooks/weft-signal grok PreToolUse"
           }
         ]
       }
     ],
     "PostToolUse": [
       {
-        "matcher": "enter_plan_mode",
         "hooks": [
           {
             "type": "command",
-            "command": "${GROK_PLUGIN_ROOT}/hooks/rf-hook.sh ask delivery --from-hook --host grok"
-          }
-        ]
-      },
-      {
-        "matcher": "run_terminal_command",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${GROK_PLUGIN_ROOT}/hooks/rf-hook.sh fact --from-hook --host grok --outcome succeeded"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${GROK_PLUGIN_ROOT}/hooks/rf-hook.sh sessions turn --from-hook --host grok --event working"
+            "command": "\"${GROK_PLUGIN_ROOT}\"/hooks/weft-signal grok PostToolUse"
           }
         ]
       }
     ],
     "PostToolUseFailure": [
       {
-        "matcher": "run_terminal_command",
         "hooks": [
           {
             "type": "command",
-            "command": "${GROK_PLUGIN_ROOT}/hooks/rf-hook.sh fact --from-hook --host grok --outcome failed"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "${GROK_PLUGIN_ROOT}/hooks/rf-hook.sh sessions turn --from-hook --host grok --event working"
+            "command": "\"${GROK_PLUGIN_ROOT}\"/hooks/weft-signal grok PostToolUseFailure"
           }
         ]
       }
@@ -87,7 +56,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "${GROK_PLUGIN_ROOT}/hooks/rf-hook.sh sessions turn --from-hook --host grok --event turn_ended"
+            "command": "\"${GROK_PLUGIN_ROOT}\"/hooks/weft-signal grok Stop"
           }
         ]
       }

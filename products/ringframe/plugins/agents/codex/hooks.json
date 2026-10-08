@@ -5,11 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}\"/codex/hooks/capture-prompt.sh"
-          },
-          {
-            "type": "command",
-            "command": "\"${PLUGIN_ROOT}\"/codex/hooks/rf-hook.sh sessions turn --from-hook --host codex --event working"
+            "command": "\"${PLUGIN_ROOT}\"/codex/hooks/weft-signal codex UserPromptSubmit"
           }
         ]
       }
@@ -20,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}\"/codex/hooks/rf-hook.sh sessions turn --from-hook --host codex --event waiting"
+            "command": "\"${PLUGIN_ROOT}\"/codex/hooks/weft-signal codex PreToolUse"
           }
         ]
       }
@@ -30,7 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}\"/codex/hooks/rf-hook.sh sessions turn --from-hook --host codex --event waiting"
+            "command": "\"${PLUGIN_ROOT}\"/codex/hooks/weft-signal codex PermissionRequest"
           }
         ]
       }
@@ -40,7 +36,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}\"/codex/hooks/rf-hook.sh sessions turn --from-hook --host codex --event working"
+            "command": "\"${PLUGIN_ROOT}\"/codex/hooks/weft-signal codex PostToolUse"
           }
         ]
       }
@@ -50,7 +46,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${PLUGIN_ROOT}\"/codex/hooks/rf-hook.sh sessions turn --from-hook --host codex --event turn_ended"
+            "command": "\"${PLUGIN_ROOT}\"/codex/hooks/weft-signal codex Stop"
           }
         ]
       }

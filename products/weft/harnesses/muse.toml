@@ -39,3 +39,24 @@ available = []
 name = "plugin.id"
 on = ["active"]
 want = ["rf"]
+
+# What each of its hooks means to Weft (ADR-0030 D4). RingFrame's plugin registers
+# these hooks, every one running `weft-signal <id> <hook>`; fab7's check keeps the
+# two in step. Payload paths are dotted; `forward` passes a prompt or a tool to
+# `ringframe observe` (D9).
+# A native Muse hook has no matcher: `weft signal` matches the PreToolUse row
+# by its tool. Every payload carries `session_id` (observed on the echo
+# provider) and names the project as `cwd`.
+[signal]
+session = "session_id"
+workspace = "cwd"
+prompt = "prompt"
+tool = "tool_name"
+on = [
+  { hook = "SessionStart",                             state = "ready" },
+  { hook = "UserPromptSubmit",                         state = "working", forward = "prompt" },
+  { hook = "PreToolUse",  tool = "request_user_input", state = "waiting" },
+  { hook = "PermissionRequest",                        state = "waiting" },
+  { hook = "PostToolUse",                              state = "working" },
+  { hook = "Stop",                                     state = "turn_ended" },
+]

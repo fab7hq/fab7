@@ -29,65 +29,68 @@
     "commands": [],
     "hooks": [
       {
-        "id": "ready",
+        "id": "SessionStart",
         "event": "SessionStart",
         "command": [
           "sh",
-          "muse/hooks/ready.sh"
+          "muse/hooks/weft-signal",
+          "muse",
+          "SessionStart"
         ],
         "timeoutMs": 10000
       },
       {
-        "id": "capture-prompt",
+        "id": "UserPromptSubmit",
         "event": "UserPromptSubmit",
         "command": [
           "sh",
-          "muse/hooks/capture-prompt.sh"
+          "muse/hooks/weft-signal",
+          "muse",
+          "UserPromptSubmit"
         ],
         "timeoutMs": 10000
       },
       {
-        "id": "prompt-working",
-        "event": "UserPromptSubmit",
-        "command": [
-          "sh",
-          "muse/hooks/prompt-working.sh"
-        ],
-        "timeoutMs": 10000
-      },
-      {
-        "id": "question-waiting",
+        "id": "PreToolUse-request_user_input",
         "event": "PreToolUse",
         "command": [
           "sh",
-          "muse/hooks/question-waiting.sh"
+          "muse/hooks/weft-signal",
+          "muse",
+          "PreToolUse"
         ],
         "timeoutMs": 10000
       },
       {
-        "id": "permission-waiting",
+        "id": "PermissionRequest",
         "event": "PermissionRequest",
         "command": [
           "sh",
-          "muse/hooks/permission-waiting.sh"
+          "muse/hooks/weft-signal",
+          "muse",
+          "PermissionRequest"
         ],
         "timeoutMs": 10000
       },
       {
-        "id": "tool-working",
+        "id": "PostToolUse",
         "event": "PostToolUse",
         "command": [
           "sh",
-          "muse/hooks/tool-working.sh"
+          "muse/hooks/weft-signal",
+          "muse",
+          "PostToolUse"
         ],
         "timeoutMs": 10000
       },
       {
-        "id": "turn-ended",
+        "id": "Stop",
         "event": "Stop",
         "command": [
           "sh",
-          "muse/hooks/turn-ended.sh"
+          "muse/hooks/weft-signal",
+          "muse",
+          "Stop"
         ],
         "timeoutMs": 10000
       }

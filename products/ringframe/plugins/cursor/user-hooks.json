@@ -3,44 +3,33 @@
   "hooks": {
     "sessionStart": [
       {
-        "command": "ringframe sessions turn --from-hook --host cursor --event ready >/dev/null 2>&1; printf '{}'"
+        "command": "command -v weft >/dev/null 2>&1 && exec weft signal --reply '{}' cursor sessionStart; printf '{}'"
       }
     ],
     "beforeSubmitPrompt": [
       {
-        "command": "ringframe sessions capture --host cursor --host-version \"$CURSOR_VERSION\" >/dev/null 2>&1; printf '{}'"
-      },
-      {
-        "command": "ringframe sessions turn --from-hook --host cursor --event working >/dev/null 2>&1; printf '{}'"
+        "command": "command -v weft >/dev/null 2>&1 && exec weft signal --reply '{}' cursor beforeSubmitPrompt; printf '{}'"
       }
     ],
     "preToolUse": [
       {
         "matcher": "AskQuestion",
-        "command": "ringframe sessions turn --from-hook --host cursor --event waiting >/dev/null 2>&1; printf '{}'"
+        "command": "command -v weft >/dev/null 2>&1 && exec weft signal --reply '{}' cursor preToolUse; printf '{}'"
       }
     ],
     "postToolUse": [
       {
-        "matcher": "Shell",
-        "command": "ringframe fact --from-hook --host cursor --outcome succeeded >/dev/null 2>&1; printf '{}'"
-      },
-      {
-        "command": "ringframe sessions turn --from-hook --host cursor --event working >/dev/null 2>&1; printf '{}'"
+        "command": "command -v weft >/dev/null 2>&1 && exec weft signal --reply '{}' cursor postToolUse; printf '{}'"
       }
     ],
     "postToolUseFailure": [
       {
-        "matcher": "Shell",
-        "command": "ringframe fact --from-hook --host cursor --outcome failed >/dev/null 2>&1; printf '{}'"
-      },
-      {
-        "command": "ringframe sessions turn --from-hook --host cursor --event working >/dev/null 2>&1; printf '{}'"
+        "command": "command -v weft >/dev/null 2>&1 && exec weft signal --reply '{}' cursor postToolUseFailure; printf '{}'"
       }
     ],
     "stop": [
       {
-        "command": "ringframe sessions turn --from-hook --host cursor --event turn_ended >/dev/null 2>&1; printf '{}'"
+        "command": "command -v weft >/dev/null 2>&1 && exec weft signal --reply '{}' cursor stop; printf '{}'"
       }
     ]
   }

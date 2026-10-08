@@ -3,13 +3,7 @@
     "PreInvocation": [
       {
         "type": "command",
-        "command": "./hooks/rf-hook.sh sessions turn --from-hook --host antigravity --event working"
-      }
-    ],
-    "Stop": [
-      {
-        "type": "command",
-        "command": "./hooks/rf-hook.sh sessions turn --from-hook --host antigravity --event turn_ended"
+        "command": "./hooks/weft-signal --reply '{}' antigravity PreInvocation"
       }
     ],
     "PreToolUse": [
@@ -18,7 +12,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "./hooks/rf-hook.sh --allow sessions turn --from-hook --host antigravity --event waiting"
+            "command": "./hooks/weft-signal --reply '{\"decision\":\"allow\"}' antigravity PreToolUse"
           }
         ]
       }
@@ -29,9 +23,15 @@
         "hooks": [
           {
             "type": "command",
-            "command": "./hooks/rf-hook.sh sessions turn --from-hook --host antigravity --event working"
+            "command": "./hooks/weft-signal --reply '{}' antigravity PostToolUse"
           }
         ]
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "./hooks/weft-signal --reply '{}' antigravity Stop"
       }
     ]
   }

@@ -41,3 +41,25 @@ installed = ["."]
 available = []
 name = "name"
 want = ["fab7"]
+
+# What each of its hooks means to Weft (ADR-0030 D4). RingFrame's plugin registers
+# these hooks, every one running `weft-signal <id> <hook>`; fab7's check keeps the
+# two in step. Payload paths are dotted; `forward` passes a prompt or a tool to
+# `ringframe observe` (D9).
+# Every hook answers `{}`. `conversation_id` holds the same value as
+# `session_id`; a hook names the project as a list, `workspace_roots`.
+[signal]
+session = "session_id"
+workspace = "workspace_roots"
+prompt = "prompt"
+tool = "tool_name"
+command = "tool_input.command"
+reply = "{}"
+on = [
+  { hook = "sessionStart",                             state = "ready" },
+  { hook = "beforeSubmitPrompt",                       state = "working", forward = "prompt" },
+  { hook = "preToolUse",  tool = "AskQuestion",        state = "waiting" },
+  { hook = "postToolUse",                              state = "working", forward = "tool", outcome = "succeeded" },
+  { hook = "postToolUseFailure",                       state = "working", forward = "tool", outcome = "failed" },
+  { hook = "stop",                                     state = "turn_ended" },
+]

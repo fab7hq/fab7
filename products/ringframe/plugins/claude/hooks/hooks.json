@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host claude-code --event ready"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/weft-signal claude-code SessionStart"
           }
         ]
       }
@@ -15,11 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/capture-prompt.sh"
-          },
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host claude-code --event working"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/weft-signal claude-code UserPromptSubmit"
           }
         ]
       }
@@ -30,7 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host claude-code --event waiting"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/weft-signal claude-code PreToolUse"
           }
         ]
       }
@@ -40,54 +36,27 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host claude-code --event waiting"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/weft-signal claude-code PermissionRequest"
           }
         ]
       }
     ],
     "PostToolUse": [
       {
-        "matcher": "EnterPlanMode",
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/rf-hook.sh ask delivery --from-hook --host claude-code"
-          }
-        ]
-      },
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/rf-hook.sh fact --from-hook --host claude-code --outcome succeeded"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host claude-code --event working"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/weft-signal claude-code PostToolUse"
           }
         ]
       }
     ],
     "PostToolUseFailure": [
       {
-        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/rf-hook.sh fact --from-hook --host claude-code --outcome failed"
-          }
-        ]
-      },
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host claude-code --event working"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/weft-signal claude-code PostToolUseFailure"
           }
         ]
       }
@@ -97,7 +66,17 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/rf-hook.sh sessions turn --from-hook --host claude-code --event turn_ended"
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/weft-signal claude-code Stop"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/weft-signal claude-code SessionEnd"
           }
         ]
       }
