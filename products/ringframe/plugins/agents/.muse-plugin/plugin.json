@@ -29,68 +29,56 @@
     "commands": [],
     "hooks": [
       {
-        "id": "SessionStart",
+        "id": "session-start",
         "event": "SessionStart",
         "command": [
           "sh",
-          "muse/hooks/weft-signal",
-          "muse",
-          "SessionStart"
+          "muse/hooks/session-start.sh"
         ],
         "timeoutMs": 10000
       },
       {
-        "id": "UserPromptSubmit",
+        "id": "user-prompt-submit",
         "event": "UserPromptSubmit",
         "command": [
           "sh",
-          "muse/hooks/weft-signal",
-          "muse",
-          "UserPromptSubmit"
+          "muse/hooks/user-prompt-submit.sh"
         ],
         "timeoutMs": 10000
       },
       {
-        "id": "PreToolUse-request_user_input",
+        "id": "pre-tool-use-request-user-input",
         "event": "PreToolUse",
         "command": [
           "sh",
-          "muse/hooks/weft-signal",
-          "muse",
-          "PreToolUse"
+          "muse/hooks/pre-tool-use-request-user-input.sh"
         ],
         "timeoutMs": 10000
       },
       {
-        "id": "PermissionRequest",
+        "id": "permission-request",
         "event": "PermissionRequest",
         "command": [
           "sh",
-          "muse/hooks/weft-signal",
-          "muse",
-          "PermissionRequest"
+          "muse/hooks/permission-request.sh"
         ],
         "timeoutMs": 10000
       },
       {
-        "id": "PostToolUse",
+        "id": "post-tool-use",
         "event": "PostToolUse",
         "command": [
           "sh",
-          "muse/hooks/weft-signal",
-          "muse",
-          "PostToolUse"
+          "muse/hooks/post-tool-use.sh"
         ],
         "timeoutMs": 10000
       },
       {
-        "id": "Stop",
+        "id": "stop",
         "event": "Stop",
         "command": [
           "sh",
-          "muse/hooks/weft-signal",
-          "muse",
-          "Stop"
+          "muse/hooks/stop.sh"
         ],
         "timeoutMs": 10000
       }

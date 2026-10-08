@@ -27,11 +27,11 @@ def hook_files():
             yield path, doc
 
 
-def entries(doc):
+def entries(doc, root):
     """(hook, matcher, command, has_matchers) for every registered command."""
     if isinstance(doc.get("capabilities"), dict):
         for h in doc["capabilities"]["hooks"]:
-            yield h["event"], None, shlex.join(h["command"]), False
+            yield h["event"], None, wrapped(root, h["command"]), False
         return
     for table in doc.values():
         if not isinstance(table, dict):
@@ -48,6 +48,15 @@ def words_of(command):
     lex = shlex.shlex(command, posix=True, punctuation_chars=True)
     lex.whitespace_split = True
     return list(lex)
+
+
+def wrapped(root, command):
+    """A Muse hook is `sh <script>`, one script per hook (Muse refuses two hooks
+    with one source); the script's last line is the command it runs."""
+    if len(command) == 2 and command[0] == "sh" and not command[1].endswith("weft-signal"):
+        lines = (root / command[1]).read_text().splitlines()
+        return lines[-1] if lines else ""
+    return shlex.join(command)
 
 
 def signal_args(command):
@@ -88,7 +97,7 @@ def check():
         root = PLUGINS / path.relative_to(PLUGINS).parts[0]
         if path.name != "user-hooks.json" and not any(root.rglob("weft-signal")):
             bad.append(f"{path}: no hooks/weft-signal shim in its plugin")
-        for hook, matcher, command, has_matchers in entries(doc):
+        for hook, matcher, command, has_matchers in entries(doc, root):
             where = f"{path}: {hook}"
             if any(w == "ringframe" or w.endswith("/ringframe") for w in words_of(command)):
                 bad.append(f"{where} runs ringframe")
