@@ -15,17 +15,13 @@ fallback = "human_handoff"
 
 # What the ringframe CLI reads about this harness. How to start it, resume it and
 # set its plugin up is not RingFrame's: those are in the harness's own file for
-# the tool that runs it. No text to match on its screen: an agent's state comes
+# the tool that runs it. No text to match on its screen: an agent's state is
 # from its hooks.
 # The name a person reads, in the handoff the CLI writes.
 title = "Muse Code"
 # The folder names this harness's files go by in a repository (its plugin
 # folder): how an Eval links a step that names the harness to its files.
 path_names = ["muse"]
-# Every hook payload carries it (observed on the echo provider).
-session_field = "session_id"
-# A hook names the project as `cwd`, and runs there.
-workspace_field = "cwd"
 
 [routing]
 precedence = ["native_goal", "native_plan", "native_direct"]
