@@ -17,9 +17,7 @@ jobs:
           import json, pathlib, sys
           bad = []
           for manifest, source in ((".claude-plugin/marketplace.json", lambda e: e["source"]),
-                                   (".agents/plugins/marketplace.json", lambda e: e["source"]["path"]),
-                                   (".cursor-plugin/marketplace.json", lambda e: e["source"]),
-                                   (".grok-plugin/marketplace.json", lambda e: e["source"])):
+                                   (".agents/plugins/marketplace.json", lambda e: e["source"]["path"])):
               entries = json.loads(pathlib.Path(manifest).read_text())["plugins"]
               names = [e["name"] for e in entries]
               if len(names) != len(set(names)):
@@ -30,9 +28,6 @@ jobs:
           versions = {json.loads(pathlib.Path(f).read_text())["version"] for f in
                       ("products/ringframe/plugins/claude/.claude-plugin/plugin.json",
                        "products/ringframe/plugins/agents/.codex-plugin/plugin.json",
-                       "products/ringframe/plugins/agents/.muse-plugin/plugin.json",
-                       "products/ringframe/plugins/cursor/.cursor-plugin/plugin.json",
-                       "products/ringframe/plugins/grok/.grok-plugin/plugin.json",
                        "products/ringframe/plugins/antigravity/plugin.json")}
           versions |= {e["version"] for e in json.loads(pathlib.Path(".claude-plugin/marketplace.json")
                                                          .read_text())["plugins"] if e["name"] == "rf"}

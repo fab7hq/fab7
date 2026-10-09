@@ -18,21 +18,13 @@ HARNESSES = pathlib.Path("products/weft/harnesses")
 
 
 def hook_files():
-    """Every file in RingFrame's plugins that registers hooks, and its plugin root."""
-    for path in sorted(PLUGINS.rglob("*.json")):
-        doc = json.loads(path.read_text())
-        if path.name in ("hooks.json", "user-hooks.json"):
-            yield path, doc
-        elif isinstance(doc.get("capabilities"), dict) and doc["capabilities"].get("hooks"):
-            yield path, doc
+    """Every hooks.json in RingFrame's plugins."""
+    for path in sorted(PLUGINS.rglob("hooks.json")):
+        yield path, json.loads(path.read_text())
 
 
-def entries(doc, root):
-    """(hook, matcher, command, has_matchers) for every registered command."""
-    if isinstance(doc.get("capabilities"), dict):
-        for h in doc["capabilities"]["hooks"]:
-            yield h["event"], None, wrapped(root, h["command"]), False
-        return
+def entries(doc):
+    """(hook, matcher, command) for every registered command."""
     for table in doc.values():
         if not isinstance(table, dict):
             continue
@@ -40,7 +32,7 @@ def entries(doc, root):
             for e in listed:
                 commands = [c["command"] for c in e["hooks"]] if "hooks" in e else [e["command"]]
                 for command in commands:
-                    yield hook, e.get("matcher"), command, True
+                    yield hook, e.get("matcher"), command
 
 
 def words_of(command):
@@ -50,20 +42,11 @@ def words_of(command):
     return list(lex)
 
 
-def wrapped(root, command):
-    """A Muse hook is `sh <script>`, one script per hook (Muse refuses two hooks
-    with one source); the script's last line is the command it runs."""
-    if len(command) == 2 and command[0] == "sh" and not command[1].endswith("weft-signal"):
-        lines = (root / command[1]).read_text().splitlines()
-        return lines[-1] if lines else ""
-    return shlex.join(command)
-
-
 def signal_args(command):
-    """(reply, id, hook) from a command that runs the shim or `weft signal`, else None."""
+    """(reply, id, hook) from a command that runs the shim, else None."""
     words = words_of(command)
     for i, w in enumerate(words):
-        if w.endswith("weft-signal") or (w == "signal" and i > 0 and words[i - 1] == "weft"):
+        if w.endswith("weft-signal"):
             rest = words[i + 1 :]
             reply = None
             if rest[:1] == ["--reply"]:
@@ -90,14 +73,12 @@ def check():
         table = tomllib.loads(path.read_text()).get("signal")
         if table is not None:
             signals[path.stem] = table
-    seen = {}  # id -> [(hook, matcher, has_matchers)]
+    seen = {}  # id -> [(hook, matcher)]
     for path, doc in hook_files():
-        # Cursor's user hooks are copied into ~/.cursor by the person, away from
-        # any plugin folder, so they run `weft signal` inline instead of the shim.
         root = PLUGINS / path.relative_to(PLUGINS).parts[0]
-        if path.name != "user-hooks.json" and not any(root.rglob("weft-signal")):
+        if not any(root.rglob("weft-signal")):
             bad.append(f"{path}: no hooks/weft-signal shim in its plugin")
-        for hook, matcher, command, has_matchers in entries(doc, root):
+        for hook, matcher, command in entries(doc):
             where = f"{path}: {hook}"
             if any(w == "ringframe" or w.endswith("/ringframe") for w in words_of(command)):
                 bad.append(f"{where} runs ringframe")
@@ -113,14 +94,14 @@ def check():
                 bad.append(f"{where} names {harness}, which has no harness file with [signal]")
                 continue
             rows = [r for r in table.get("on", []) if r["hook"] == hook
-                    and (r.get("tool") is None or not has_matchers or r.get("tool") == matcher)]
+                    and (r.get("tool") is None or r.get("tool") == matcher)]
             if not rows:
                 bad.append(f"{where} (matcher {matcher}) is in no [signal] row of {harness}")
                 continue
             want = rows[0].get("reply", table.get("reply"))
             if not same_reply(reply, want):
                 bad.append(f"{where} replies {reply!r}; [signal] says {want!r}")
-            seen.setdefault(harness, []).append((hook, matcher, has_matchers))
+            seen.setdefault(harness, []).append((hook, matcher))
     for harness, table in signals.items():
         for field in ("session", "workspace", "on"):
             if field not in table:
@@ -128,8 +109,8 @@ def check():
         for row in table.get("on", []):
             if row.get("forward") == "tool" and row.get("outcome") not in ("succeeded", "failed"):
                 bad.append(f"{harness}: {row['hook']} forwards a tool with no outcome")
-            if not any(h == row["hook"] and (row.get("tool") is None or not m_ok or m == row.get("tool"))
-                       for h, m, m_ok in seen.get(harness, [])):
+            if not any(h == row["hook"] and (row.get("tool") is None or m == row.get("tool"))
+                       for h, m in seen.get(harness, [])):
                 bad.append(f"{harness}: [signal] row {row['hook']} {row.get('tool') or ''} is not registered")
     return bad
 
