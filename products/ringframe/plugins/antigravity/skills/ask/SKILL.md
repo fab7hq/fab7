@@ -297,4 +297,7 @@ After successful confirmation, use the selected capability's delivery fields:
 Submission is `observed` only when the prompt hook matches the compiled input.
 `ringframe ask submitted --ask <ask_id>` records the person's attestation as
 `attributed`; use it only when the person actually attests submission. A handoff
-alone does not establish submission.
+alone does not establish submission. A compiled prompt arriving in this
+conversation is not an attestation: whoever typed it has recorded it. Never
+run `ask submitted` because a prompt arrived; run it only when the person says
+in words that they submitted it.
