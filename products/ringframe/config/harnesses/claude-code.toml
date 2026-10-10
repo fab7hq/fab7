@@ -9,6 +9,12 @@ invocation_prefix = "/rf:"
 # claude-code 2.1.278: a paste of 512 characters or more becomes `[Pasted text #N]`.
 # A prompt at or over this length cannot carry its command in the same paste.
 paste_fold_chars = 512
+# What its prompt hook reports for a prompt that is wholly one long paste: the
+# paste inside these markers, `{id}` the id it gives the paste (HostLab
+# ringframe-ask-ledger-q19, Claude Code 2.1.295). A typed command before the
+# paste leaves it unwrapped. `observe prompt` compares without them.
+paste_open = "\n\n<pasted_content id=\"{id}\">\n"
+paste_close = "\n</pasted_content id=\"{id}\">\n"
 subagents = true
 fallback = "human_handoff"
 
