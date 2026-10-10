@@ -1,0 +1,38 @@
+{
+  "rf-state": {
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "./hooks/weft-signal --reply '{}' antigravity PreInvocation"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "ask_question",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./hooks/weft-signal --reply '{\"decision\":\"allow\"}' antigravity PreToolUse"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "ask_question",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./hooks/weft-signal --reply '{}' antigravity PostToolUse"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "./hooks/weft-signal --reply '{}' antigravity Stop"
+      }
+    ]
+  }
+}
