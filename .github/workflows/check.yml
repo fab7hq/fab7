@@ -57,6 +57,11 @@ jobs:
       - name: the plugins' hooks match Weft's [signal]
         run: python3 .github/scripts/hooks_match_signal.py
 
+      # A harness file that does not say where its received prompt is is refused
+      # (Weft ADR-0033 D4), on made-up harnesses.
+      - name: the check refuses a harness file without its received prompt
+        run: python3 .github/scripts/test_hooks_match_signal.py
+
       # Configuration is data that lands on a user's machine and is theirs to edit, so
       # nothing here inspects its contents. This only proves the product can load it.
       - name: install the core this configuration is for

@@ -5,6 +5,10 @@ RingFrame's plugin hook file for that harness, with the row's tool as its matche
 where it names one and the row's reply as its --reply; nothing else is
 registered; every entry runs the weft-signal shim with the file's id; and no
 entry runs ringframe.
+
+Every shipped harness file says where the prompt its harness received is: a
+[signal] with `prompt` and a row that forwards it. Weft proves a send by that
+report, and sends nothing to a harness without one (Weft ADR-0033 D4).
 """
 
 import json
@@ -17,9 +21,9 @@ PLUGINS = pathlib.Path("products/ringframe/plugins")
 HARNESSES = pathlib.Path("products/weft/harnesses")
 
 
-def hook_files():
+def hook_files(plugins):
     """Every hooks.json in RingFrame's plugins."""
-    for path in sorted(PLUGINS.rglob("hooks.json")):
+    for path in sorted(plugins.rglob("hooks.json")):
         yield path, json.loads(path.read_text())
 
 
@@ -66,16 +70,20 @@ def same_reply(a, b):
         return a == b
 
 
-def check():
+def check(plugins=PLUGINS, harnesses=HARNESSES):
     bad = []
     signals = {}
-    for path in sorted(HARNESSES.glob("*.toml")):
+    for path in sorted(harnesses.glob("*.toml")):
         table = tomllib.loads(path.read_text()).get("signal")
+        if table is None or "prompt" not in table:
+            bad.append(f"{path.stem}: [signal] does not say where the received prompt is (prompt)")
+        elif not any(r.get("forward") == "prompt" for r in table.get("on", [])):
+            bad.append(f"{path.stem}: no [signal] row forwards the received prompt")
         if table is not None:
             signals[path.stem] = table
     seen = {}  # id -> [(hook, matcher)]
-    for path, doc in hook_files():
-        root = PLUGINS / path.relative_to(PLUGINS).parts[0]
+    for path, doc in hook_files(plugins):
+        root = plugins / path.relative_to(plugins).parts[0]
         if not any(root.rglob("weft-signal")):
             bad.append(f"{path}: no hooks/weft-signal shim in its plugin")
         for hook, matcher, command in entries(doc):
