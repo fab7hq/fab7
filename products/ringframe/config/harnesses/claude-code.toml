@@ -10,8 +10,8 @@ invocation_prefix = "/rf:"
 # A prompt at or over this length cannot carry its command in the same paste.
 paste_fold_chars = 512
 # What its prompt hook reports for a prompt that is wholly one long paste: the
-# paste inside these markers, `{id}` the id it gives the paste (HostLab
-# ringframe-ask-ledger-q19, Claude Code 2.1.295). A typed command before the
+# paste inside these markers, `{id}` the id it gives the paste (Claude
+# Code 2.1.295). A typed command before the
 # paste leaves it unwrapped. `observe prompt` compares without them.
 paste_open = "\n\n<pasted_content id=\"{id}\">\n"
 paste_close = "\n</pasted_content id=\"{id}\">\n"
@@ -21,14 +21,14 @@ fallback = "human_handoff"
 # What the ringframe CLI reads about this harness. How to start it, resume it and
 # set its plugin up is not RingFrame's: those are in the harness's own file for
 # the tool that runs it. No text to match on its screen, and no hook payload: the CLI
-# reads none (ADR-0022).
+# reads none.
 # The name a person reads, in the handoff the CLI writes.
 title = "Claude Code"
 # The folder names this harness's files go by in a repository (its plugin
 # folder): how an Eval links a step that names the harness to its files.
 path_names = ["claude"]
 
-# Which tools `ringframe observe tool` makes something of (ADR-0022).
+# Which tools `ringframe observe tool` makes something of.
 [observe]
 delivery_tool = "EnterPlanMode"   # its success is a delivery receipt
 shell_tool = "Bash"               # its runs are tool facts

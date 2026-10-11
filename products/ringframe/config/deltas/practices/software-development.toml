@@ -345,4 +345,4 @@ tier = "core"
 text = """\
 Where the requirement is silent, write the assumption you are making in one \
 line before acting on it."""
-status = "candidate"   # q09 found no effect from the abstract form; this form is to be evaluated
+status = "candidate"   # the abstract form showed no effect; this form is to be evaluated

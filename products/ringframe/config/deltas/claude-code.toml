@@ -1,4 +1,4 @@
-# RingFrame route rules for Claude Code. Rendered by the CLI only when `status = "qualified"`; qualified by ringframe-route-rules-q01.
+# RingFrame route rules for Claude Code. Rendered by the CLI only when `status = "qualified"`.
 # A route rule says what the turn delivers, the order of the work, when it
 # stops and what it shows; practice rules say what good work looks like.
 # What each rule rests on: research/knowledge-base/harnesses/claude-code/capability.md.

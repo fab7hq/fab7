@@ -1,4 +1,4 @@
-"""RingFrame's plugin hook files and Weft's [signal] stay in step (Weft ADR-0030 D6).
+"""RingFrame's plugin hook files and Weft's [signal] stay in step.
 
 For each Weft harness file with [signal]: every hook a row names is registered in
 RingFrame's plugin hook file for that harness, with the row's tool as its matcher
@@ -8,7 +8,7 @@ entry runs ringframe.
 
 Every shipped harness file says where the prompt its harness received is: a
 [signal] with `prompt` and a row that forwards it. Weft proves a send by that
-report, and sends nothing to a harness without one (Weft ADR-0033 D4).
+report, and sends nothing to a harness without one.
 """
 
 import json

@@ -1,5 +1,5 @@
-"""fab7's check refuses a harness file that does not say where its received prompt is
-(Weft ADR-0033 D4), on made-up harnesses."""
+"""fab7's check refuses a harness file that does not say where its received prompt is,
+on made-up harnesses."""
 
 import pathlib
 import sys

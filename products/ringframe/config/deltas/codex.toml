@@ -1,4 +1,4 @@
-# RingFrame route rules for Codex. Rendered by the CLI only when `status = "qualified"`; qualified by ringframe-route-rules-q01.
+# RingFrame route rules for Codex. Rendered by the CLI only when `status = "qualified"`.
 # A route rule says what the turn delivers, the order of the work, when it
 # stops and what it shows; practice rules say what good work looks like.
 # What each rule rests on: research/knowledge-base/harnesses/codex/capability.md.
@@ -12,7 +12,7 @@ label = "Plan As Files"
 status = "qualified"
 capability = "native_plan"
 applies_to = { result = ["plan"] }
-# Preflight P0.3 of ringframe-route-rules-q01 (codex-cli 0.158.0): Plan mode
+# Measured on codex-cli 0.158.0: Plan mode
 # wrote nothing even when told to; it ends with a proposed plan, and the files
 # are written on the next turn, out of Plan mode.
 text = """\
@@ -31,8 +31,8 @@ matrix_ref = "https://docs.getfab7.com/ringframe/harnesses/codex#ask"
 [[entries]]
 id = "codex.native_plan.after_approval"
 label = "After Approval"
-# No generated prompt carried it in ringframe-route-rules-q01: every L2
-# attempt (5 of 5) classified the bounded change as a plan, as the routing
+# No generated prompt carried it: every attempt (5 of 5)
+# classified the bounded change as a plan, as the routing
 # guidance's plan-first rule directs.
 status = "candidate"
 capability = "native_plan"

@@ -1,4 +1,4 @@
-# RingFrame route rules for Antigravity. Rendered by the CLI only when `status = "qualified"`; qualified by ringframe-route-rules-q01.
+# RingFrame route rules for Antigravity. Rendered by the CLI only when `status = "qualified"`.
 # A route rule says what the turn delivers, the order of the work, when it
 # stops and what it shows; practice rules say what good work looks like.
 # What each rule rests on: research/knowledge-base/harnesses/antigravity/capability.md.
@@ -28,8 +28,8 @@ matrix_ref = "https://docs.getfab7.com/ringframe/harnesses/antigravity#ask"
 [[entries]]
 id = "antigravity.native_plan.after_approval"
 label = "After Approval"
-# No generated prompt carried it in ringframe-route-rules-q01: every L2
-# attempt (5 of 5) classified the bounded change as a plan, as the routing
+# No generated prompt carried it: every attempt (5 of 5)
+# classified the bounded change as a plan, as the routing
 # guidance's plan-first rule directs.
 status = "candidate"
 capability = "native_plan"

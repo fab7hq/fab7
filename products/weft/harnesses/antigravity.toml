@@ -37,12 +37,12 @@ on = []
 # What `list` prints, instead of JSON, when nothing is installed.
 none = "No imported plugins."
 
-# What each of its hooks means to Weft (ADR-0030 D4). RingFrame's plugin registers
+# What each of its hooks means to Weft. RingFrame's plugin registers
 # these hooks, every one running `weft-signal <id> <hook>`; fab7's check keeps the
 # two in step. Payload paths are dotted; `forward` passes a prompt or a tool to
-# `ringframe observe` (D9).
-# A PreToolUse answered without a decision is a deny (agy 1.2.12,
-# ringframe-weft-waiting-q01), so that hook answers allow. Its payload's tool
+# `ringframe observe`.
+# A PreToolUse answered without a decision is a deny (agy
+# 1.2.12), so that hook answers allow. Its payload's tool
 # field is not recorded yet: its hook file registers PreToolUse and
 # PostToolUse for ask_question only, and these rows name no tool. Its hooks
 # run from the plugin's own directory and name no cwd: the workspace is the
@@ -52,7 +52,7 @@ session = "conversationId"
 workspace = "workspacePaths"
 # No hook carries the prompt; the transcript the payload names holds it, and
 # when PreInvocation follows a typed prompt its last line is that prompt
-# (HostLab probe A, agy 1.3.2).
+# (agy 1.3.2).
 prompt = { file = "transcriptPath", last = { type = "USER_INPUT" }, field = "content", between = ["<USER_REQUEST>\n", "\n</USER_REQUEST>"] }
 reply = "{}"
 on = [

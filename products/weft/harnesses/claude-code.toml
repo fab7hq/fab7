@@ -35,10 +35,10 @@ available = ["available"]
 name = "id"
 on = ["enabled"]
 
-# What each of its hooks means to Weft (ADR-0030 D4). RingFrame's plugin registers
+# What each of its hooks means to Weft. RingFrame's plugin registers
 # these hooks, every one running `weft-signal <id> <hook>`; fab7's check keeps the
 # two in step. Payload paths are dotted; `forward` passes a prompt or a tool to
-# `ringframe observe` (D9).
+# `ringframe observe`.
 [signal]
 session = "session_id"
 workspace = "cwd"
