@@ -39,10 +39,10 @@ from [fab7hq/docs](https://github.com/fab7hq/docs).
 ## Releases
 
 Tagged `vX.Y.Z`. A tag covers every product here, so any change — a new rule, a
-plugin fix, a new product — is one version bump, and it matches the version of
-[Weft](https://github.com/fab7hq/weft). Plugins install from the default
-branch; a product that reads configuration from this repository resolves the
-highest tag.
+plugin fix, a new product — is one version bump. It is tagged only when this
+repository changes, so it can sit behind [Weft](https://github.com/fab7hq/weft)'s
+version. Plugins install from the default branch; a product that reads
+configuration from this repository resolves the highest tag.
 
 ## License
 
