@@ -1,0 +1,105 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${GROK_PLUGIN_ROOT}/hooks/weft-signal grok SessionStart"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${GROK_PLUGIN_ROOT}/hooks/weft-signal grok UserPromptSubmit"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "ask_user_question",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${GROK_PLUGIN_ROOT}/hooks/weft-signal grok PreToolUse"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${GROK_PLUGIN_ROOT}/hooks/weft-signal grok Notification"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${GROK_PLUGIN_ROOT}/hooks/weft-signal grok PostToolUse"
+          }
+        ]
+      }
+    ],
+    "PostToolUseFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${GROK_PLUGIN_ROOT}/hooks/weft-signal grok PostToolUseFailure"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${GROK_PLUGIN_ROOT}/hooks/weft-signal grok Stop"
+          }
+        ]
+      }
+    ],
+    "StopCancelled": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${GROK_PLUGIN_ROOT}/hooks/weft-signal grok StopCancelled"
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${GROK_PLUGIN_ROOT}/hooks/weft-signal grok StopFailure"
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${GROK_PLUGIN_ROOT}/hooks/weft-signal grok SessionEnd"
+          }
+        ]
+      }
+    ]
+  }
+}
