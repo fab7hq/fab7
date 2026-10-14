@@ -10,7 +10,7 @@ The marketplace for Fab7 plugins. Add it once, install any Fab7 product from it.
 | `products/ringframe/config/` | RingFrame's configuration: harness profiles, rules and route rules |
 | `products/weft/harnesses/` | What [Weft](https://docs.getfab7.com/weft/) knows of each harness |
 
-Claude Code, Codex and Antigravity are supported.
+Claude Code, Codex, Antigravity and Grok Build are supported.
 
 ## Install
 
