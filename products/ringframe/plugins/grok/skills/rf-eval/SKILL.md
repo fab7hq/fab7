@@ -42,12 +42,13 @@ $ARGUMENTS
 
 Before opening, read `config.toml` in this skill's directory, beside this `SKILL.md`, once: its `[eval] parallel` is how many tasks
 may run at once (4 when the file is missing or unreadable; say so once in the
-report). Each role's model and effort are in this plugin's agent definitions,
+report). Each role's effort is in this plugin's agent definitions,
 `rf-map`, `rf-reduce` and `rf-confirm`, in the plugin's `agents` folder, two levels above this `SKILL.md`: RingFrame reads them
 when you pass that folder as `--agents-from <folder>`; do not read them
 yourself. The invocation's role words win over them, key by key: pass those
-as `--agents '<json>'`, with only the keys the words set. Never guess a model
-or an effort.
+as `--agents '<json>'`, with only the keys the words set. A judge runs on
+this session's model: a role word's model cannot reach it, so say so once and
+leave `model` out. Never guess an effort.
 
 ## Commands
 
@@ -66,7 +67,7 @@ stop. Setting the repository up is the person's to do, at its root.
 Skip this for `debate` or `continue`, but resolve the roles the same way; for
 `gather`, stop after it. Run `ringframe eval open --host grok --agents-from <folder>` once, with the
 invocation's `--override` when it has one, adding `--agents '<json>'` with the
-invocation's role words only, for example `--agents '{"confirm":{"model":"opus","effort":"high"}}'`; no
+invocation's role words only, for example `--agents '{"confirm":{"effort":"high"}}'`; no
 `--agents` flag when it has none. Keep `eval_id`.
 
 - Exit 2 `eval.no_open_ask`: report "nothing to evaluate: no open Ask" and
@@ -89,18 +90,16 @@ Repeat:
    out again at once.
 2. When its `state` is `done`, go to §3.
 3. Spawn one sub-agent for every entry of `tasks`, all of them together: one
-   `Agent` call per task, all in one message, in the foreground when the tool
-   lets you choose: `subagent_type` the task's `agent`, one of this plugin's
-   `rf-map`, `rf-reduce` and `rf-confirm` (listed among your agent types,
-   perhaps as `rf:rf-map`); `prompt` the
-   task's `prompt`, verbatim and nothing else; `model` the task's `model` when
-   it has one, as an alias: `sonnet`, `opus`, `haiku` or `fable` (the tool
-   refuses a full model ID, so pass `claude-opus-5-5` as `opus`); a
-   `description` naming the task id. The task's `effort` is
-   already in its task file; pass it nowhere.
+   `spawn_subagent` call per task, all in one message, in the foreground
+   (no `background`): `subagent_type` the task's `agent`, one of this
+   plugin's `rf-map`, `rf-reduce` and `rf-confirm` (listed among your agent
+   types, perhaps as `rf:rf-map`); `prompt` the task's `prompt`, verbatim and
+   nothing else; a `description` naming the task id. `spawn_subagent` takes
+   no model: a judge runs on this session's. The task's `effort` is already
+   in its task file; pass it nowhere.
 4. Wait until every sub-agent you spawned has replied. A reply is one line,
    `<task id> accepted` or `<task id> failed: <reason>`; read nothing else and
-   check nothing. The `Agent` result is the reply.
+   check nothing. The `spawn_subagent` result is the reply.
 5. Go back to 1. When `tasks` is empty and the state is `running`, other tasks
    are still out: wait for your sub-agents, then run `next` again.
 
