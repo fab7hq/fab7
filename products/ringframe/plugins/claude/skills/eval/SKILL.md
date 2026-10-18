@@ -3,7 +3,7 @@ name: eval
 description: Judge the work against every open Ask with small, checked judging tasks RingFrame hands out; record a verdict with its confidence. Asks nothing.
 argument-hint: [gather | debate <eval_id>] [role=model/effort ...]
 disable-model-invocation: true
-allowed-tools: Agent Bash(ringframe *) Read(//**)
+allowed-tools: Agent Bash(ringframe *) Read(//**) Edit(./.fab7/rf/tmp/**)
 ---
 
 You are running RingFrame Eval inside Claude Code. RingFrame reads the change,
