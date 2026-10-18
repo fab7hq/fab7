@@ -93,7 +93,7 @@ prompt_prefix_kind = "inline"   # an agent-directed command: it expands into thi
 qualification = {}
 limitations = [
   "/goal is user-entered on Antigravity; completion is the model's own marker",
-  "no prompt hook exists, so a submission is attributed, never observed",
+  "no prompt hook exists: run in Weft, a submission is observed from the transcript PreInvocation names; run alone, it is attributed",
   "forced continuation ends only on the complete or the cancelled marker",
 ]
 
@@ -122,7 +122,7 @@ prompt_prefix_kind = "inline"   # an agent-directed command for this turn
 qualification = {}
 limitations = [
   "This profile maps Plan to user submission",
-  "no prompt hook exists, so a submission is attributed, never observed",
+  "no prompt hook exists: run in Weft, a submission is observed from the transcript PreInvocation names; run alone, it is attributed",
 ]
 
 [[capabilities]]
@@ -148,16 +148,3 @@ requires_explicit_request_for_effects = [
 ]
 qualification = {}
 limitations = ["no delivery receipt exists for same-turn continuation"]
-
-[conversation]
-verified = "agy 1.3.5"
-path = "transcriptPath"
-find = "brain/{session}/.system_generated/logs/transcript.jsonl"
-time = "created_at"
-person = { when = { type = "USER_INPUT", source = "USER_EXPLICIT" }, text = "content", between = ["<USER_REQUEST>\n", "\n</USER_REQUEST>"] }
-agent = { when = { type = "PLANNER_RESPONSE" }, text = "content" }
-steps = { when = { type = "PLANNER_RESPONSE" }, in = "tool_calls", tool = "name", input = "args", call = "step_index" }
-outcomes = { when = { type = ["GENERIC", "TOOL_RESPONSE"] }, call = "step_index", text = "content", failed = { status = "ERROR" } }
-argument = { run_command = "CommandLine", view_file = "AbsolutePath", write_to_file = "TargetFile", replace_file_content = "TargetFile", ask_question = "questions.0.question", search_web = "query", read_url_content = "Url" }
-names = { run_command = "Run", view_file = "Read", write_to_file = "Write", replace_file_content = "Update", ask_question = "Ask" }
-

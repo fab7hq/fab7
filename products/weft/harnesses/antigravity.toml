@@ -41,9 +41,10 @@ on = ["enabled"]
 # two in step. Payload paths are dotted; `forward` passes a prompt or a tool to
 # `ringframe observe`.
 # A PreToolUse answered without a decision is a deny (agy
-# 1.2.12), so that hook answers allow. Its payload's tool
-# field is not recorded yet: its hook file registers PreToolUse and
-# PostToolUse for ask_question only, and these rows name no tool. Its hooks
+# 1.2.12), so that hook answers allow. Its payload names the tool at
+# `toolCall.name` and a command at `toolCall.args.CommandLine`; neither is
+# read yet: its hook file registers PreToolUse and PostToolUse for
+# ask_question only, and these rows name no tool. Its hooks
 # run from the plugin's own directory and name no cwd: the workspace is the
 # first of `workspacePaths`; there is no session_id.
 [signal]
