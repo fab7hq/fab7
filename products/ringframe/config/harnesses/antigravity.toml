@@ -93,7 +93,7 @@ prompt_prefix_kind = "inline"   # an agent-directed command: it expands into thi
 qualification = {}
 limitations = [
   "/goal is user-entered on Antigravity; completion is the model's own marker",
-  "no prompt hook exists: run in Weft, a submission is observed from the transcript PreInvocation names; run alone, it is attributed",
+  "no prompt hook exists: a tool that runs it observes a submission from the transcript PreInvocation names; run alone, a submission is attributed",
   "forced continuation ends only on the complete or the cancelled marker",
 ]
 
@@ -122,7 +122,7 @@ prompt_prefix_kind = "inline"   # an agent-directed command for this turn
 qualification = {}
 limitations = [
   "This profile maps Plan to user submission",
-  "no prompt hook exists: run in Weft, a submission is observed from the transcript PreInvocation names; run alone, it is attributed",
+  "no prompt hook exists: a tool that runs it observes a submission from the transcript PreInvocation names; run alone, a submission is attributed",
 ]
 
 [[capabilities]]
