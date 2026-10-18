@@ -45,6 +45,10 @@ Identify the open Asks and the latest completed Eval sharing an open
 Ask, including its verdict and confidence. If there are no open Asks, report
 nothing to close and stop. If either command fails, show the error and stop.
 
+An argument `--eval <eval_id>` names the Eval this Seal binds, as a tool that
+runs RingFrame types it: pass it to `seal create`, and do not read it as the
+disposition or the note.
+
 Seal binds the latest matching Eval by default; pass `--eval <eval_id>` only
 when the person names another. An Eval's absence, age, changed subject, or
 verdict does not require a new Eval or block the person's decision.
