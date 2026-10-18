@@ -8,6 +8,9 @@ program = "claude"
 # How a recorded session is opened again; the id is appended.
 resume = ["--resume"]
 # No `transcript`: it prints inline, so the terminal keeps its history.
+# Every agent Weft starts: RingFrame's working files, which its Eval judges
+# write, written without asking. Every other write still asks.
+flags = ["--allowedTools=Edit(./.fab7/rf/tmp/**)"]
 # Turbo mode, when Weft's config.toml turns it on: every permission granted and no
 # question asked, for a person who wants the agent to run on its own.
 turbo = ["--dangerously-skip-permissions"]
