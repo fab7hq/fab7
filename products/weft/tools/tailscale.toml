@@ -1,24 +1,18 @@
 # Weft tool file: Tailscale Funnel, a tunnel adapter for Weft's Remote.
 # Everything Weft knows about this provider: how to start it, how to read its
-# address, and how to install it when the person says yes. Funnel puts this
-# machine's port on the internet at its stable `<machine>.<tailnet>.ts.net`
-# address; the phone needs no Tailscale app. Shipped by fab7; `install.sh` and
-# `weft update` copy it into ~/.fab7/weft/tools/, replaced on every update.
-# Never edit the copy.
+# address, and where its installation guide is: installing it is the person's,
+# with `tailscale` on PATH. Funnel puts this machine's port on the internet at
+# its stable `<machine>.<tailnet>.ts.net` address; the phone needs no
+# Tailscale app. Shipped by fab7; `install.sh` and `weft update` copy it into
+# ~/.fab7/weft/tools/, replaced on every update. Never edit the copy.
 kind = "tunnel"
 title = "Tailscale Funnel"
 program = "tailscale"
-# Where Tailscale's macOS app keeps its command line, which is not on PATH:
-# looked at after `[remote] program` and PATH.
-paths = ["/Applications/Tailscale.app/Contents/MacOS/Tailscale"]
 # What follows the program to start it; {port} is Weft's loopback port.
 run = ["funnel", "{port}"]
 # Its address is the first https:// URL in its output whose host ends so.
 address = ".ts.net"
 # Said wherever Remote is on: what this tunnel can see.
 note = "TLS ends on this machine; Tailscale's relay sees the host name"
-
-# When `brew` is on PATH, the person's own package manager installs the app.
-# Nothing is downloaded otherwise: Tailscale runs with its own system daemon.
-[install.brew]
-argv = ["brew", "install", "--cask", "tailscale-app"]
+# How the person installs it, opened from Remote's setup.
+guide = "https://github.com/fab7hq/fab7/blob/main/products/weft/tools/tailscale.md"

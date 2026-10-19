@@ -1,9 +1,9 @@
 # Weft tool file: Cloudflare Tunnel, a tunnel adapter for Weft's Remote.
 # Everything Weft knows about this provider: how to start it, how to read its
-# address, and how to install it when the
-# person says yes. TryCloudflare's quick tunnel needs no account and no
-# settings. Shipped by fab7; `install.sh` and `weft update` copy it into
-# ~/.fab7/weft/tools/, replaced on every update. Never edit the copy.
+# address, and where its installation guide is: installing it is the person's.
+# TryCloudflare's quick tunnel needs no account and no settings. Shipped by
+# fab7; `install.sh` and `weft update` copy it into ~/.fab7/weft/tools/,
+# replaced on every update. Never edit the copy.
 kind = "tunnel"
 title = "Cloudflare Tunnel"
 program = "cloudflared"
@@ -13,21 +13,5 @@ run = ["tunnel", "--no-autoupdate", "--url", "http://127.0.0.1:{port}"]
 address = ".trycloudflare.com"
 # Said wherever Remote is on: what this tunnel can see.
 note = "traffic is decrypted at Cloudflare's edge"
-
-# When `brew` is on PATH, the person's own package manager installs it, and
-# keeps it updated.
-[install.brew]
-argv = ["brew", "install", "cloudflared"]
-
-# Otherwise Cloudflare's latest release on GitHub, as Weft installs itself,
-# into ~/.fab7/weft/bin. Each machine's asset; a .tgz holds the program at its
-# top. The asset must match GitHub's digest for it, and the program the
-# checksum Cloudflare lists for that asset in the release's notes.
-[install.download]
-repo = "cloudflare/cloudflared"
-
-[install.download.assets]
-darwin-arm64 = "cloudflared-darwin-arm64.tgz"
-darwin-amd64 = "cloudflared-darwin-amd64.tgz"
-linux-amd64 = "cloudflared-linux-amd64"
-linux-arm64 = "cloudflared-linux-arm64"
+# How the person installs it, opened from Remote's setup.
+guide = "https://github.com/fab7hq/fab7/blob/main/products/weft/tools/cloudflared.md"
