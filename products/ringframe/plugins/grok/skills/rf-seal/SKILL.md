@@ -55,9 +55,12 @@ Seal binds the latest matching Eval by default; pass `--eval <eval_id>` only
 when the person names another. An Eval's absence, age, changed subject, or
 verdict does not require a new Eval or block the person's decision.
 
+The Asks this Seal closes are the bound Eval's: the open Asks in its
+`basis.asks`. With no Eval, they are every open Ask.
+
 ## 2. Confirm the decision
 
-Show the open Ask titles, the selected Eval's verdict and confidence (or
+Show the titles of the Asks this Seal closes, the selected Eval's verdict and confidence (or
 "no Eval"), the disposition, and any supplied note through native confirmation.
 Dispositions are `accepted`, `rejected`, `deferred`, and `abandoned`; each closes
 the Asks. Never choose a disposition for the person if none was supplied.
