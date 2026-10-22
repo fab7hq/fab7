@@ -100,6 +100,16 @@
           }
         ]
       }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${GROK_PLUGIN_ROOT}/hooks/weft-signal grok SubagentStart"
+          }
+        ]
+      }
     ]
   }
 }
