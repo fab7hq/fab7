@@ -81,9 +81,11 @@ jobs:
           curl -fsSL -o "$archive" "$base/$archive"
           curl -fsSL -o "$archive.sha256" "$base/$archive.sha256"
           sha256sum -c "$archive.sha256"
-          tar -xzf "$archive"
-          sudo install -m 755 ringframe /usr/local/bin/ringframe
-          rm -f "$archive" "$archive.sha256" ringframe weft
+          # Unpacked aside: the archive holds the app and fab7's files too.
+          work=$(mktemp -d)
+          tar -xzf "$archive" -C "$work"
+          sudo install -m 755 "$work/ringframe" /usr/local/bin/ringframe
+          rm -rf "$work" "$archive" "$archive.sha256"
           ringframe --version
       - name: the product can load this configuration
         run: |
