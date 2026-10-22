@@ -51,3 +51,36 @@ Before your final message, run the checks that show the change works, \
 report each command with its result, and list the files you changed."""
 why = "Same-turn work has no receipt; the final message is the only record of what was checked."
 matrix_ref = "https://docs.getfab7.com/ringframe/harnesses/grok#ask"
+
+[[entries]]
+id = "grok.native_goal.step_loop"
+label = "Step Loop"
+status = "candidate"
+capability = "native_goal"
+applies_to = { result = ["workspace_change"] }
+# It works a plan, so the prompt must name one the workspace holds, by path.
+names_plan = true
+text = """\
+Work the plan's steps one at a time, in its order. Per step: read the code \
+it touches against the step, make the change test-first, then review the \
+diff against the step."""
+why = """\
+A persistent objective needs an iteration shape; the owner's loop is \
+analyze, TDD, review. Outcome judgement belongs to rf:eval."""
+matrix_ref = "https://docs.getfab7.com/ringframe/harnesses/grok#ask"
+
+[[entries]]
+id = "grok.native_goal.done_check"
+label = "Done Check"
+status = "candidate"
+capability = "native_goal"
+text = """\
+An independent review must reproduce the evidence before the goal is \
+complete, so show each check as you run it: the command and its result. Done \
+when every step's check has passed here. If a step needs the owner, write \
+`BLOCKED: <step>: <question>` and pause the goal there."""
+why = """\
+Grok marks a goal complete only after an evidence review confirms it, and \
+pauses it with the gaps otherwise: checks shown give that review something \
+to reproduce, and a blocked step has no other way out."""
+matrix_ref = "https://docs.getfab7.com/ringframe/harnesses/grok#ask"

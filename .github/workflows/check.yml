@@ -61,6 +61,9 @@ jobs:
       - name: the plugins' hooks match Weft's [signal]
         run: python3 .github/scripts/hooks_match_signal.py
 
+      - name: each harness file's judge defaults are its plugin's judges' efforts
+        run: python3 .github/scripts/eval_defaults_match_agents.py
+
       # A harness file that does not say where its received prompt is is refused,
       # on made-up harnesses.
       - name: the check refuses a harness file without its received prompt

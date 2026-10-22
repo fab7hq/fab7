@@ -79,7 +79,7 @@ sources = [
   "research/knowledge-base/harnesses/antigravity/capability.md",
   "https://antigravity.google/docs/slash-commands/",
 ]
-purpose = "Antigravity long-running goal, entered by the person with /goal"
+purpose = "Works on its own until it marks the goal done"
 activation = {}
 confirmation = { tool = "ask_question" }
 continuation = """\
@@ -107,7 +107,7 @@ sources = [
   "research/knowledge-base/harnesses/antigravity/capability.md",
   "https://antigravity.google/docs/slash-commands/",
 ]
-purpose = "Antigravity plan: a plan artifact and the person's approval before code changes"
+purpose = "Writes a plan for your approval before it changes code"
 activation = {}
 confirmation = { tool = "ask_question" }
 continuation = """\
@@ -133,7 +133,7 @@ capability; also work the user explicitly asks to execute immediately or \
 without planning. Effects listed in requires_explicit_request_for_effects \
 require that explicit source intent."""
 sources = ["research/knowledge-base/harnesses/antigravity/capability.md"]
-purpose = "continue immediately under normal permissions"
+purpose = "Does the work now, in this turn"
 activation = {}
 confirmation = { tool = "ask_question" }
 continuation = "same turn"

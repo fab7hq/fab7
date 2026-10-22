@@ -87,7 +87,7 @@ A plan or analysis before implementation, or bounded work with effects when \
 the user has not requested immediate execution. Do not prefer this general \
 default over a fitting continuing objective or dedicated review."""
 sources = ["https://code.claude.com/docs/en/tools-reference"]
-purpose = "read-only exploration and a reviewable plan before effects"
+purpose = "Plans first, and changes nothing until you approve the plan"
 activation = { mechanism = "capability_activate", tool = "EnterPlanMode" }
 confirmation = { tool = "AskUserQuestion" }
 continuation = """\
@@ -117,7 +117,7 @@ capability; also work the user explicitly asks to execute immediately or \
 without planning. Effects listed in requires_explicit_request_for_effects \
 require that explicit source intent."""
 sources = ["https://code.claude.com/docs/en/tools-reference"]
-purpose = "continue immediately under normal permissions"
+purpose = "Does the work now, in this turn"
 activation = {}
 confirmation = { tool = "AskUserQuestion" }
 continuation = "same turn"
@@ -146,7 +146,7 @@ should continue until that condition is met. Infer this from the intended \
 continuation, without requiring the word goal. Do not select for a plan-only \
 or review-only request."""
 sources = ["https://code.claude.com/docs/en/goal"]
-purpose = "Claude Code persistent goal, entered by the person with /goal"
+purpose = "Keeps working, turn after turn, until the goal is met"
 activation = {}
 confirmation = { tool = "AskUserQuestion" }
 continuation = """\

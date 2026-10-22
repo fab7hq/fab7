@@ -13,7 +13,7 @@ guidance = [
 [[capabilities]]
 id = "human_handoff"
 selection = "Use only as the fallback for an unrecognized host."
-purpose = "unrecognized host; no native capability selected; the person submits the prompt"
+purpose = "You send the prompt yourself"
 activation = {}
 confirmation = {}
 continuation = "manual"

@@ -26,7 +26,7 @@ path_names = ["grok"]
 shell_tool = "run_terminal_command"   # its runs are tool facts
 
 [routing]
-precedence = ["native_plan", "native_direct"]
+precedence = ["native_goal", "native_plan", "native_direct"]
 guidance = [
   """\
 Infer the intended outcome, required continuation, and effects from the \
@@ -73,6 +73,37 @@ report unavailable tools or rejected commands without claiming activation.""",
 ]
 
 [[capabilities]]
+id = "native_goal"
+selection = """\
+A continuing objective with a user-supplied terminal condition, where work \
+should continue until that condition is met. Infer this from the intended \
+continuation, without requiring the word goal. Do not select for a plan-only \
+or review-only request."""
+sources = [
+  "research/knowledge-base/harnesses/grok/capability.md",
+  "https://docs.x.ai/build/modes-and-commands",
+]
+purpose = "Keeps working until an independent review confirms the goal is met"
+activation = {}
+confirmation = { tool = "ask_user_question" }
+continuation = """\
+the person submits the prompt; Grok works across rounds and marks the goal \
+complete only after an independent evidence review confirms it; otherwise \
+the goal stays active or pauses with the gaps it found"""
+effects = ["per source intent"]
+permission_owner = "host"
+delivery_mode = "human_handoff"
+prompt_prefix = "/goal "
+prompt_prefix_kind = "inline"   # the argument is the objective; status, pause, resume and clear manage it
+qualification = {}
+limitations = [
+  "/goal is user-entered on Grok and on unless goal.enabled or GROK_GOAL turns it off",
+  "This profile maps Goal to user submission in the TUI",
+  "what the prompt hook receives for a /goal submission is not measured",
+  "completion is the evidence review's judgement, which reads only the evidence the agent shows",
+]
+
+[[capabilities]]
 id = "native_plan"
 selection = """\
 A plan or analysis before implementation, or bounded work with effects when \
@@ -82,7 +113,7 @@ sources = [
   "research/knowledge-base/harnesses/grok/capability.md",
   "https://docs.x.ai/build/modes-and-commands",
 ]
-purpose = "Grok Plan mode, entered by the person with /plan"
+purpose = "Plans first in Plan mode; you approve before it changes code"
 activation = {}
 confirmation = { tool = "ask_user_question" }
 continuation = """\
@@ -111,7 +142,7 @@ capability; also work the user explicitly asks to execute immediately or \
 without planning. Effects listed in requires_explicit_request_for_effects \
 require that explicit source intent."""
 sources = ["research/knowledge-base/harnesses/grok/capability.md"]
-purpose = "continue immediately under normal permissions"
+purpose = "Does the work now, in this turn"
 activation = {}
 confirmation = { tool = "ask_user_question" }
 continuation = "same turn"
