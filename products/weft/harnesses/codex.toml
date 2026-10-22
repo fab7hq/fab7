@@ -1,7 +1,8 @@
 # Weft harness file: Codex. What Weft needs to start this harness, pick a
 # session back up and set its plugin up, and nothing RingFrame reads: RingFrame's
-# own facts about it are in its profile. Shipped by fab7; `install.sh` and
-# `weft update` copy it into ~/.fab7/weft/harnesses/, replaced on every update.
+# own facts about it are in its profile. Shipped by fab7; `install.sh`, or
+# a new Weft's first start, copies it into ~/.fab7/weft/harnesses/, replaced on
+# every update.
 # Never edit the copy.
 title = "Codex"
 program = "codex"

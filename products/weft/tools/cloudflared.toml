@@ -2,8 +2,8 @@
 # Everything Weft knows about this provider: how to start it, how to read its
 # address, and where its installation guide is: installing it is the person's.
 # TryCloudflare's quick tunnel needs no account and no settings. Shipped by
-# fab7; `install.sh` and `weft update` copy it into ~/.fab7/weft/tools/,
-# replaced on every update. Never edit the copy.
+# fab7; `install.sh`, or a new Weft's first start, copies it into
+# ~/.fab7/weft/tools/, replaced on every update. Never edit the copy.
 kind = "tunnel"
 title = "Cloudflare Tunnel"
 program = "cloudflared"
