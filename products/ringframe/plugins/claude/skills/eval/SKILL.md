@@ -96,9 +96,9 @@ Repeat:
    perhaps as `rf:rf-map`); `prompt` the
    task's `prompt`, verbatim and nothing else; `model` the task's `model` when
    it has one, as an alias: `sonnet`, `opus`, `haiku` or `fable` (the tool
-   refuses a full model ID, so pass `claude-opus-5-5` as `opus`); a
-   `description` naming the task id. The task's `effort` is
-   already in its task file; pass it nowhere.
+   refuses a full model ID, so pass `claude-opus-5-5` as `opus`); `effort`
+   the task's `effort` when it has one, as given; a `description` naming the
+   task id.
 4. Wait until every sub-agent you spawned has replied. A reply is one line,
    `<task id> accepted` or `<task id> failed: <reason>`; read nothing else and
    check nothing. The `Agent` result is the reply.
