@@ -28,10 +28,12 @@ a wording fix must not cost a binary release.
 - Plugin names are unique across products.
 - The repository is released as a whole: tags are `vX.Y.Z`, semver, and cover
   every product. Do not introduce a per-product tag series.
-- A practice catalog entry that is `situational` must list `concerns`, or it
-  can never be selected. CI enforces this.
+- Every practice rule here has a `label`, a `when` (the situation it matters
+  in) and a `family`. RingFrame refuses a catalog without them, and keeps
+  every rule id: Sense's labels name rules by id.
 - Adding a practice domain is a file in `config/deltas/practices/` with a
-  `description`. No code change is needed anywhere.
+  `description`. No code change is needed anywhere. Every domain but
+  `software-development` is a pack, off until a layer switches it on.
 
 ## Testing a change locally
 

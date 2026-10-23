@@ -1,4 +1,4 @@
-# RingFrame practice deltas: autonomous trading, a specialist domain.
+# RingFrame practice deltas: autonomous trading, a pack: off until a layer switches it on.
 schema = "ringframe.deltas/1"
 scope = "practice"
 domain = "autonomous-trading"
@@ -7,24 +7,8 @@ Trading strategies and the systems that run them: signals and indicators, \
 backtests, market and reference data, order execution and routing, positions \
 and risk limits, broker or exchange integration, and live or paper trading \
 operations."""
-# core_cap is additive to the software-development base; see spec §8
-render = { heading = "Rules:", core_cap = 4 }
+render = { heading = "Rules:" }
 source = "https://www.fia.org/sites/default/files/2024-07/FIA_WP_AUTOMATED%20TRADING%20RISK%20CONTROLS_FINAL_0.pdf"
-concerns = [
-  "strategy_research",
-  "backtest",
-  "data_pipeline",
-  "execution",
-  "order_routing",
-  "risk_limits",
-  "position_sizing",
-  "live_deploy",
-  "monitoring",
-  "reconciliation",
-  "broker_integration",
-  "cost_model",
-  "operate",
-]
 
 # ================= research validity
 
@@ -33,8 +17,8 @@ id = "practice.no_lookahead"
 label = "No Lookahead"
 principle = "Point-in-Time Discipline"
 applies_to = { task = ["research", "plan", "implement", "review"] }
-tier = "core"
-priority = 10
+when = "The work uses historical data to make or test trading decisions."
+family = "domain"
 text = """\
 Keep two timestamps for every input, when the event occurred and when it \
 became available, and let a decision use only information available at \
@@ -52,8 +36,8 @@ id = "practice.walk_forward"
 label = "Walk Forward"
 principle = "Walk-Forward Validation"
 applies_to = { task = ["research", "plan"] }
-tier = "core"
-priority = 20
+when = "A strategy is fitted or evaluated on historical data."
+family = "domain"
 text = """\
 Freeze a chronological evaluation procedure before running it: fit on \
 earlier data, evaluate on later data, roll forward, purge overlapping label \
@@ -67,8 +51,8 @@ id = "practice.locked_oos"
 label = "Locked OOS"
 principle = "Locked Out-of-Sample"
 applies_to = { task = ["research", "plan", "diagnose", "review"] }
-priority = 30
-concerns = ["strategy_research", "backtest"]
+when = "A strategy is evaluated on held-out data."
+family = "domain"
 text = """\
 Freeze the strategy, its parameters, and any retraining procedure before the \
 final held-out evaluation; a frozen adaptive procedure may retrain on \
@@ -80,7 +64,8 @@ happened and obtain fresh data before claiming a result."""
 id = "practice.no_repaint"
 label = "No Repaint"
 applies_to = { task = ["research", "implement", "diagnose", "review"] }
-concerns = ["strategy_research", "backtest", "data_pipeline"]
+when = "The work computes trading signals or indicators."
+family = "domain"
 text = """\
 Require every signal to be causal: reproducible later from exactly the \
 information that was available when it fired. Test it by extending the \
@@ -93,7 +78,8 @@ actually acted on is never overwritten."""
 id = "practice.indicator_warmup"
 label = "Indicator Warmup"
 applies_to = { task = ["research", "implement", "review"] }
-concerns = ["strategy_research", "backtest", "data_pipeline"]
+when = "The work computes indicators that need history before they are valid."
+family = "domain"
 text = """\
 State each indicator's required history and valid-input conditions and emit \
 no signal until both hold; never fill missing early values into a tradable \
@@ -105,7 +91,8 @@ id = "practice.survivorship"
 label = "Survivorship"
 principle = "Survivorship Bias"
 applies_to = { task = ["research", "implement", "review"] }
-concerns = ["backtest", "data_pipeline", "strategy_research"]
+when = "A backtest or study picks a universe of instruments over time."
+family = "domain"
 text = """\
 Build the universe from point-in-time membership as of each historical date, \
 and retain delisted, merged, and failed instruments together with their \
@@ -116,7 +103,8 @@ period."""
 id = "practice.corporate_actions"
 label = "Corporate Actions"
 applies_to = { task = ["research", "implement", "diagnose", "review"] }
-concerns = ["data_pipeline", "backtest", "strategy_research"]
+when = "The work uses prices affected by splits, dividends or other corporate actions."
+family = "domain"
 text = """\
 Keep adjusted research series distinct from executable prices and from \
 actual cash and share accounting; state which adjustment convention each \
@@ -128,7 +116,8 @@ sudden outsized move as a suspected unhandled action until checked."""
 id = "practice.session_time"
 label = "Sessions"
 applies_to = { task = ["research", "implement", "diagnose", "review"] }
-concerns = ["data_pipeline", "backtest", "execution"]
+when = "The work handles market timestamps, trading sessions or calendars."
+family = "domain"
 text = """\
 Store timestamps with an explicit timezone and align them to the venue's \
 session rather than the calendar day, including overnight and continuous \
@@ -139,8 +128,8 @@ session boundary is midnight in your local zone."""
 id = "practice.cost_realism"
 label = "Cost Realism"
 applies_to = { task = ["research", "implement", "review"] }
-priority = 40
-concerns = ["backtest", "cost_model", "execution"]
+when = "A backtest or P&L includes, or should include, trading costs."
+family = "domain"
 text = """\
 Account for every cost exactly once — commission, spread, slippage, impact, \
 and financing or borrow — whether it is embedded in the fill price or \
@@ -153,7 +142,8 @@ id = "practice.multiple_testing"
 label = "Multiple Testing"
 principle = "Selection Bias"
 applies_to = { task = ["research", "review"] }
-concerns = ["strategy_research", "backtest"]
+when = "Many strategy variants or parameter settings are being searched."
+family = "domain"
 text = """\
 Record the full search history, including configurations that were tried and \
 rejected, and adjust the selected result for selection bias with a method \
@@ -165,7 +155,8 @@ many searches is evidence of search until adjusted."""
 id = "practice.param_stability"
 label = "Parameter Stability"
 applies_to = { task = ["research", "plan", "review"] }
-concerns = ["strategy_research", "backtest"]
+when = "A strategy's parameters are being chosen."
+family = "domain"
 text = """\
 Perturb each parameter by economically meaningful amounts and report how \
 performance responds; investigate sensitivity you cannot explain and prefer \
@@ -175,7 +166,8 @@ settings inside a stable region over an isolated peak."""
 id = "practice.regime"
 label = "Regime"
 applies_to = { task = ["research", "plan", "operate", "review"] }
-concerns = ["strategy_research", "monitoring"]
+when = "A strategy relies on market conditions that may change."
+family = "domain"
 text = """\
 State the market condition the edge assumes, the observable criteria that \
 would show it no longer holds, and the response to each, all defined in \
@@ -188,9 +180,8 @@ than treating one breach as proof."""
 id = "practice.kill_switch"
 label = "Kill Switch"
 applies_to = { task = ["plan", "implement", "operate", "review"] }
-tier = "core"
-priority = 10
-concerns = ["execution", "live_deploy", "risk_limits", "operate"]
+when = "The work builds or runs live or paper trading."
+family = "domain"
 text = """\
 Provide a halt that runs independently of the strategy process, blocks the \
 affected strategy's new submissions, handles its working orders by a stated \
@@ -203,9 +194,8 @@ separate process before live risk."""
 id = "practice.idempotent_orders"
 label = "Idempotent Orders"
 applies_to = { task = ["implement", "review"] }
-tier = "core"
-priority = 20
-concerns = ["execution", "order_routing", "broker_integration"]
+when = "The work submits, retries or recovers orders."
+family = "domain"
 text = """\
 Persist one identifier per logical order intent before submitting and reuse \
 it on every retry and during recovery; confirm the venue's duplicate and \
@@ -217,9 +207,8 @@ execution identity, not by order identity alone."""
 id = "practice.pretrade_limits"
 label = "Pre-Trade Limits"
 applies_to = { task = ["plan", "implement", "operate", "review"] }
-tier = "core"
-priority = 30
-concerns = ["risk_limits", "position_sizing", "execution"]
+when = "The work sends orders to a venue."
+family = "domain"
 text = """\
 Check every order and every amendment in the path before submission against \
 per-order size, price tolerance, resulting position and notional including \
@@ -232,8 +221,8 @@ remain allowed after a breach."""
 id = "practice.reconciliation"
 label = "Reconciliation"
 applies_to = { task = ["implement", "operate", "review"] }
-priority = 40
-concerns = ["reconciliation", "monitoring", "broker_integration", "execution", "operate"]
+when = "The work keeps positions, cash or orders that must match the venue's records."
+family = "domain"
 text = """\
 Compare internal positions, cash, and open orders against fresh venue \
 records on a stated schedule, on every restart, and after recovery, with \
@@ -245,7 +234,8 @@ while exposure is uncertain; do not stop unrelated strategies for it."""
 id = "practice.partial_fills"
 label = "Partial Fills"
 applies_to = { task = ["implement", "diagnose", "review"] }
-concerns = ["execution", "order_routing", "reconciliation"]
+when = "The work handles order fills, cancels or corrections."
+family = "domain"
 text = """\
 Reserve the full intended exposure before submission, then update filled and \
 remaining quantity from the venue's own fill, cancel, and correction events \
@@ -256,7 +246,8 @@ distance after each event as well as before submission."""
 id = "practice.feed_recovery"
 label = "Feed Recovery"
 applies_to = { task = ["implement", "operate", "review"] }
-concerns = ["data_pipeline", "execution", "broker_integration", "monitoring"]
+when = "The work consumes a live market data stream."
+family = "domain"
 text = """\
 Assume the connection drops. Heartbeat the stream, reconnect with backoff, \
 then recover to a consistent state by taking a fresh snapshot and replaying \
@@ -268,7 +259,8 @@ cancellations priority over new submissions."""
 id = "practice.stale_data"
 label = "Stale Data"
 applies_to = { task = ["implement", "operate", "review"] }
-concerns = ["data_pipeline", "execution", "monitoring"]
+when = "Trading decisions depend on market data that can arrive late or not at all."
+family = "domain"
 text = """\
 Detect data that is stale, gapped, out of order, or invalid, and block any \
 decision that depends on it. State separately how existing positions are \
@@ -279,7 +271,8 @@ a position or disable an unrelated safety control. Record every gap."""
 id = "practice.paper_first"
 label = "Paper First"
 applies_to = { task = ["plan", "operate"] }
-concerns = ["live_deploy", "execution"]
+when = "A strategy or trading system is moving from development to live."
+family = "domain"
 text = """\
 Run the whole path in paper before live to exercise order construction, \
 state transitions, scheduling, and monitoring, and deliberately test retries \
@@ -293,7 +286,8 @@ behaviour are not shown by it."""
 id = "practice.risk_per_trade"
 label = "Risk Budget"
 applies_to = { task = ["implement", "plan", "review"] }
-concerns = ["position_sizing", "risk_limits"]
+when = "The work sizes positions or sets stops."
+family = "domain"
 text = """\
 State a risk budget for each position and for the portfolio, including \
 correlated losses and adverse execution, and size within it; a stop or \
@@ -304,7 +298,8 @@ loss. Never size from conviction or from the last result."""
 id = "practice.fractional_sizing"
 label = "Fractional Sizing"
 applies_to = { task = ["research", "implement", "plan", "review"] }
-concerns = ["position_sizing", "risk_limits", "strategy_research"]
+when = "Position sizes come from estimated returns or volatility."
+family = "domain"
 text = """\
 Size conservatively for uncertainty in estimated returns, volatility, and \
 dependence. If using Kelly, state the estimation assumptions and the chosen \
@@ -319,7 +314,8 @@ drawdowns."""
 id = "practice.leverage_carry"
 label = "Leverage"
 applies_to = { task = ["implement", "plan", "operate", "review"] }
-concerns = ["risk_limits", "position_sizing", "execution"]
+when = "The work holds leveraged, margined or borrowed positions."
+family = "domain"
 text = """\
 For leveraged, margined, or borrowed positions, state the exposure, the \
 applicable margin requirements, the financing and borrow costs, and the \
@@ -331,7 +327,8 @@ change."""
 id = "practice.drawdown_stop"
 label = "Drawdown Stop"
 applies_to = { task = ["plan", "operate", "review"] }
-concerns = ["risk_limits", "monitoring", "operate"]
+when = "A strategy runs live and needs loss limits."
+family = "domain"
 text = """\
 Before going live, define the drawdown limit with its equity basis, \
 high-water mark, measurement frequency, treatment of open positions at the \
@@ -344,7 +341,8 @@ decision; do not widen the limit to avoid it."""
 id = "practice.audit_trail"
 label = "Audit Trail"
 applies_to = { task = ["implement", "operate", "review"] }
-concerns = ["monitoring", "reconciliation", "operate"]
+when = "The work makes trading decisions or changes that must be explained later."
+family = "domain"
 text = """\
 Record decision-time inputs, the strategy, model, and configuration versions \
 in force, each decision, each order with its acknowledgements and fills, and \
@@ -357,7 +355,8 @@ id = "practice.one_live_change"
 label = "One Live Change"
 principle = "Law of Unintended Consequences"
 applies_to = { task = ["operate", "implement", "review"] }
-concerns = ["live_deploy", "operate"]
+when = "Changes are deployed to a live trading system."
+family = "domain"
 text = """\
 Prefer one bounded, attributable change at a time in live, with the \
 observation window and rollback criteria stated before deploying. When \
