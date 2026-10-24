@@ -80,7 +80,7 @@ Repeat:
    run hands out one task (`task`).
 2. When its `state` is `done`, go to §3.
 3. Spawn one sub-agent for every task it handed out, all of them together: one
-   `invoke_subagent` call with one `Subagents` entry per task: `TypeName`
+   `invoke_subagent` call with one `Subagents` entry per task: `TypeName`, for any role but `requirements` (which takes none),
    `rf-` and the task's `role`, one of this plugin's `rf-map`, `rf-reduce` and `rf-confirm`
    (listed among your subagents, perhaps as `rf:rf-map`); `Role`
    `RingFrame <role> judge`, with the task's `role`;

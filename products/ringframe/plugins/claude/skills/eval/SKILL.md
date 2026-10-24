@@ -89,7 +89,7 @@ Repeat:
    `Agent` call per task, all in one message, in the foreground when the tool
    lets you choose: `subagent_type` `rf-` and the task's `role`, one of this plugin's
    `rf-map`, `rf-reduce` and `rf-confirm` (listed among your agent types,
-   perhaps as `rf:rf-map`); `prompt` the
+   perhaps as `rf:rf-map`), and none for a `requirements` task; `prompt` the
    task's `prompt`, verbatim and nothing else; `model` the task's `model` when
    it has one, as an alias: `sonnet`, `opus`, `haiku` or `fable` (the tool
    refuses a full model ID, so pass `claude-opus-5-5` as `opus`); `effort`

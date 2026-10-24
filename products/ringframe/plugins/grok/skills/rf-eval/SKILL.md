@@ -87,7 +87,7 @@ Repeat:
 2. When its `state` is `done`, go to §3.
 3. Spawn one sub-agent for every task it handed out, all of them together: one
    `spawn_subagent` call per task, all in one message, in the foreground
-   (no `background`): `subagent_type` `rf-` and the task's `role`, one of this
+   (no `background`): `subagent_type`, for any role but `requirements` (which takes none), `rf-` and the task's `role`, one of this
    plugin's `rf-map`, `rf-reduce` and `rf-confirm` (listed among your agent
    types, perhaps as `rf:rf-map`); `prompt` the task's `prompt`, verbatim and
    nothing else; a `description` naming the task id. `spawn_subagent` takes
