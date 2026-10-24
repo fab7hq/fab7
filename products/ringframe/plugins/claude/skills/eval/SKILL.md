@@ -81,17 +81,13 @@ invocation's role words only, for example `--agents '{"confirm":{"model":"opus",
 
 Repeat:
 
-1. Run `ringframe eval next --eval <eval_id> --parallel <parallel> --host claude-code`, adding
-   the same `--agents-from <folder>` and `--agents '<json>'` as §1: for an
-   Eval opened elsewhere, it is how this harness's tiers reach its tasks.
-   Add `--returned <task id>` once for every sub-agent that has finished since
-   the last `next`, whatever it replied, and for every one that could not
-   start: RingFrame hands a task that came back without an accepted output
-   out again at once.
+1. Run `ringframe eval task --eval <eval_id>`; while its `state` is `running`
+   and fewer than <parallel> of your sub-agents are out, run it again. Each
+   run hands out one task (`task`).
 2. When its `state` is `done`, go to §3.
-3. Spawn one sub-agent for every entry of `tasks`, all of them together: one
+3. Spawn one sub-agent for every task it handed out, all of them together: one
    `Agent` call per task, all in one message, in the foreground when the tool
-   lets you choose: `subagent_type` the task's `agent`, one of this plugin's
+   lets you choose: `subagent_type` `rf-` and the task's `role`, one of this plugin's
    `rf-map`, `rf-reduce` and `rf-confirm` (listed among your agent types,
    perhaps as `rf:rf-map`); `prompt` the
    task's `prompt`, verbatim and nothing else; `model` the task's `model` when
@@ -102,13 +98,13 @@ Repeat:
 4. Wait until every sub-agent you spawned has replied. A reply is one line,
    `<task id> accepted` or `<task id> failed: <reason>`; read nothing else and
    check nothing. The `Agent` result is the reply.
-5. Go back to 1. When `tasks` is empty and the state is `running`, other tasks
-   are still out: wait for your sub-agents, then run `next` again.
+5. Go back to 1. While the `state` is `waiting`, every ready task is out or
+   RingFrame's checks are still running: wait for the next reply, or, with no
+   sub-agent out, a minute, then run `task` again.
 
 A spawn acknowledgement is not a reply. A sub-agent that could not start, or
-ended without its line, has still finished: name its task with `--returned`
-in the next `next`, as for any other. Never wait for a task's time to run
-out. If the sub-agent tool is absent or reports it is unavailable,
+ended without its line, has still finished: RingFrame hands its task out
+again once its time is up. If the sub-agent tool is absent or reports it is unavailable,
 report that this harness cannot run the Eval's judges now, give the command
 `/rf:eval debate <eval_id>` for another harness, and stop. Never do a task
 yourself.
