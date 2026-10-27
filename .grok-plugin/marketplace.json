@@ -9,7 +9,7 @@
       "name": "rf",
       "source": "./products/ringframe/plugins/grok",
       "description": "RingFrame /rf-ask, /rf-eval, /rf-seal for Grok Build (requires the `ringframe` CLI)",
-      "version": "0.2.0"
+      "version": "0.3.0"
     }
   ]
 }
