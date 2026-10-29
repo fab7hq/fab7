@@ -6,7 +6,7 @@ The marketplace for Fab7 plugins. Add it once, install any Fab7 product from it.
 
 | Path | What it holds |
 | --- | --- |
-| `products/ringframe/plugins/` | The `rf` plugin: [RingFrame](https://docs.getfab7.com/ringframe/)'s Ask, Eval and Seal inside your coding agent |
+| `products/ringframe/plugins/` | The `rf` plugin: hooks that tell [Weft](https://docs.getfab7.com/weft/) what your coding agent is doing |
 | `products/ringframe/config/` | RingFrame's configuration: harness profiles, rules and route rules |
 | `products/weft/harnesses/` | What [Weft](https://docs.getfab7.com/weft/) knows of each harness |
 

@@ -8,7 +8,7 @@
     {
       "name": "rf",
       "source": "./products/ringframe/plugins/grok",
-      "description": "RingFrame /rf-ask, /rf-eval, /rf-seal for Grok Build (requires the `ringframe` CLI)",
+      "description": "RingFrame's hooks for Grok Build: they report what the agent is doing",
       "version": "0.3.0"
     }
   ]

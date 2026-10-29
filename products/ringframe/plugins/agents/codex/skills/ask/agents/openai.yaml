@@ -1,6 +1,0 @@
-interface:
-  display_name: "RingFrame Ask"
-  short_description: "RingFrame ask inside Codex"
-  default_prompt: "Use $rf:ask."
-policy:
-  allow_implicit_invocation: false

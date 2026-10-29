@@ -57,7 +57,7 @@ it touches against the step, make the change test-first, then review the \
 diff against the step."""
 why = """\
 A persistent objective needs an iteration shape; the owner's loop is \
-analyze, TDD, review. Outcome judgement belongs to rf:eval."""
+analyze, TDD, review. Outcome judgement belongs to the Eval."""
 evidence = "ringframe-route-rules-q01 (well-defined prompts; plan-then-goal chain)"
 matrix_ref = "https://docs.getfab7.com/ringframe/harnesses/codex#ask"
 
