@@ -1,4 +1,4 @@
-// Every end of a turn, to Weft, whatever ended it: the person's interrupt
+// Every end of a turn, to the signal script, whatever ended it: the person's interrupt
 // sends no classic hook, so without this a pane would read as still working.
 import type { Register } from 'claude-code';
 
