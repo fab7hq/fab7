@@ -1,4 +1,5 @@
 {
+  "modules": ["./turn.ts"],
   "hooks": {
     "SessionStart": [
       {
@@ -77,17 +78,6 @@
           {
             "type": "command",
             "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/weft-signal claude-code StopFailure"
-          }
-        ]
-      }
-    ],
-    "Notification": [
-      {
-        "matcher": "idle_prompt",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "\"${CLAUDE_PLUGIN_ROOT}\"/hooks/weft-signal claude-code Notification"
           }
         ]
       }
