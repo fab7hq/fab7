@@ -6,3 +6,4 @@
 .DS_Store
 .playwright-mcp/
 .fab7/
+__pycache__/
