@@ -24,11 +24,15 @@ workspace = "cwd"
 """
 
 
-def bench(signal):
+def bench(signal, module=None):
     tmp = pathlib.Path(tempfile.mkdtemp())
     plugin = tmp / "plugins" / "loom"
     (plugin / "hooks").mkdir(parents=True)
-    (plugin / "hooks.json").write_text(HOOKS)
+    hooks = HOOKS
+    if module is not None:
+        hooks = '{"modules": ["./turn.ts"],' + HOOKS[1:]
+        (plugin / "turn.ts").write_text(module)
+    (plugin / "hooks.json").write_text(hooks)
     (plugin / "hooks" / "weft-signal").write_text("#!/bin/sh\n")
     harnesses = tmp / "harnesses"
     harnesses.mkdir()
@@ -56,6 +60,25 @@ class ReceivedPrompt(unittest.TestCase):
         (tmp / "harnesses" / "loom.toml").write_text('title = "Loom"\n')
         bad = hooks_match_signal.check(tmp / "plugins", tmp / "harnesses")
         self.assertTrue(any("loom" in b for b in bad), bad)
+
+
+ENDED = SIGNAL.replace('state = "working"{forward} }},', 'state = "working"{forward} }},\n  {{ hook = "Ended", state = "turn_ended" }},')
+MODULE = "const signal = [`${{$.plugin.root}}/hooks/weft-signal`, 'loom', '{hook}'];\n"
+
+
+class HooksModule(unittest.TestCase):
+    def test_a_row_the_hooks_module_reports_through_the_shim_is_registered(self):
+        good = ENDED.format(prompt='prompt = "prompt"\n', forward=', forward = "prompt"')
+        self.assertEqual(bench(good, MODULE.format(hook="Ended")), [])
+
+    def test_a_row_no_module_reports_is_still_refused(self):
+        bad = bench(ENDED.format(prompt='prompt = "prompt"\n', forward=', forward = "prompt"'))
+        self.assertTrue(any("Ended" in b and "not registered" in b for b in bad), bad)
+
+    def test_a_module_that_reports_a_hook_no_row_names_is_refused(self):
+        good = SIGNAL.format(prompt='prompt = "prompt"\n', forward=', forward = "prompt"')
+        bad = bench(good, MODULE.format(hook="Other"))
+        self.assertTrue(any("Other" in b for b in bad), bad)
 
 
 if __name__ == "__main__":

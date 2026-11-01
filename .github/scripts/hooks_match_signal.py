@@ -4,7 +4,8 @@ For each Weft harness file with [signal]: every hook a row names is registered i
 RingFrame's plugin hook file for that harness, with the row's tool as its matcher
 where it names one and the row's reply as its --reply; nothing else is
 registered; every entry runs the weft-signal shim with the file's id; and no
-entry runs ringframe.
+entry runs ringframe. A hooks module the file loads (`modules`) registers the
+hooks it reports through the shim: `weft-signal`, then the id and the hook.
 
 Every shipped harness file says where the prompt its harness received is: a
 [signal] with `prompt` and a row that forwards it. Weft proves a send by that
@@ -13,6 +14,7 @@ report, and sends nothing to a harness without one.
 
 import json
 import pathlib
+import re
 import shlex
 import sys
 import tomllib
@@ -37,6 +39,16 @@ def entries(doc):
                 commands = [c["command"] for c in e["hooks"]] if "hooks" in e else [e["command"]]
                 for command in commands:
                     yield hook, e.get("matcher"), command
+
+
+MODULE_SIGNAL = re.compile(r"""weft-signal[`'"]\s*,\s*['"]([\w.-]+)['"]\s*,\s*['"](\w+)['"]""")
+
+
+def module_signals(path, doc):
+    """(id, hook) for every report through the shim in the hooks modules a file loads."""
+    for module in doc.get("modules", []):
+        for harness, hook in MODULE_SIGNAL.findall((path.parent / module).read_text()):
+            yield harness, hook
 
 
 def words_of(command):
@@ -110,6 +122,14 @@ def check(plugins=PLUGINS, harnesses=HARNESSES):
             if not same_reply(reply, want):
                 bad.append(f"{where} replies {reply!r}; [signal] says {want!r}")
             seen.setdefault(harness, []).append((hook, matcher))
+        for harness, hook in module_signals(path, doc):
+            table = signals.get(harness)
+            if table is None:
+                bad.append(f"{path}: its module names {harness}, which has no harness file with [signal]")
+            elif not any(r["hook"] == hook and r.get("tool") is None for r in table.get("on", [])):
+                bad.append(f"{path}: its module reports {hook}, which is in no [signal] row of {harness}")
+            else:
+                seen.setdefault(harness, []).append((hook, None))
     for harness, table in signals.items():
         for field in ("session", "workspace", "on"):
             if field not in table:
