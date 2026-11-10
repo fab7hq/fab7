@@ -86,7 +86,7 @@ on = [
 # entries are tool results, interruptions and injected context. Thinking,
 # attachments and bookkeeping entries are not drawn.
 [conversation]
-verified = "2.1.296 (Claude Code)"
+verified = "2.1.322 (Claude Code)"
 path = "transcript_path"
 find = "projects/*/{session}.jsonl"
 time = "timestamp"

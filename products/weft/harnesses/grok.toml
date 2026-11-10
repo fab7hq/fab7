@@ -84,7 +84,7 @@ on = [
 # `tool_call` and its outcome a later `tool_call_update` (grok 1.0.52, recorded
 # in HostLab). Thoughts, hook runs and turn ends are not drawn.
 [conversation]
-verified = "grok 1.0.52"
+verified = "grok 1.0.77"
 path = "transcript_path"
 find = "sessions/*/{session}/updates.jsonl"
 time = "timestamp"

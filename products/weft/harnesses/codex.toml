@@ -128,7 +128,7 @@ on = [
 # user messages. Each step is written once it completes, so it carries its own
 # outcome.
 [conversation]
-verified = "codex-cli 0.162.1"
+verified = "codex-cli 0.167.0"
 path = "transcript_path"
 find = "sessions/*/*/*/rollout-*-{session}.jsonl"
 time = "timestamp"

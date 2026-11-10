@@ -73,7 +73,7 @@ on = [
 # free-text `GENERIC` / `TOOL_RESPONSE` step outcomes and `<SYSTEM_MESSAGE>`
 # entries are refined by `weft-sense` Head 2.
 [conversation]
-verified = "agy 1.3.5"
+verified = "agy 1.5.5"
 path = "transcriptPath"
 find = "brain/{session}/.system_generated/logs/transcript.jsonl"
 time = "created_at"
