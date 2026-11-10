@@ -73,6 +73,8 @@ on = ["enabled", "installed"]
 # 0.162.0).
 [signal]
 session = "session_id"
+# A hook that ends a turn has the agent's last reply.
+said = "last_assistant_message"
 workspace = "cwd"
 prompt = [
   "prompt",
