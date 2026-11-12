@@ -1,0 +1,258 @@
+# RingFrame practice deltas: machine learning, a pack: off until a layer switches it on.
+schema = "ringframe.deltas/1"
+scope = "practice"
+domain = "machine-learning"
+description = """\
+Building, training and shipping models: datasets and labels, splits and \
+evaluation, fine-tuning and training runs, GPU and model-call costs, export \
+and serving, and models in people's hands."""
+render = { heading = "Rules:" }
+source = "https://developers.google.com/machine-learning/guides/rules-of-ml"
+
+# Sources beside Rules of ML: Breck et al., "The ML Test Score" (2017);
+# Sculley et al., "Hidden Technical Debt in Machine Learning Systems" (2015);
+# Kapoor & Narayanan, "Leakage and the Reproducibility Crisis in ML-based
+# Science" (2023); Mitchell et al., "Model Cards for Model Reporting" (2019);
+# Gebru et al., "Datasheets for Datasets" (2021).
+
+# ================= before any model
+
+[[entries]]
+id = "practice.simplest_model"
+label = "Simplest Model"
+principle = "Rules of ML: Rule #1"
+applies_to = { task = ["research", "plan", "implement", "review"] }
+when = "The work introduces a model, or picks a model's kind or size."
+family = "domain"
+text = """\
+Ship a heuristic or the smallest model that could work first, with a solid \
+pipeline around it; move to a larger model only when measured results on the \
+same held-out rows show the gain is worth its size, latency and upkeep."""
+why = """\
+Most early gains come from the pipeline and the data, not the model; a large \
+model on a weak pipeline hides the weakness."""
+
+[[entries]]
+id = "practice.baseline_first"
+label = "Baseline First"
+applies_to = { task = ["research", "implement", "review"] }
+when = "The work claims a model, feature or change improves results."
+family = "domain"
+text = """\
+Measure a simple baseline (a rule, the majority answer, the previous model) \
+on the same rows and splits before claiming a gain, and report the gain over \
+it, not the raw score."""
+
+# ================= data and labels
+
+[[entries]]
+id = "practice.label_audit"
+label = "Label Audit"
+principle = "Datasheets for Datasets"
+applies_to = { task = ["plan", "implement", "review"] }
+when = "The work creates, generates, buys or changes labels."
+family = "domain"
+text = """\
+Write what each label means before labelling. Measure agreement between \
+labellers or readers, audit a sample of what they agree on, and have a person \
+decide what they disagree on. Keep the label's source and reason with it."""
+
+[[entries]]
+id = "practice.data_lineage"
+label = "Data Lineage"
+applies_to = { task = ["implement", "operate", "review"] }
+when = "The work trains, exports or releases a model, or changes the data it trains on."
+family = "domain"
+text = """\
+Keep raw data append-only and build training sets as immutable snapshots \
+named by their content's digest. Every model names the snapshot, code commit \
+and configuration it came from, so it can be rebuilt; correct data by adding \
+a recorded decision, never by editing a file in place."""
+
+[[entries]]
+id = "practice.data_validation"
+label = "Data Validation"
+principle = "The ML Test Score"
+applies_to = { task = ["implement", "operate", "review"] }
+when = "New data enters training or serving."
+family = "domain"
+text = """\
+Check incoming rows against a schema and expected ranges, and fail the build \
+on a schema error rather than training on it. Report each build's counts per \
+class and source beside the last build's, so a missing source or a shifted \
+mix is seen before training."""
+
+[[entries]]
+id = "practice.synthetic_data"
+label = "Synthetic Data"
+applies_to = { task = ["research", "implement", "review"] }
+when = "The work trains or evaluates on generated or synthetic data."
+family = "domain"
+text = """\
+Check generated rows' labels as you would any labeller's, keep them marked as \
+generated, and always report results on real data separately; a model that \
+only does well on generated rows has learned the generator."""
+
+# ================= splits and evaluation
+
+[[entries]]
+id = "practice.split_by_unit"
+label = "Split by Unit"
+applies_to = { task = ["research", "plan", "implement", "review"] }
+when = "The work splits data into train, calibration and test, or adds new data to existing splits."
+family = "domain"
+text = """\
+Split by the unit that must stay together (a user, session, document, \
+workspace, time period or source), never by row. Assign a unit its split \
+once and keep it across releases, so later results are comparable."""
+
+[[entries]]
+id = "practice.leakage"
+label = "No Leakage"
+principle = "Leakage and the Reproducibility Crisis"
+applies_to = { task = ["research", "implement", "diagnose", "review"] }
+when = "Features, labels or examples could carry information the model will not have when it predicts."
+family = "domain"
+text = """\
+Fit preprocessing, vocabularies and thresholds on training data only. Remove \
+held-out examples whose text or near-duplicate is in training, and features \
+that encode the label or are known only after the prediction. Report how many \
+were removed."""
+
+[[entries]]
+id = "practice.frozen_test"
+label = "Frozen Test"
+applies_to = { task = ["research", "plan", "review"] }
+when = "A model is evaluated on held-out data to choose between options or to report a result."
+family = "domain"
+text = """\
+Choose models, thresholds and settings on the calibration split; touch the \
+test split only for the final report. Once a test result has steered a \
+choice, it is development evidence: say so, and add fresh test data."""
+
+[[entries]]
+id = "practice.coverage_first"
+label = "Coverage First"
+applies_to = { task = ["plan", "implement", "review"] }
+when = "Training is about to start, or results will be reported per class, segment or source."
+family = "domain"
+text = """\
+Before training, count the held-out rows each claimed behaviour, class, \
+segment and source needs, without a model. Fix a shortfall with data before \
+training, never by lowering the minimum or dropping the claim afterwards."""
+
+[[entries]]
+id = "practice.slice_metrics"
+label = "Slice Metrics"
+applies_to = { task = ["research", "review"] }
+when = "A model's results are reported or compared."
+family = "domain"
+text = """\
+Report results per slice that matters (class, source, user segment, version) \
+and name the behaviours that must hold, beside the aggregate and the previous \
+release's numbers; an average hides the slice that fails."""
+
+[[entries]]
+id = "practice.variance"
+label = "Seeds and Variance"
+applies_to = { task = ["research", "review"] }
+when = "Two models, configurations or runs are compared."
+family = "domain"
+text = """\
+Fix and record seeds, and measure the spread across seeds or folds before \
+calling a difference real; a gap smaller than the spread is not a result. \
+Change one factor at a time and record the rest of the configuration."""
+
+# ================= training runs
+
+[[entries]]
+id = "practice.smoke_run"
+label = "Smoke Run"
+applies_to = { task = ["implement", "operate"] }
+when = "The work starts a long or paid training run."
+family = "domain"
+text = """\
+Run the whole path first on a small slice on your own machine: a few training \
+steps, export, verification and the report, through the same code. Start the \
+long or paid run only when that path ends with no errors."""
+
+[[entries]]
+id = "practice.compute_cap"
+label = "Compute Cap"
+applies_to = { task = ["plan", "operate"] }
+when = "The work rents GPUs or pays for model calls."
+family = "domain"
+text = """\
+Get the spend approved with a cap before it starts, set a hard stop that ends \
+the machine at the cap, download and verify the outputs, then tear the \
+machine down. Record each run's time and cost."""
+
+[[entries]]
+id = "practice.checkpoints"
+label = "Checkpoints"
+applies_to = { task = ["implement", "operate"] }
+when = "A training run is long enough to be interrupted or to fail late."
+family = "domain"
+text = """\
+Save resumable checkpoints during the run and checksums of every output, and \
+verify them after download, so an interruption or a bad copy costs minutes, \
+not the run."""
+
+# ================= shipping and use
+
+[[entries]]
+id = "practice.train_serve_parity"
+label = "Train-Serve Parity"
+principle = "The ML Test Score"
+applies_to = { task = ["implement", "review"] }
+when = "A model is exported, or served by code other than the code that trained it."
+family = "domain"
+text = """\
+Ship the preprocessing and tokenization with the model as one contract, and \
+check the serving runtime against golden inputs and outputs recorded from \
+training, to a stated tolerance, before release."""
+
+[[entries]]
+id = "practice.calibrated_abstain"
+label = "Calibrated Abstain"
+applies_to = { task = ["implement", "review"] }
+when = "A model's output drives a product decision or is shown to people as a suggestion."
+family = "domain"
+text = """\
+Calibrate scores on the calibration split, and answer nothing below a sure \
+cut. Measure and report how often the model is confidently wrong; a wrong \
+suggestion shown with confidence costs more than none."""
+
+[[entries]]
+id = "practice.monitor_in_use"
+label = "Monitor in Use"
+applies_to = { task = ["implement", "operate", "review"] }
+when = "A model runs in production or on people's machines."
+family = "domain"
+text = """\
+Record what the model answered and what the person then did, watch how often \
+they override it, and define in advance what triggers retraining; feed those \
+records back as labels only after review."""
+
+[[entries]]
+id = "practice.model_card"
+label = "Model Card"
+principle = "Model Cards for Model Reporting"
+applies_to = { task = ["document", "operate", "review"] }
+when = "A model or dataset is published or handed to others."
+family = "domain"
+text = """\
+Publish with it what it is for and not for, what data it learned from, its \
+results per slice, its known limits, and the licenses of its base model and \
+data."""
+
+[[entries]]
+id = "practice.model_licenses"
+label = "Licenses and Privacy"
+applies_to = { task = ["research", "plan", "implement"] }
+when = "The work takes in a pretrained model, a dataset or people's own data."
+family = "domain"
+text = """\
+Confirm each base model's and dataset's license allows the use and the \
+release you plan. Keep people's private data where they keep it; never put it \
+in a repository, a published artifact or a request to an outside service."""
