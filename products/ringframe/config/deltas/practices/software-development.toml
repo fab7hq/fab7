@@ -9,10 +9,9 @@ render = { heading = "Rules:" }
 source = "https://lawsofsoftwareengineering.com/"
 
 # when: the situation the rule matters in, matched against the request.
-# family: scope, simplicity, reuse, testing, cleanup or domain; one rule of
-# each family is proposed at most.
+# family: scope, simplicity, reuse, testing, cleanup or domain.
 
-# ================= design philosophies
+# ================= conventions
 
 [[entries]]
 id = "practice.kiss"
@@ -42,57 +41,6 @@ options, parameters, and extension points that nobody has asked for, and \
 remove code that no current path uses."""
 
 [[entries]]
-id = "practice.dry"
-label = "DRY"
-principle = "DRY"
-applies_to = { task = ["implement"] }
-when = "The change repeats logic that already exists elsewhere, or gathers repeated code into one place."
-family = "reuse"
-text = """\
-Give every piece of knowledge one authoritative place; when the same logic \
-appears a third time, consolidate it, and until then tolerate the \
-duplication rather than invent an abstraction that does not yet fit."""
-
-[[entries]]
-id = "practice.solid"
-label = "SOLID"
-principle = "SOLID"
-applies_to = { task = ["implement"] }
-when = "The change reshapes units, what each is responsible for, or the interfaces between them."
-family = "simplicity"
-text = """\
-Give each unit one responsibility and one reason to change; extend behaviour \
-through the seams the code already has rather than by editing stable code; \
-keep substitutes honest to the contract they replace; keep interfaces small \
-enough that callers depend only on what they use; let high-level code depend \
-on abstractions that already exist, not on concrete details."""
-
-[[entries]]
-id = "practice.demeter"
-label = "Demeter"
-principle = "Law of Demeter"
-applies_to = { task = ["implement"] }
-when = "The code reaches through one object into another's internals, or the change would add such a chain."
-family = "simplicity"
-text = """\
-Talk to immediate collaborators only; do not reach through one object to \
-operate on another's internals."""
-
-[[entries]]
-id = "practice.least_astonishment"
-label = "Least Astonishment"
-principle = "Principle of Least Astonishment"
-applies_to = { task = ["implement", "document"] }
-when = "The change adds or renames a name, signature, default, flag or visible behaviour that others will use."
-family = "reuse"
-text = """\
-Make names, signatures, defaults, and behaviour match what a reader of the \
-surrounding code would expect; when a choice would surprise, prefer the \
-conventional one."""
-
-# ================= architecture laws
-
-[[entries]]
 id = "practice.gall"
 label = "Gall"
 principle = "Gall's Law"
@@ -102,75 +50,6 @@ family = "simplicity"
 text = """\
 Start from the simplest version that works end to end and grow it; never \
 design the complete system before a simple one runs."""
-
-[[entries]]
-id = "practice.hyrum"
-label = "Hyrum"
-principle = "Hyrum's Law"
-applies_to = { task = ["implement"] }
-when = "The change alters behaviour others can observe: an API, an output or file format, a command, a default."
-family = "reuse"
-text = """\
-Treat every observable behaviour as something someone depends on; preserve \
-it unless the requirement says to change it, and name the change when you \
-do."""
-
-[[entries]]
-id = "practice.leaky_abstractions"
-label = "Leaky Abstractions"
-principle = "Law of Leaky Abstractions and Tesler's Law"
-applies_to = { task = ["implement", "plan"] }
-when = "The work wraps complex or unreliable behaviour behind a new layer."
-family = "simplicity"
-text = """\
-Do not add a layer to hide complexity that will leak through anyway; put \
-irreducible complexity where it is visible and tested, and do not pretend it \
-has gone."""
-
-[[entries]]
-id = "practice.second_system"
-label = "Second System"
-principle = "Second-System Effect"
-applies_to = { task = ["plan"] }
-when = "The work replaces or rewrites something that already works."
-family = "scope"
-text = """\
-When replacing something that works, carry over only what the requirement \
-needs; do not use the rewrite to add everything the first version lacked."""
-
-[[entries]]
-id = "practice.unintended_consequences"
-label = "Unintended Consequences"
-principle = "Law of Unintended Consequences"
-applies_to = { task = ["implement", "operate"] }
-when = "The change touches a running or tightly coupled system: stored data, concurrency, a deployment."
-family = "testing"
-text = """\
-Change one thing at a time in a complex system and observe the effect before \
-the next change."""
-
-# ================= planning laws
-
-[[entries]]
-id = "practice.knuth"
-label = "Knuth"
-principle = "Premature Optimization"
-applies_to = { task = ["plan", "implement"] }
-when = "The request is about speed, or the change is tempted to optimise."
-family = "simplicity"
-text = "Do not optimize on suspicion; measure first, and optimize the measured bottleneck only."
-
-[[entries]]
-id = "practice.ninety_ninety"
-label = "Ninety-Ninety"
-principle = "Ninety-Ninety Rule and Hofstadter's Law"
-applies_to = { task = ["plan"] }
-when = "A plan breaks large work into items."
-family = "scope"
-text = """\
-Break the work into small items, each with a done condition a command or a \
-named person can check, so that the last ten percent is visible rather than \
-hidden inside a large item."""
 
 [[entries]]
 id = "practice.goodhart"
@@ -184,31 +63,6 @@ Define done by the requirement being met, not by a proxy such as coverage, \
 line count, or test count; check the behaviour the requirement describes."""
 
 [[entries]]
-id = "practice.pareto"
-label = "Pareto"
-principle = "Pareto Principle"
-applies_to = { task = ["plan"] }
-when = "A plan orders work that has uncertain or risky parts."
-family = "scope"
-text = """\
-Order items by the value and risk they retire; put the thinnest end-to-end \
-path through the riskiest part first."""
-
-[[entries]]
-id = "practice.brooks"
-label = "Brooks"
-principle = "Brooks's Law and Amdahl's Law"
-applies_to = { task = ["plan", "implement"] }
-when = "The work could be split across several agents or sub-agents."
-family = "scope"
-text = """\
-Split work across agents only along independent items; hand research and \
-review to a sub-agent when the context would grow past what one agent holds \
-well, and keep a single implementation in one thread."""
-
-# ================= quality laws
-
-[[entries]]
 id = "practice.boy_scout"
 label = "Boy Scout"
 principle = "Boy Scout Rule and Broken Windows"
@@ -218,19 +72,6 @@ family = "cleanup"
 text = """\
 Leave the code you touch better than you found it; for problems outside what \
 the requirement touches, record them instead of fixing them."""
-
-[[entries]]
-id = "practice.testing_pyramid"
-label = "Testing Pyramid"
-principle = "Testing Pyramid"
-applies_to = { task = ["implement"] }
-when = "The work changes behaviour that tests can check."
-family = "testing"
-text = """\
-Write the failing test from the requirement first and make it pass with the \
-smallest change; prefer many fast tests against the real unit, mocking only \
-boundaries you do not own; add slower integration tests only where a unit \
-test cannot see the behaviour."""
 
 [[entries]]
 id = "practice.pesticide"
@@ -244,40 +85,6 @@ When a fault escaped the existing tests, add the test that would have caught \
 it rather than re-running the ones that did not."""
 
 [[entries]]
-id = "practice.kernighan"
-label = "Kernighan"
-principle = "Kernighan's Law"
-applies_to = { task = ["implement", "review"] }
-when = "The change could be written in a clever, compact way that is harder to read."
-family = "simplicity"
-text = """\
-Write code plain enough to debug at half your cleverness; when a clever \
-construct saves lines but costs clarity, choose clarity."""
-
-[[entries]]
-id = "practice.linus"
-label = "Linus"
-principle = "Linus's Law"
-applies_to = { task = ["review"] }
-when = "A change or a plan is being reviewed."
-family = "testing"
-text = """\
-Review as an independent reader: judge the change against the requirement \
-rather than its description, and report each finding with the concrete way \
-it fails, ordered by severity."""
-
-[[entries]]
-id = "practice.postel"
-label = "Postel"
-principle = "Postel's Law"
-applies_to = { task = ["implement"] }
-when = "The change reads or writes data at a boundary: an API, a file, a protocol, input from people."
-family = "reuse"
-text = """\
-Be strict in what you produce and tolerant in what you accept at a boundary, \
-without silently accepting what the contract forbids."""
-
-[[entries]]
 id = "practice.murphy"
 label = "Murphy"
 principle = "Murphy's Law"
@@ -288,14 +95,198 @@ text = """\
 Assume every step can fail; verify the current state before changing it and \
 name the rollback before the first change."""
 
-# ================= decision laws
+# ================= what the request asks for
+
+[[entries]]
+id = "practice.stated_constraints"
+label = "Stated Constraints"
+principle = "agent practice: instruction following"
+applies_to = { task = ["implement", "plan", "operate", "document", "clarify", "review"] }
+when = "The request sets a limit on the work: files or areas not to touch, no new dependencies, keep an interface, a size or style limit, or words like only, don't, without."
+family = "scope"
+text = """\
+Treat each limit the request sets as a hard check: keep it for the whole \
+task, check each one again before you report, and if one blocks the work, \
+stop and say so instead of working around it."""
+why = """\
+Constraint violation is the most common agent failure in real sessions \
+(38%, 49% on CLI agents, and rising)."""
+
+[[entries]]
+id = "practice.assumptions"
+label = "Unstated Choices"
+principle = "owner practice"
+applies_to = { task = ["plan", "implement", "diagnose"] }
+when = "The request names a goal but leaves open a choice that changes the result: which behaviour, which files or users, or what counts as done."
+family = "scope"
+text = """\
+If a wrong guess would be costly to undo or would change what the person \
+gets, ask one short question first; otherwise take the conventional choice, \
+state it in one line, and go on."""
+status = "candidate"   # the abstract form showed no effect; this form is to be evaluated
+
+[[entries]]
+id = "practice.answer_only"
+label = "Answer Only"
+principle = "agent practice: scope"
+applies_to = { task = ["question", "research", "review", "diagnose"] }
+when = "The request asks a question, or for an explanation, review or diagnosis, and asks for no change."
+family = "domain"
+text = """\
+Answer or report without editing files, committing or running commands that \
+change state; offer the change as a next step instead."""
+why = """\
+Agents treat a question as permission to edit (scope overreach, 10% of \
+episodes); understanding code is the most common request (18%)."""
+
+# ================= planning
+
+[[entries]]
+id = "practice.ninety_ninety"
+label = "Plan in Small Checked Steps"
+principle = "Ninety-Ninety Rule, Hofstadter's Law and Pareto Principle"
+applies_to = { task = ["plan", "implement"] }
+when = "The request asks for a plan, design or breakdown of work, or for a feature that spans several modules or services."
+family = "scope"
+text = """\
+Break the work into small items, each with a done check a command or a named \
+person can run; put the thinnest end-to-end path through the riskiest part \
+first, and land each item as its own reviewable change."""
+
+[[entries]]
+id = "practice.brooks"
+label = "Parallel Agents"
+principle = "Brooks's Law and Amdahl's Law"
+applies_to = { task = ["plan", "implement"] }
+when = "The request asks for work to run in parallel, or to hand parts to several agents, sub-agents or worktrees."
+family = "scope"
+text = """\
+Split only along items that touch different files, give each its own branch \
+or worktree, keep one implementation per item, and use sub-agents for \
+research and review rather than for overlapping edits."""
+
+# ================= writing and changing code
+
+[[entries]]
+id = "practice.follow_patterns"
+label = "Follow Repo Patterns"
+principle = "DRY and Principle of Least Astonishment"
+applies_to = { task = ["implement", "document"] }
+when = "The request adds another of something the repo already has (an endpoint, component, command, flag, config key, handler, job, test or helper), or names one to copy."
+family = "reuse"
+text = """\
+Find the nearest existing example and follow its structure, names, error \
+handling and helpers; reuse what exists instead of writing a near-copy, and \
+when a choice would surprise a reader of the surrounding code, take the \
+conventional one."""
+why = """\
+Agent code duplicates instead of reusing (GitClear 2025); reviewers' fixes \
+to agent PRs are mostly repo conventions."""
+
+[[entries]]
+id = "practice.restructure"
+label = "Restructure Without Changing Behaviour"
+principle = "Second-System Effect"
+applies_to = { task = ["implement", "plan"] }
+when = "The request restructures or rewrites working code: a refactor, rename, extract, split or move, a conversion such as callbacks to async, or a port to another framework or language."
+family = "cleanup"
+text = """\
+Keep behaviour the same unless the request says otherwise: make sure tests \
+pin the current behaviour before you start, change structure in small steps \
+that each pass, add no features on the way, and list any behaviour you did \
+change on purpose."""
+why = """\
+Agent refactors are frequent (26% of agent commits) and patches often \
+change more behaviour than needed (PatchDiff)."""
+
+[[entries]]
+id = "practice.hyrum"
+label = "Compatibility"
+principle = "Hyrum's Law"
+applies_to = { task = ["implement", "plan", "review"] }
+when = "The request changes or removes something others already use: a public function or endpoint, a CLI command or flag, a config key, a file or data format, an event, or a default."
+family = "reuse"
+text = """\
+Treat current behaviour as depended on: find its callers and users first, \
+keep it unless the request says to change it, and name each change you make \
+to it with what a caller must do."""
+
+[[entries]]
+id = "practice.dependency_change"
+label = "Dependency Change"
+principle = "Lindy Effect"
+applies_to = { task = ["implement", "plan", "research", "operate"] }
+when = "The request adds, removes, replaces or upgrades a package, library, SDK, framework or toolchain version."
+family = "reuse"
+text = """\
+Prefer what the repo already uses or a long-maintained package; confirm the \
+package exists under that exact name and publisher; read the changelog or \
+migration guide between the versions; change it with the repo's package \
+manager and lockfile; run the full build and tests."""
+why = """\
+About 20% of packages LLMs suggest do not exist and the invented names \
+recur (Spracklen et al., USENIX Security 2025); upgrades break on unread \
+changelogs."""
+
+[[entries]]
+id = "practice.map_territory"
+label = "Check the Real Tool"
+principle = "The Map Is Not the Territory"
+applies_to = { task = ["implement", "diagnose", "question", "research", "document"] }
+when = "The request depends on a named external library, framework, service API, CLI tool, config option or version."
+family = "testing"
+text = """\
+Confirm the API, option or flag exists in the version this repo pins (the \
+lockfile, its docs or source) before using it; trust the running system and \
+the repository over memory."""
+
+[[entries]]
+id = "practice.knuth"
+label = "Measure Before Optimising"
+principle = "Premature Optimization"
+applies_to = { task = ["implement", "diagnose", "plan"] }
+when = "The request is about performance: slowness, latency, memory, CPU, bundle or load time, query time, or the cost of a run."
+family = "simplicity"
+text = """\
+Measure before changing anything, with the same input and command before and \
+after; change only the measured bottleneck and report both numbers."""
+
+# ================= tests and failures
+
+[[entries]]
+id = "practice.testing_pyramid"
+label = "Test the Change"
+principle = "Testing Pyramid"
+applies_to = { task = ["implement"] }
+when = "The request adds or changes code behaviour (a feature, a fix, a new case) or asks for tests to be written."
+family = "testing"
+text = """\
+Write the failing test from the requirement first and make it pass with the \
+smallest change; prefer many fast tests against the real unit, mocking only \
+boundaries you do not own; add slower integration tests only where a unit \
+test cannot see the behaviour."""
+
+[[entries]]
+id = "practice.fix_code_not_test"
+label = "Fix the Code, Not the Test"
+principle = "agent practice: reward hacking"
+applies_to = { task = ["implement", "diagnose"] }
+when = "The request asks to make failing tests, a build, a type check, lint or CI pass."
+family = "testing"
+text = """\
+Make the checks pass by fixing the code; do not delete, skip, loosen or \
+special-case a test or a check. If a test itself looks wrong, stop and say \
+why before changing it."""
+why = """\
+Agents edit or special-case tests to pass them; telling them to stop and \
+report a flawed test cut this from ~93% to ~1% (ImpossibleBench)."""
 
 [[entries]]
 id = "practice.occam"
-label = "Occam"
+label = "Reproduce First"
 principle = "Occam's Razor and First Principles"
-applies_to = { task = ["diagnose", "research"] }
-when = "A fault is being diagnosed or a question researched."
+applies_to = { task = ["diagnose", "implement", "question"] }
+when = "The request reports a failure: an error message, a crash, a hang, a failing or flaky test, wrong output, or something that broke after a change."
 family = "testing"
 text = """\
 Reproduce the fault first and reduce it to the smallest case; prefer the \
@@ -303,60 +294,89 @@ simplest explanation that fits all the evidence; reason from what the system \
 actually does, not from what it is supposed to do."""
 
 [[entries]]
+id = "practice.failed_attempt"
+label = "Failed Attempt"
+principle = "Sunk Cost Fallacy"
+applies_to = { task = ["clarify", "diagnose", "implement"] }
+when = "The request says an earlier attempt or fix did not work, or the same problem came back."
+family = "cleanup"
+text = """\
+Do not patch the patch: re-check the diagnosis from fresh evidence, say what \
+the earlier attempt got wrong, and change approach instead of adding to it."""
+why = """\
+"Still broken" follow-ups are about 4% of what people send coding agents; \
+patching on top of a wrong diagnosis repeats it, and Claude Code's guide \
+advises starting over after two failed corrections."""
+
+# ================= review and judgement
+
+[[entries]]
+id = "practice.linus"
+label = "Review Findings"
+principle = "Linus's Law"
+applies_to = { task = ["review"] }
+when = "The request asks to review a diff, branch, pull request, commit, plan or design."
+family = "testing"
+text = """\
+Review as an independent reader against the requirement, not the \
+description; report findings that affect correctness first, each with the \
+concrete way it fails, skip style unless asked, and say so when you find \
+nothing."""
+
+[[entries]]
 id = "practice.confirmation_bias"
-label = "Confirmation Bias"
+label = "Check the Conclusion"
 principle = "Confirmation Bias and Dunning-Kruger"
-applies_to = { task = ["research", "question", "clarify", "review", "diagnose"] }
-when = "A conclusion is drawn from evidence: a diagnosis, a review, research, an answer."
+applies_to = { task = ["question", "research", "review", "clarify"] }
+when = "The request asks for a judgement about the code or system: whether something is safe, still used, correct or finished, how it works, or which option is better."
 family = "testing"
 text = """\
 Look for the evidence that would prove you wrong before concluding; keep \
 what you observed apart from what you inferred, and state your confidence."""
 
+# ================= risk: outside data, lasting changes, history
+
 [[entries]]
-id = "practice.map_territory"
-label = "Map Is Not Territory"
-principle = "The Map Is Not the Territory"
-applies_to = { task = ["diagnose", "implement"] }
-when = "The work relies on an API, option, library or behaviour that may differ from its docs or from memory."
-family = "testing"
+id = "practice.untrusted_input"
+label = "Untrusted Input"
+principle = "Postel's Law, revised (RFC 9413)"
+applies_to = { task = ["implement", "review"] }
+when = "The change handles data from outside the program (requests, uploads, files, webhooks, CLI arguments, user input) or touches login, permissions, tokens or secrets."
+family = "domain"
 text = """\
-Trust the running system and the repository over documentation, memory, or \
-assumption; confirm an API, option, or behaviour exists before relying on \
-it."""
+Validate outside data strictly and reject what the contract forbids with a \
+clear error; never build SQL, shell commands or paths from it unescaped; \
+keep secrets out of code, logs and errors; check access on every path."""
+why = """\
+LLM code is insecure in 45% of tasks (Veracode 2025); vibe-coded commits \
+add 3.8x more findings (SWE-chat)."""
 
 [[entries]]
-id = "practice.sunk_cost"
-label = "Sunk Cost"
-principle = "Sunk Cost Fallacy"
-applies_to = { task = ["implement", "plan"] }
-when = "An approach is struggling, or the effort already spent pulls toward continuing it."
-family = "cleanup"
-text = """\
-When an approach is not working, abandon it regardless of the effort already \
-spent, and say so."""
-
-[[entries]]
-id = "practice.lindy"
-label = "Lindy"
-principle = "Lindy Effect"
-applies_to = { task = ["research", "plan"] }
-when = "The work chooses a library, tool, pattern or approach."
-family = "reuse"
-text = """\
-Prefer approaches, libraries, and patterns with a long record over new ones \
-unless the requirement needs what only the new one offers."""
-
-# ================= cross-cutting (owner practice; to be evaluated)
-
-[[entries]]
-id = "practice.assumptions"
-label = "Assumptions"
-principle = "owner practice"
-applies_to = { task = ["plan", "implement", "diagnose"] }
-when = "The request leaves details unstated that the work must decide."
+id = "practice.unintended_consequences"
+label = "Hard to Undo"
+principle = "Law of Unintended Consequences"
+applies_to = { task = ["implement", "operate", "plan"] }
+when = "The request changes something hard to undo: stored data or a schema migration, a deploy or release, shared infrastructure or cloud resources, or deleting files or records."
 family = "scope"
 text = """\
-Where the requirement is silent, write the assumption you are making in one \
-line before acting on it."""
-status = "candidate"   # the abstract form showed no effect; this form is to be evaluated
+Check the current state first, name the rollback before the first change, \
+prefer a dry run or a backup, change one thing at a time, and stop to ask \
+before any step that cannot be undone."""
+why = """\
+The rare severe agent failures are irreversible: a deleted production \
+database, rewritten history, an unapproved release."""
+
+[[entries]]
+id = "practice.git_changes"
+label = "Git Changes"
+principle = "agent practice: version control"
+applies_to = { task = ["operate", "implement"] }
+when = "The request asks to commit, branch, merge, rebase, push, tag, or open or update a pull request."
+family = "cleanup"
+text = """\
+Stage only this task's files and read the staged diff for secrets and stray \
+files; say what changed and why; never push, force, rewrite shared history, \
+or discard uncommitted work unless the request says to."""
+why = """\
+Git is 12.6% of prompts (SWE-chat); rewriting history and deleting \
+uncommitted work are among the severe real failures."""

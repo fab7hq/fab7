@@ -3,9 +3,10 @@ schema = "ringframe.deltas/1"
 scope = "practice"
 domain = "machine-learning"
 description = """\
-Building, training and shipping models: datasets and labels, splits and \
-evaluation, fine-tuning and training runs, GPU and model-call costs, export \
-and serving, and models in people's hands."""
+Building, training and shipping models: datasets and labels, including \
+LLM-made data, splits and evaluation, LLM judges, fine-tuning and training \
+runs, GPU and model-call costs, export and serving, and models in people's \
+hands."""
 render = { heading = "Rules:" }
 source = "https://developers.google.com/machine-learning/guides/rules-of-ml"
 
@@ -13,35 +14,45 @@ source = "https://developers.google.com/machine-learning/guides/rules-of-ml"
 # Sculley et al., "Hidden Technical Debt in Machine Learning Systems" (2015);
 # Kapoor & Narayanan, "Leakage and the Reproducibility Crisis in ML-based
 # Science" (2023); Mitchell et al., "Model Cards for Model Reporting" (2019);
-# Gebru et al., "Datasheets for Datasets" (2021).
+# Gebru et al., "Datasheets for Datasets" (2021); Karpathy, "A Recipe for
+# Training Neural Networks" (2019); Bouthillier et al., "Accounting for
+# Variance in Machine Learning Benchmarks" (2021); Shumailov et al., "AI
+# models collapse when trained on recursively generated data" (2024); Guo et
+# al., "On Calibration of Modern Neural Networks" (2017); Zheng et al.,
+# "Judging LLM-as-a-Judge with MT-Bench and Chatbot Arena" (2023).
 
 # ================= before any model
 
 [[entries]]
 id = "practice.simplest_model"
 label = "Simplest Model"
-principle = "Rules of ML: Rule #1"
+principle = "Rules of ML: Rule #4"
 applies_to = { task = ["research", "plan", "implement", "review"] }
-when = "The work introduces a model, or picks a model's kind or size."
+when = "The work picks a model or base model to train, fine-tune or call, or changes its kind or size."
 family = "domain"
 text = """\
-Ship a heuristic or the smallest model that could work first, with a solid \
-pipeline around it; move to a larger model only when measured results on the \
-same held-out rows show the gain is worth its size, latency and upkeep."""
+Start from a rule or the smallest model that could work, with the whole \
+pipeline around it. Pick a larger or different model only from a comparison \
+of candidates on the same held-out rows that weighs the result against size, \
+latency and cost."""
 why = """\
-Most early gains come from the pipeline and the data, not the model; a large \
-model on a weak pipeline hides the weakness."""
+Most early gains come from the pipeline and the data; a model picked by name \
+or size instead of by a measured comparison is often the wrong trade."""
 
 [[entries]]
 id = "practice.baseline_first"
 label = "Baseline First"
+principle = "A Recipe for Training Neural Networks"
 applies_to = { task = ["research", "implement", "review"] }
-when = "The work claims a model, feature or change improves results."
+when = "The work tries a new model, feature, prompt or method to raise a metric."
 family = "domain"
 text = """\
-Measure a simple baseline (a rule, the majority answer, the previous model) \
-on the same rows and splits before claiming a gain, and report the gain over \
-it, not the raw score."""
+Measure a simple baseline (a rule, the majority or an input-independent \
+answer, the previous model) on the same rows and splits before claiming a \
+gain, and report the gain over it, not the raw score."""
+why = """\
+A score means little until it sits beside what a trivial answer gets on the \
+same rows; many gains shrink or vanish there."""
 
 # ================= data and labels
 
@@ -50,209 +61,329 @@ id = "practice.label_audit"
 label = "Label Audit"
 principle = "Datasheets for Datasets"
 applies_to = { task = ["plan", "implement", "review"] }
-when = "The work creates, generates, buys or changes labels."
+when = "The work writes a labelling guide, labels or relabels rows, or merges labels from people or models."
 family = "domain"
 text = """\
-Write what each label means before labelling. Measure agreement between \
-labellers or readers, audit a sample of what they agree on, and have a person \
-decide what they disagree on. Keep the label's source and reason with it."""
+Write what each label means, with hard cases, before labelling. Measure \
+agreement between labellers, people or models, audit a sample of what they \
+agree on, and have a person decide what they disagree on. Check a model's \
+labels against a person-labelled sample before using them, and check the \
+test labels too. Keep each label's source and reason with it."""
+why = """\
+Wrong labels in the test set change which model looks best; a model labeller \
+makes the same mistake everywhere, so agreement alone does not prove it \
+right."""
 
 [[entries]]
 id = "practice.data_lineage"
 label = "Data Lineage"
+principle = "The ML Test Score"
 applies_to = { task = ["implement", "operate", "review"] }
-when = "The work trains, exports or releases a model, or changes the data it trains on."
+when = "The work builds a training set, records what a run used, or traces a model back to its data and code."
 family = "domain"
 text = """\
 Keep raw data append-only and build training sets as immutable snapshots \
-named by their content's digest. Every model names the snapshot, code commit \
-and configuration it came from, so it can be rebuilt; correct data by adding \
-a recorded decision, never by editing a file in place."""
+named by their content's digest. Every model names the snapshot, code \
+commit, configuration and seeds it came from, so it can be rebuilt; correct \
+data by adding a recorded decision, never by editing a file in place."""
+why = """\
+A model that cannot be traced to its data, code and settings cannot be \
+rebuilt, compared or fixed."""
 
 [[entries]]
 id = "practice.data_validation"
 label = "Data Validation"
 principle = "The ML Test Score"
 applies_to = { task = ["implement", "operate", "review"] }
-when = "New data enters training or serving."
+when = "The work loads, refreshes or merges a dataset, or adds a data source, for training or serving."
 family = "domain"
 text = """\
-Check incoming rows against a schema and expected ranges, and fail the build \
-on a schema error rather than training on it. Report each build's counts per \
-class and source beside the last build's, so a missing source or a shifted \
-mix is seen before training."""
+Check incoming rows against a schema and expected ranges, count empty fields \
+and exact duplicates, and fail the build on a schema error rather than \
+training on it. Report each build's counts per class and source beside the \
+last build's, so a missing source or a shifted mix is seen before training."""
+why = """\
+Bad data seldom stops a training run; it shows up late, as a quietly worse \
+model."""
 
 [[entries]]
 id = "practice.synthetic_data"
-label = "Synthetic Data"
-applies_to = { task = ["research", "implement", "review"] }
-when = "The work trains or evaluates on generated or synthetic data."
+label = "LLM-Made Data"
+principle = "Model Collapse"
+applies_to = { task = ["research", "plan", "implement", "review"] }
+when = "The work has an LLM or agent write new training or test examples, or trains a small model to copy a larger model's answers."
 family = "domain"
 text = """\
-Check generated rows' labels as you would any labeller's, keep them marked as \
-generated, and always report results on real data separately; a model that \
-only does well on generated rows has learned the generator."""
+Write down the generation prompt and the mix of cases you want, vary \
+sources, seeds and phrasing, and remove near-copies. Mark generated rows, \
+check their labels on a sample as you would any labeller's, and keep the \
+final test on real data; report results on real and generated rows apart."""
+why = """\
+A model trained on generated rows learns the generator's habits and loses \
+the rare cases; a score on generated rows says little about real requests."""
 
 # ================= splits and evaluation
 
 [[entries]]
 id = "practice.split_by_unit"
 label = "Split by Unit"
+principle = "Leakage and the Reproducibility Crisis"
 applies_to = { task = ["research", "plan", "implement", "review"] }
-when = "The work splits data into train, calibration and test, or adds new data to existing splits."
+when = "The work creates or changes train, validation and test splits, or adds new data to them."
 family = "domain"
 text = """\
 Split by the unit that must stay together (a user, session, document, \
-workspace, time period or source), never by row. Assign a unit its split \
+workspace, time period, source, or the prompt that generated the rows), \
+never by row, and keep near-copies in one split. Assign a unit its split \
 once and keep it across releases, so later results are comparable."""
+why = """\
+When rows of one user, document or prompt sit on both sides of a split, the \
+model scores by recognising them, not by generalising."""
 
 [[entries]]
 id = "practice.leakage"
 label = "No Leakage"
 principle = "Leakage and the Reproducibility Crisis"
 applies_to = { task = ["research", "implement", "diagnose", "review"] }
-when = "Features, labels or examples could carry information the model will not have when it predicts."
+when = "The work builds features, preprocessing or prompts from data, or a held-out score looks too good to be true."
 family = "domain"
 text = """\
 Fit preprocessing, vocabularies and thresholds on training data only. Remove \
-held-out examples whose text or near-duplicate is in training, and features \
-that encode the label or are known only after the prediction. Report how many \
-were removed."""
+held-out examples whose text or near-copy is in training or in a prompt's \
+examples, and features that encode the label or are known only after the \
+prediction. A public benchmark a pretrained model may have seen is not a \
+clean test. Report how many were removed."""
+why = """\
+A leak makes held-out scores look better than the model will do in use, and \
+it is common even in published work."""
 
 [[entries]]
 id = "practice.frozen_test"
 label = "Frozen Test"
+principle = "Leakage and the Reproducibility Crisis"
 applies_to = { task = ["research", "plan", "review"] }
-when = "A model is evaluated on held-out data to choose between options or to report a result."
+when = "The work tunes settings, thresholds or prompts, picks a checkpoint or model, or reports a final score."
 family = "domain"
 text = """\
-Choose models, thresholds and settings on the calibration split; touch the \
-test split only for the final report. Once a test result has steered a \
-choice, it is development evidence: say so, and add fresh test data."""
-
-[[entries]]
-id = "practice.coverage_first"
-label = "Coverage First"
-applies_to = { task = ["plan", "implement", "review"] }
-when = "Training is about to start, or results will be reported per class, segment or source."
-family = "domain"
-text = """\
-Before training, count the held-out rows each claimed behaviour, class, \
-segment and source needs, without a model. Fix a shortfall with data before \
-training, never by lowering the minimum or dropping the claim afterwards."""
+Choose models, checkpoints, thresholds, prompts and judge prompts on the \
+validation split; touch the test split only for the final report. Once a \
+test result has steered a choice, it is development evidence: say so, and \
+add fresh test data."""
+why = """\
+Each choice made by looking at the test set fits it a little; the final \
+score then overstates how the model does on new data."""
 
 [[entries]]
 id = "practice.slice_metrics"
 label = "Slice Metrics"
-applies_to = { task = ["research", "review"] }
-when = "A model's results are reported or compared."
+principle = "The ML Test Score"
+applies_to = { task = ["research", "plan", "review"] }
+when = "The work reports results by class, language, source or user group, or a metric dropped for some inputs."
 family = "domain"
 text = """\
-Report results per slice that matters (class, source, user segment, version) \
-and name the behaviours that must hold, beside the aggregate and the previous \
-release's numbers; an average hides the slice that fails."""
+Before training, count the held-out rows each class, segment and source \
+needs, and fix a shortfall with data, never by dropping the claim. Report \
+each slice with its row count beside the aggregate and the last release, \
+flag slices too small to judge, and read a sample of the errors in the worst \
+slice."""
+why = """\
+An average hides the slice that fails, and a slice of a dozen rows proves \
+nothing."""
 
 [[entries]]
 id = "practice.variance"
 label = "Seeds and Variance"
-applies_to = { task = ["research", "review"] }
-when = "Two models, configurations or runs are compared."
+principle = "Accounting for Variance in Machine Learning Benchmarks"
+applies_to = { task = ["research", "review", "diagnose"] }
+when = "The work compares close runs or settings (a sweep, an ablation, a new seed), or the same setup gives different numbers."
 family = "domain"
 text = """\
-Fix and record seeds, and measure the spread across seeds or folds before \
-calling a difference real; a gap smaller than the spread is not a result. \
-Change one factor at a time and record the rest of the configuration."""
+Fix and record seeds, and measure the spread across seeds or folds, or a \
+bootstrap interval on the test set, before calling a difference real; a gap \
+smaller than the spread is not a result. Change one factor at a time and \
+record the rest of the configuration. Expect GPU and library versions to \
+change results even with the same seed."""
+why = """\
+Seeds alone move a fine-tuned small model by more than many claimed gains."""
+
+[[entries]]
+id = "practice.judge_check"
+label = "Judge Check"
+principle = "Judging LLM-as-a-Judge"
+applies_to = { task = ["plan", "implement", "review"] }
+when = "The work scores outputs with an LLM judge, or writes or changes a judge's prompt or rubric."
+family = "domain"
+text = """\
+Check the judge against a person's pass or fail labels before trusting it, \
+and report how often it catches real failures and passes real successes, not \
+raw agreement. Prefer pass or fail with a reason over a 1 to 5 score, swap \
+answer order in pairwise judging, keep the judge from grading its own \
+model's output, and recheck it when its model or prompt changes."""
+why = """\
+Judges favour first, longer and their own answers; an unchecked judge turns \
+its bias into the result."""
 
 # ================= training runs
 
 [[entries]]
 id = "practice.smoke_run"
 label = "Smoke Run"
+principle = "A Recipe for Training Neural Networks"
 applies_to = { task = ["implement", "operate"] }
-when = "The work starts a long or paid training run."
+when = "The work starts or readies a full, long or paid training run or batch job."
 family = "domain"
 text = """\
-Run the whole path first on a small slice on your own machine: a few training \
-steps, export, verification and the report, through the same code. Start the \
-long or paid run only when that path ends with no errors."""
+Run the whole path first on a small slice on your own machine: a few \
+training steps, export, verification and the report, through the same code. \
+Start the long or paid run only when that path ends with no errors."""
+why = """\
+A path that breaks at export or the report after hours on a paid machine \
+wastes the whole run; a small run finds the break in minutes."""
 
 [[entries]]
 id = "practice.compute_cap"
-label = "Compute Cap"
-applies_to = { task = ["plan", "operate"] }
-when = "The work rents GPUs or pays for model calls."
+label = "Spend Cap"
+principle = "Spend Cap"
+applies_to = { task = ["plan", "implement", "operate"] }
+when = "The work rents GPUs, or runs or changes code that calls a paid model or API in bulk."
 family = "domain"
 text = """\
-Get the spend approved with a cap before it starts, set a hard stop that ends \
-the machine at the cap, download and verify the outputs, then tear the \
-machine down. Record each run's time and cost."""
+Estimate the cost from a small sample and get a cap approved before \
+starting; set a hard stop at the cap. Cache calls by input digest, drop \
+duplicates before calling, and bound retries, honouring Retry-After. Use \
+batch pricing when results can wait. Record each run's time, tokens and \
+cost, and tear down rented machines once the outputs are verified."""
+why = """\
+Unbounded retries, repeated calls and idle machines are where the bill comes \
+from."""
 
 [[entries]]
 id = "practice.checkpoints"
 label = "Checkpoints"
-applies_to = { task = ["implement", "operate"] }
-when = "A training run is long enough to be interrupted or to fail late."
+principle = "PyTorch: Saving and Loading Models"
+applies_to = { task = ["implement", "operate", "diagnose"] }
+when = "The work saves or resumes training, or trains on machines that can be stopped, such as spot or rented GPUs."
 family = "domain"
 text = """\
-Save resumable checkpoints during the run and checksums of every output, and \
-verify them after download, so an interruption or a bad copy costs minutes, \
-not the run."""
+Save resumable checkpoints during the run: weights, optimizer, scheduler and \
+scaler state, the step and data position, and random state. Test that a \
+resumed run matches an uninterrupted one. Keep checksums of every output and \
+verify them after download."""
+why = """\
+Rented and spot machines stop without warning, and a checkpoint that lacks \
+the optimizer or scheduler state resumes as a different run."""
+
+[[entries]]
+id = "practice.training_sanity"
+label = "Training Sanity"
+principle = "A Recipe for Training Neural Networks"
+applies_to = { task = ["diagnose", "implement"] }
+when = "A training run diverges, gives NaN, will not learn, or a metric moved after a training change."
+family = "domain"
+text = """\
+Look at a batch exactly as it enters the model, check the first step's loss \
+against chance, and make the model overfit a handful of rows. Compare with \
+the last good run's configuration and data, and change one thing at a time."""
+why = """\
+A training bug rarely raises an error; the run finishes and is quietly \
+worse. These checks find most such bugs in minutes."""
 
 # ================= shipping and use
 
 [[entries]]
-id = "practice.train_serve_parity"
-label = "Train-Serve Parity"
-principle = "The ML Test Score"
-applies_to = { task = ["implement", "review"] }
-when = "A model is exported, or served by code other than the code that trained it."
+id = "practice.train_serve_skew"
+label = "Train-Serve Skew"
+principle = "Rules of ML: Rules #29, #32, #37"
+applies_to = { task = ["implement", "diagnose", "review"] }
+when = "Serving or app code prepares a model's inputs (features, tokenizer, preprocessing) apart from the training code."
 family = "domain"
 text = """\
-Ship the preprocessing and tokenization with the model as one contract, and \
-check the serving runtime against golden inputs and outputs recorded from \
-training, to a stated tolerance, before release."""
+Share the feature and preprocessing code between training and serving, and \
+pin the tokenizer and its version with the model. Log the inputs the model \
+sees when serving and compare a sample with what training computed for the \
+same records, to a stated tolerance."""
+why = """\
+Two copies of the same feature drift apart, and nothing fails: the model \
+just gets worse."""
+
+[[entries]]
+id = "practice.export_check"
+label = "Export Check"
+principle = "The ML Test Score"
+applies_to = { task = ["implement", "operate", "review"] }
+when = "The work exports, converts or quantizes a model (ONNX, TensorRT, Core ML, fp16, int8, 4-bit)."
+family = "domain"
+text = """\
+Compare the exported model's outputs with the original's on recorded golden \
+inputs, to a stated tolerance. For lower precision, also rerun the eval set \
+with its slices and measure size and latency on the target device. Calibrate \
+static quantization on real rows; when accuracy drops, find the layers that \
+diverge before trying another method."""
+why = """\
+Export and quantization fail quietly: the file loads, the numbers shift, and \
+accuracy is lost only on some inputs."""
 
 [[entries]]
 id = "practice.calibrated_abstain"
-label = "Calibrated Abstain"
-applies_to = { task = ["implement", "review"] }
-when = "A model's output drives a product decision or is shown to people as a suggestion."
+label = "Thresholds and Calibration"
+principle = "On Calibration of Modern Neural Networks"
+applies_to = { task = ["implement", "review", "diagnose"] }
+when = "The work sets or changes a score threshold, calibrates scores, or decides when a model should abstain."
 family = "domain"
 text = """\
-Calibrate scores on the calibration split, and answer nothing below a sure \
-cut. Measure and report how often the model is confidently wrong; a wrong \
-suggestion shown with confidence costs more than none."""
+Fit calibration (temperature or Platt scaling) and choose thresholds on the \
+validation split, refit them after every retrain, and ship them with the \
+model. Answer nothing below a sure cut. Report how often the model is \
+confidently wrong; a wrong suggestion shown with confidence costs more than \
+none."""
+why = """\
+Modern networks are overconfident, and a threshold fitted to one model is \
+wrong for the next."""
 
 [[entries]]
 id = "practice.monitor_in_use"
-label = "Monitor in Use"
-applies_to = { task = ["implement", "operate", "review"] }
-when = "A model runs in production or on people's machines."
+label = "Rollout and Monitor"
+principle = "The ML Test Score"
+applies_to = { task = ["plan", "implement", "operate"] }
+when = "The work puts a new or retrained model in front of users, or watches or rolls back one already in use."
 family = "domain"
 text = """\
-Record what the model answered and what the person then did, watch how often \
-they override it, and define in advance what triggers retraining; feed those \
-records back as labels only after review."""
+Run a new model in shadow on live inputs before it decides anything, roll it \
+out in steps with a tested rollback to the previous artifact, and watch its \
+input mix, scores and how often people override it against what training \
+saw. Set retraining triggers in advance; use logged outcomes as labels only \
+after review."""
+why = """\
+A model in use fails quietly as its inputs drift; without a shadow run and a \
+tested rollback, the first sign is the people it misleads."""
 
 [[entries]]
 id = "practice.model_card"
 label = "Model Card"
 principle = "Model Cards for Model Reporting"
 applies_to = { task = ["document", "operate", "review"] }
-when = "A model or dataset is published or handed to others."
+when = "The work publishes or hands over a model or dataset, or writes its card or release notes."
 family = "domain"
 text = """\
 Publish with it what it is for and not for, what data it learned from, its \
 results per slice, its known limits, and the licenses of its base model and \
 data."""
+why = """\
+Without its intended use, data and limits written down, a model gets used \
+where it fails."""
 
 [[entries]]
 id = "practice.model_licenses"
 label = "Licenses and Privacy"
+principle = "Datasheets for Datasets"
 applies_to = { task = ["research", "plan", "implement"] }
-when = "The work takes in a pretrained model, a dataset or people's own data."
+when = "The work picks a pretrained model, dataset or teacher model, or uses data that holds people's personal information."
 family = "domain"
 text = """\
-Confirm each base model's and dataset's license allows the use and the \
-release you plan. Keep people's private data where they keep it; never put it \
-in a repository, a published artifact or a request to an outside service."""
+Confirm each base model's, dataset's and teacher model's license or terms \
+allow the use and the release you plan, including training on its outputs. \
+Keep people's private data where they keep it; never put it in a repository, \
+a published artifact or a request to an outside service."""
+why = """\
+A license or a teacher's terms can forbid the release after the work is \
+done, and private data, once sent or published, cannot be taken back."""

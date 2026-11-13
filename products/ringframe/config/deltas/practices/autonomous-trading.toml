@@ -16,94 +16,82 @@ source = "https://www.fia.org/sites/default/files/2024-07/FIA_WP_AUTOMATED%20TRA
 id = "practice.no_lookahead"
 label = "No Lookahead"
 principle = "Point-in-Time Discipline"
-applies_to = { task = ["research", "plan", "implement", "review"] }
-when = "The work uses historical data to make or test trading decisions."
+applies_to = { task = ["research", "implement", "diagnose", "review"] }
+when = "The work builds or checks the features, signals or data joins a backtest or strategy reads: shifts, rolling windows, resampling, merges of other timeframes or sources."
 family = "domain"
 text = """\
-Keep two timestamps for every input, when the event occurred and when it \
-became available, and let a decision use only information available at \
-decision time. Model execution after signal availability plus the applicable \
-latency. A completed bar's close is available for the next decision; a \
-window that ends at the current completed observation is not a leak. A value \
-that was revised, restated, or not yet published at decision time is."""
+Let each decision use only data available at decision time, and fill no \
+earlier than the next price after the signal. Use closed bars only; a value \
+from a forming bar or a higher timeframe that has not closed repaints. Watch \
+for negative shifts, whole-series statistics, fixed-row lookups and joins \
+on revised or late data. Test it: extend the history and check that \
+earlier signals do not change."""
 why = """\
-The bias is using information before it could have been known, not using \
-recent information. Freqtrade's own non-biased example is a rolling window \
-that includes the current row."""
+Freqtrade's lookahead analysis and TradingView's repainting page list these \
+patterns; a rolling window that ends at the current closed bar is not a \
+leak."""
 
 [[entries]]
-id = "practice.walk_forward"
-label = "Walk Forward"
-principle = "Walk-Forward Validation"
-applies_to = { task = ["research", "plan"] }
-when = "A strategy is fitted or evaluated on historical data."
+id = "practice.indicator_code"
+label = "Indicator Code"
+applies_to = { task = ["research", "implement", "diagnose", "review"] }
+when = "The work adds, ports or fixes an indicator or signal formula: RSI, ATR, VWAP, moving averages, z-scores, ranks."
 family = "domain"
 text = """\
-Freeze a chronological evaluation procedure before running it: fit on \
-earlier data, evaluate on later data, roll forward, purge overlapping label \
-periods and apply an embargo where labels span time. Report the per-window \
-results and their dispersion against acceptance criteria you set in advance, \
-rather than either averaging windows together or declaring every \
-inconsistency a failure."""
+Check the formula against a reference implementation on a fixed sample, \
+warm-up rows included. State how much history it needs and emit no signal \
+before that; set the strategy's startup history at least that long, since \
+live runs get less history than backtests. Handle flat prices, zero volume, \
+division by zero and missing values without producing a tradable signal."""
 
 [[entries]]
-id = "practice.locked_oos"
-label = "Locked OOS"
+id = "practice.out_of_sample"
+label = "Out-of-Sample"
 principle = "Locked Out-of-Sample"
 applies_to = { task = ["research", "plan", "diagnose", "review"] }
-when = "A strategy is evaluated on held-out data."
+when = "The work decides whether a strategy works: judging a backtest result, a walk-forward run, or a test on held-out or recent data."
 family = "domain"
 text = """\
-Freeze the strategy, its parameters, and any retraining procedure before the \
-final held-out evaluation; a frozen adaptive procedure may retrain on \
-earlier data inside that evaluation. Once a held-out result has influenced a \
-design choice it is development evidence, not a test. Record that it \
-happened and obtain fresh data before claiming a result."""
+Fit on earlier data and test on later data, rolling forward, with a gap \
+between them where labels or holding periods overlap. Freeze the strategy, \
+its parameters and the pass criteria before the final test, and report \
+each window, not only the average. A test that changed the design is no \
+longer a test; say so and get new data."""
 
 [[entries]]
-id = "practice.no_repaint"
-label = "No Repaint"
-applies_to = { task = ["research", "implement", "diagnose", "review"] }
-when = "The work computes trading signals or indicators."
+id = "practice.overfitting"
+label = "Overfitting"
+principle = "Selection Bias"
+applies_to = { task = ["research", "plan", "review"] }
+when = "The work tunes or searches strategy parameters or variants: hyperopt, grid search, parameter sweeps, picking the best of many backtests."
 family = "domain"
 text = """\
-Require every signal to be causal: reproducible later from exactly the \
-information that was available when it fired. Test it by extending the \
-history with identical input versions and initialization and checking that \
-earlier signals are unchanged. Data corrections and updates to an unfinished \
-bar are legitimate revisions; keep them as separate versions so the signal \
-actually acted on is never overwritten."""
-
-[[entries]]
-id = "practice.indicator_warmup"
-label = "Indicator Warmup"
-applies_to = { task = ["research", "implement", "review"] }
-when = "The work computes indicators that need history before they are valid."
-family = "domain"
-text = """\
-State each indicator's required history and valid-input conditions and emit \
-no signal until both hold; never fill missing early values into a tradable \
-signal. Fix the evaluation start date before running, so that excluding the \
-warm-up span cannot be used to hide losses."""
+Keep every trial, not only the winner, and judge the best result against \
+the number of trials, for example with the deflated Sharpe ratio. Prefer \
+settings in a stable region over a sharp peak: nudge each parameter and \
+report how results move. Search no finer than the market can tell apart."""
+why = """\
+Freqtrade's hyperopt docs warn that precision finer than 0.001 usually \
+overfits; Bailey et al. measure the probability of backtest overfitting."""
 
 [[entries]]
 id = "practice.survivorship"
 label = "Survivorship"
 principle = "Survivorship Bias"
 applies_to = { task = ["research", "implement", "review"] }
-when = "A backtest or study picks a universe of instruments over time."
+when = "The work picks which symbols or pairs a backtest trades: a universe, an index, a pair list or a screener over past dates."
 family = "domain"
 text = """\
 Build the universe from point-in-time membership as of each historical date, \
 and retain delisted, merged, and failed instruments together with their \
-economic outcomes; never backtest a current index membership over a past \
-period."""
+economic outcomes; never backtest a current index membership, or a crypto \
+pair list built from today's volume or listings, over a past period."""
 
 [[entries]]
 id = "practice.corporate_actions"
 label = "Corporate Actions"
 applies_to = { task = ["research", "implement", "diagnose", "review"] }
-when = "The work uses prices affected by splits, dividends or other corporate actions."
+when = "The work uses stock prices or positions affected by splits, dividends, mergers or ticker changes."
 family = "domain"
 text = """\
 Keep adjusted research series distinct from executable prices and from \
@@ -114,65 +102,32 @@ sudden outsized move as a suspected unhandled action until checked."""
 
 [[entries]]
 id = "practice.session_time"
-label = "Sessions"
+label = "Sessions and Time"
 applies_to = { task = ["research", "implement", "diagnose", "review"] }
-when = "The work handles market timestamps, trading sessions or calendars."
+when = "The work handles timestamps, time zones, trading hours, market calendars, holidays or bar boundaries."
 family = "domain"
 text = """\
 Store timestamps with an explicit timezone and align them to the venue's \
 session rather than the calendar day, including overnight and continuous \
 sessions, holidays, half days, and daylight-saving shifts. Never assume the \
-session boundary is midnight in your local zone."""
+session boundary is midnight in your local zone. Crypto trades around the \
+clock; take a daily bar's boundary from the venue, usually UTC."""
 
 [[entries]]
 id = "practice.cost_realism"
-label = "Cost Realism"
-applies_to = { task = ["research", "implement", "review"] }
-when = "A backtest or P&L includes, or should include, trading costs."
+label = "Fills and Costs"
+applies_to = { task = ["research", "implement", "diagnose", "review"] }
+when = "The work sets how a backtest or simulator fills orders or charges costs: fill prices, limit and stop fills, slippage, fees, funding or borrow."
 family = "domain"
 text = """\
-Account for every cost exactly once — commission, spread, slippage, impact, \
-and financing or borrow — whether it is embedded in the fill price or \
-charged separately; do not mechanically subtract a full spread on every \
-fill. Stress the assumptions and report the cost level at which the edge \
-disappears."""
-
-[[entries]]
-id = "practice.multiple_testing"
-label = "Multiple Testing"
-principle = "Selection Bias"
-applies_to = { task = ["research", "review"] }
-when = "Many strategy variants or parameter settings are being searched."
-family = "domain"
-text = """\
-Record the full search history, including configurations that were tried and \
-rejected, and adjust the selected result for selection bias with a method \
-that accounts for the number of trials, their dependence, and the return \
-distribution, such as the deflated Sharpe ratio. A high Sharpe found after \
-many searches is evidence of search until adjusted."""
-
-[[entries]]
-id = "practice.param_stability"
-label = "Parameter Stability"
-applies_to = { task = ["research", "plan", "review"] }
-when = "A strategy's parameters are being chosen."
-family = "domain"
-text = """\
-Perturb each parameter by economically meaningful amounts and report how \
-performance responds; investigate sensitivity you cannot explain and prefer \
-settings inside a stable region over an isolated peak."""
-
-[[entries]]
-id = "practice.regime"
-label = "Regime"
-applies_to = { task = ["research", "plan", "operate", "review"] }
-when = "A strategy relies on market conditions that may change."
-family = "domain"
-text = """\
-State the market condition the edge assumes, the observable criteria that \
-would show it no longer holds, and the response to each, all defined in \
-advance; allow for uncertainty and false alarms in those criteria rather \
-than treating one breach as proof."""
+Fill only what could have traded: a limit price that was touched is not \
+surely filled, a stop can fill past its price, and when stop and target \
+both sit inside one bar assume the worse. Cap fills at a share of the bar's \
+volume. Charge each cost once, at the fee tier you actually pay, and report \
+the cost level at which the edge disappears."""
+why = """\
+Freqtrade issue 13575 measured about a 2x overstatement from exact stop \
+fills, open-price entries and the lowest fee tier."""
 
 # ================= execution safety
 
@@ -180,7 +135,7 @@ than treating one breach as proof."""
 id = "practice.kill_switch"
 label = "Kill Switch"
 applies_to = { task = ["plan", "implement", "operate", "review"] }
-when = "The work builds or runs live or paper trading."
+when = "The work adds, changes, triggers or tests a way to stop trading: a kill switch, circuit breaker, pause, or flatten-all."
 family = "domain"
 text = """\
 Provide a halt that runs independently of the strategy process, blocks the \
@@ -188,78 +143,81 @@ affected strategy's new submissions, handles its working orders by a stated \
 policy, and persists across restart. Halting is not flattening: specify \
 separately whether and how exposure is reduced, which risk-reducing orders \
 remain permitted, and who may authorize resumption. Verify the halt from a \
-separate process before live risk."""
-
-[[entries]]
-id = "practice.idempotent_orders"
-label = "Idempotent Orders"
-applies_to = { task = ["implement", "review"] }
-when = "The work submits, retries or recovers orders."
-family = "domain"
-text = """\
-Persist one identifier per logical order intent before submitting and reuse \
-it on every retry and during recovery; confirm the venue's duplicate and \
-lookup semantics for that identifier. Treat a timeout as an unknown outcome \
-to be looked up, never as a failure to resubmit. Deduplicate fills by \
-execution identity, not by order identity alone."""
+separate process before live risk. Where the venue offers it, also arm its \
+cancel-on-disconnect or cancel-all-after timer, so orders stop if the \
+process dies."""
 
 [[entries]]
 id = "practice.pretrade_limits"
 label = "Pre-Trade Limits"
 applies_to = { task = ["plan", "implement", "operate", "review"] }
-when = "The work sends orders to a venue."
+when = "The work adds or changes the checks an order must pass before it is sent: max size or notional, price bands, position caps, order rate."
 family = "domain"
 text = """\
 Check every order and every amendment in the path before submission against \
 per-order size, price tolerance, resulting position and notional including \
-outstanding orders, and order rate; monitor mark-to-market loss continuously \
-against its limit. A breach rejects the order and raises an alert rather \
-than clamping it silently, and the policy states which risk-reducing orders \
-remain allowed after a breach."""
+outstanding orders, and order rate. A breach rejects the order and raises an \
+alert rather than clamping it silently, and the policy states which \
+risk-reducing orders remain allowed after a breach."""
 
 [[entries]]
-id = "practice.reconciliation"
-label = "Reconciliation"
-applies_to = { task = ["implement", "operate", "review"] }
-when = "The work keeps positions, cash or orders that must match the venue's records."
+id = "practice.idempotent_orders"
+label = "Idempotent Orders"
+applies_to = { task = ["implement", "review"] }
+when = "The work places, retries or resends orders, or recovers after a timeout, error or reconnect."
 family = "domain"
 text = """\
-Compare internal positions, cash, and open orders against fresh venue \
-records on a stated schedule, on every restart, and after recovery, with \
-explicit timing and tolerances. Resolve a discrepancy without overwriting \
-either record, and block risk-increasing orders for the affected instruments \
-while exposure is uncertain; do not stop unrelated strategies for it."""
+Persist one identifier per logical order intent before submitting and reuse \
+it on every retry and during recovery; confirm the venue's duplicate and \
+lookup semantics for that identifier. Treat a timeout or a 5xx reply as an \
+unknown outcome to be looked up, never as a failure to resubmit. Deduplicate \
+fills by execution identity, not by order identity alone."""
 
 [[entries]]
-id = "practice.partial_fills"
-label = "Partial Fills"
+id = "practice.order_lifecycle"
+label = "Order Lifecycle"
 applies_to = { task = ["implement", "diagnose", "review"] }
-when = "The work handles order fills, cancels or corrections."
+when = "The work tracks orders after they are sent: acknowledgements, partial fills, cancels, rejects, expiries, amendments, and stop orders tied to a position."
 family = "domain"
 text = """\
 Reserve the full intended exposure before submission, then update filled and \
 remaining quantity from the venue's own fill, cancel, and correction events \
 correlated to your order identifier, and recompute exposure and risk \
-distance after each event as well as before submission."""
+distance after each event as well as before submission. After every fill, \
+partial exit or cancel, resize or replace the position's protective orders \
+so exactly one matches the open quantity."""
+
+[[entries]]
+id = "practice.reconciliation"
+label = "Reconciliation"
+applies_to = { task = ["implement", "operate", "review"] }
+when = "The work compares or syncs positions, balances, open orders, fees or P&L with the broker's or exchange's records."
+family = "domain"
+text = """\
+Compare internal positions, cash, and open orders against fresh venue \
+records on a stated schedule, on every restart before trading starts, and \
+after recovery, with explicit timing and tolerances. Resolve a discrepancy \
+without overwriting either record, and block risk-increasing orders for the \
+affected instruments while exposure is uncertain; do not stop unrelated \
+strategies for it."""
 
 [[entries]]
 id = "practice.feed_recovery"
 label = "Feed Recovery"
 applies_to = { task = ["implement", "operate", "review"] }
-when = "The work consumes a live market data stream."
+when = "The work connects to or repairs a live market data stream: websockets, reconnects, heartbeats, order book snapshots and sequence gaps."
 family = "domain"
 text = """\
 Assume the connection drops. Heartbeat the stream, reconnect with backoff, \
 then recover to a consistent state by taking a fresh snapshot and replaying \
 events from it before acting, so missed messages are repaired rather than \
-inferred. Schedule requests within the venue's rate limits and give \
-cancellations priority over new submissions."""
+inferred."""
 
 [[entries]]
 id = "practice.stale_data"
 label = "Stale Data"
 applies_to = { task = ["implement", "operate", "review"] }
-when = "Trading decisions depend on market data that can arrive late or not at all."
+when = "A live strategy or bot acts on prices, quotes or signals that can be late, missing, crossed or out of order."
 family = "domain"
 text = """\
 Detect data that is stale, gapped, out of order, or invalid, and block any \
@@ -268,72 +226,66 @@ managed while data is unavailable; stale data must not implicitly liquidate \
 a position or disable an unrelated safety control. Record every gap."""
 
 [[entries]]
-id = "practice.paper_first"
-label = "Paper First"
-applies_to = { task = ["plan", "operate"] }
-when = "A strategy or trading system is moving from development to live."
+id = "practice.go_live"
+label = "Go Live"
+principle = "Law of Unintended Consequences"
+applies_to = { task = ["plan", "operate", "implement", "review"] }
+when = "The work moves a strategy, code or config change into live trading: paper to live, raising capital, or deploying to a bot that trades real money."
 family = "domain"
 text = """\
-Run the whole path in paper before live to exercise order construction, \
-state transitions, scheduling, and monitoring, and deliberately test retries \
-and failures there. A successful paper run establishes the integration path, \
-not live execution quality: fills, queue position, and partial-fill \
-behaviour are not shown by it."""
+Run the whole path in paper or shadow first and make it fail on purpose \
+there; paper proves the path, not the fills. Start live with small capital \
+and a stated ramp. Deploy one change at a time with rollback criteria set \
+in advance; check that every running instance has the same version and \
+that no old code path can be reached by a reused flag or setting. Keep \
+paper and live keys, configs and databases apart."""
+why = """\
+Knight Capital lost $460 million when one of eight servers kept old code \
+that a repurposed flag switched on."""
 
 # ================= capital discipline
 
 [[entries]]
-id = "practice.risk_per_trade"
-label = "Risk Budget"
-applies_to = { task = ["implement", "plan", "review"] }
-when = "The work sizes positions or sets stops."
-family = "domain"
-text = """\
-State a risk budget for each position and for the portfolio, including \
-correlated losses and adverse execution, and size within it; a stop or \
-invalidation level is an assumption about the exit, not a guaranteed maximum \
-loss. Never size from conviction or from the last result."""
-
-[[entries]]
-id = "practice.fractional_sizing"
-label = "Fractional Sizing"
+id = "practice.position_sizing"
+label = "Position Sizing"
 applies_to = { task = ["research", "implement", "plan", "review"] }
-when = "Position sizes come from estimated returns or volatility."
+when = "The work decides how big a position is or where its stop-loss and take-profit sit: stake amount, risk per trade, volatility or Kelly sizing."
 family = "domain"
 text = """\
-Size conservatively for uncertainty in estimated returns, volatility, and \
-dependence. If using Kelly, state the estimation assumptions and the chosen \
-fraction; enforce position, leverage, and portfolio risk limits \
-independently of the sizing method."""
-why = """\
-Estimated optimal sizing is sensitive to estimation error. Fractional Kelly \
-reduces exposure relative to full Kelly but does not guarantee acceptable \
-drawdowns."""
+Size each position within a stated risk budget per trade and for the \
+portfolio, counting correlated positions together. A stop is an exit \
+assumption, not a maximum loss: prices gap through it. If sizing from \
+estimates such as Kelly, use a fraction and state it, and enforce position \
+and leverage caps apart from the sizing formula. Never size from the last \
+result."""
 
 [[entries]]
 id = "practice.leverage_carry"
 label = "Leverage"
 applies_to = { task = ["implement", "plan", "operate", "review"] }
-when = "The work holds leveraged, margined or borrowed positions."
+when = "The work trades with leverage or margin: futures, perpetual swaps, short selling, borrowed assets."
 family = "domain"
 text = """\
 For leveraged, margined, or borrowed positions, state the exposure, the \
 applicable margin requirements, the financing and borrow costs, and the \
 forced-close conditions. Stress adverse price moves and margin changes, and \
 monitor available collateral as prices, positions, costs, and requirements \
-change."""
+change. State the liquidation price and isolated or cross margin mode; \
+account funding payments at the venue's actual interval."""
 
 [[entries]]
-id = "practice.drawdown_stop"
-label = "Drawdown Stop"
-applies_to = { task = ["plan", "operate", "review"] }
-when = "A strategy runs live and needs loss limits."
+id = "practice.loss_limits"
+label = "Loss Limits"
+applies_to = { task = ["plan", "implement", "operate", "review"] }
+when = "The work sets or enforces a daily loss, drawdown or max-loss limit on a strategy or account."
 family = "domain"
 text = """\
 Before going live, define the drawdown limit with its equity basis, \
 high-water mark, measurement frequency, treatment of open positions at the \
-limit, and who may authorize a restart. When it is breached, record the \
-decision; do not widen the limit to avoid it."""
+limit, and who may authorize a restart. Count open positions at their mark, \
+reset at a stated session boundary, keep the running loss across restarts, \
+and halt through the kill switch on a breach. When it is breached, record \
+the decision; do not widen the limit to avoid it."""
 
 # ================= operations
 
@@ -341,24 +293,78 @@ decision; do not widen the limit to avoid it."""
 id = "practice.audit_trail"
 label = "Audit Trail"
 applies_to = { task = ["implement", "operate", "review"] }
-when = "The work makes trading decisions or changes that must be explained later."
+when = "The work records orders, fills, signals or config changes, or must explain why a past trade happened."
 family = "domain"
 text = """\
 Record decision-time inputs, the strategy, model, and configuration versions \
-in force, each decision, each order with its acknowledgements and fills, and \
-each parameter change, so any past action can be explained from stored data. \
-Aim for an explainable reconstruction, not a promise to replay every \
-computation bit for bit."""
+in force, each decision, each order with its acknowledgements and fills and \
+which strategy and version sent it, and each parameter change, so any past \
+action can be explained from stored data. Aim for an explainable \
+reconstruction, not a promise to replay every computation bit for bit."""
 
 [[entries]]
-id = "practice.one_live_change"
-label = "One Live Change"
-principle = "Law of Unintended Consequences"
-applies_to = { task = ["operate", "implement", "review"] }
-when = "Changes are deployed to a live trading system."
+id = "practice.venue_api"
+label = "Venue API"
+applies_to = { task = ["implement", "diagnose", "review"] }
+when = "The work calls a broker or exchange API to place orders or read data: a new venue, ccxt, order types, symbol mapping, rate limits, error codes."
 family = "domain"
 text = """\
-Prefer one bounded, attributable change at a time in live, with the \
-observation window and rollback criteria stated before deploying. When \
-changes must be coupled, or a repair is urgent, document the coupling and \
-its rollback rather than pretending the changes are independent."""
+Load each market's rules from the venue and round price to its tick size \
+and quantity to its step size in decimal, not float; check minimum quantity \
+and minimum order value before sending. Stay inside the venue's request \
+limits, keep budget for cancels so they are never the request that waits, \
+and back off on a rate-limit reply as it says. Sort each error code \
+into retry, give up, or outcome unknown. Keep the signing clock in sync with \
+the venue. Map each venue symbol to one internal instrument."""
+why = """\
+Binance rejects orders off tickSize, stepSize or minNotional and bans IPs \
+that ignore 429s; ccxt: the user must stay within all limits and \
+precision."""
+
+[[entries]]
+id = "practice.api_keys"
+label = "API Keys"
+applies_to = { task = ["implement", "operate", "review"] }
+when = "The work creates, stores or uses broker or exchange API keys, or switches a bot between paper and live accounts."
+family = "domain"
+text = """\
+Give a bot's key trade and read rights only, never withdrawal, and bind it \
+to the bot's IP. Use one key per bot and per environment, ideally on a \
+sub-account holding only the capital it trades. Load keys from the \
+environment or a secret store, never from code, committed config or logs. \
+Make live an explicit setting whose default is paper."""
+why = """\
+Leaked 3Commas keys were used for unauthorised trades in 2022; a key \
+without withdrawal rights and an IP binding limits the damage."""
+
+[[entries]]
+id = "practice.backtest_live_parity"
+label = "Backtest-Live Parity"
+applies_to = { task = ["implement", "diagnose", "review"] }
+when = "The work makes backtest, paper and live runs share code or data, or explains why their results differ."
+family = "domain"
+text = """\
+Run the same strategy code and the same data handling (resampling, startup \
+history, symbol mapping, time zone) in backtest and live. Compare live or \
+paper trades with a backtest of the same period, trade by trade, and \
+explain each gap by cause (fills, fees, data timing, missing history, \
+starting positions) before changing the strategy."""
+why = """\
+QuantConnect: a reconciled algorithm's live and backtest equity curves \
+overlap; Freqtrade: shorter live history changes indicator values."""
+
+[[entries]]
+id = "practice.monitoring"
+label = "Monitoring"
+applies_to = { task = ["implement", "operate", "review"] }
+when = "A bot or strategy runs unattended and the work adds or changes its alerts, heartbeats, health checks or notifications."
+family = "domain"
+text = """\
+Alert a person when the bot goes silent, when orders are rejected or \
+errors repeat, when positions disagree with the venue, and when a limit is \
+near or breached. Send alerts where someone will see them, give each a \
+stated action, and test that each one fires. An alert nobody acts on is \
+not a control."""
+why = """\
+Knight's system sent 97 warning e-mails before the open and nobody acted; \
+RTS 6 asks for real-time alerts within five seconds."""
