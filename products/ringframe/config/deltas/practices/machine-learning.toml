@@ -28,7 +28,7 @@ id = "practice.simplest_model"
 label = "Simplest Model"
 principle = "Rules of ML: Rule #4"
 applies_to = { task = ["research", "plan", "implement", "review"] }
-when = "The work picks a model or base model to train, fine-tune or call, or changes its kind or size."
+when = "The work picks the kind or size of model to train or call, or changes it: a different architecture, a larger base, or a model where a rule might do."
 family = "domain"
 text = """\
 Start from a rule or the smallest model that could work, with the whole \
@@ -44,7 +44,7 @@ id = "practice.baseline_first"
 label = "Baseline First"
 principle = "A Recipe for Training Neural Networks"
 applies_to = { task = ["research", "implement", "review"] }
-when = "The work tries a new model, feature, prompt or method to raise a metric."
+when = "The work tries a new model, feature, prompt or method and claims it raises a metric."
 family = "domain"
 text = """\
 Measure a simple baseline (a rule, the majority or an input-independent \
@@ -129,7 +129,7 @@ id = "practice.split_by_unit"
 label = "Split by Unit"
 principle = "Leakage and the Reproducibility Crisis"
 applies_to = { task = ["research", "plan", "implement", "review"] }
-when = "The work creates or changes train, validation and test splits, or adds new data to them."
+when = "The work makes or changes the train, validation and test splits, or adds new rows into them."
 family = "domain"
 text = """\
 Split by the unit that must stay together (a user, session, document, \
@@ -145,7 +145,7 @@ id = "practice.leakage"
 label = "No Leakage"
 principle = "Leakage and the Reproducibility Crisis"
 applies_to = { task = ["research", "implement", "diagnose", "review"] }
-when = "The work builds features, preprocessing or prompts from data, or a held-out score looks too good to be true."
+when = "The work fits preprocessing, vocabularies, thresholds or features on data, draws prompt examples from data, or faces a held-out score that looks too good."
 family = "domain"
 text = """\
 Fit preprocessing, vocabularies and thresholds on training data only. Remove \
@@ -162,7 +162,7 @@ id = "practice.frozen_test"
 label = "Frozen Test"
 principle = "Leakage and the Reproducibility Crisis"
 applies_to = { task = ["research", "plan", "review"] }
-when = "The work tunes settings, thresholds or prompts, picks a checkpoint or model, or reports a final score."
+when = "The work chooses something by a score (a setting, threshold, prompt, checkpoint or model) or reports a final score."
 family = "domain"
 text = """\
 Choose models, checkpoints, thresholds, prompts and judge prompts on the \
@@ -195,7 +195,7 @@ id = "practice.variance"
 label = "Seeds and Variance"
 principle = "Accounting for Variance in Machine Learning Benchmarks"
 applies_to = { task = ["research", "review", "diagnose"] }
-when = "The work compares close runs or settings (a sweep, an ablation, a new seed), or the same setup gives different numbers."
+when = "The work compares close runs or settings (a sweep, an ablation, a new seed) to decide whether a small difference is real, or the same setup gives different numbers."
 family = "domain"
 text = """\
 Fix and record seeds, and measure the spread across seeds or folds, or a \
@@ -377,7 +377,7 @@ id = "practice.model_licenses"
 label = "Licenses and Privacy"
 principle = "Datasheets for Datasets"
 applies_to = { task = ["research", "plan", "implement"] }
-when = "The work picks a pretrained model, dataset or teacher model, or uses data that holds people's personal information."
+when = "The work brings in a pretrained model, dataset or teacher model from outside, or uses data that holds people's personal information."
 family = "domain"
 text = """\
 Confirm each base model's, dataset's and teacher model's license or terms \

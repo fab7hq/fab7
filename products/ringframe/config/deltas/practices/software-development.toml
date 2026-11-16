@@ -117,7 +117,7 @@ id = "practice.assumptions"
 label = "Unstated Choices"
 principle = "owner practice"
 applies_to = { task = ["plan", "implement", "diagnose"] }
-when = "The request names a goal but leaves open a choice that changes the result: which behaviour, which files or users, or what counts as done."
+when = "The request leaves the agent a choice with a visible effect: which behaviour, approach, rows or users, what the edge cases do, or what counts as done."
 family = "scope"
 text = """\
 If a wrong guess would be costly to undo or would change what the person \
@@ -188,7 +188,7 @@ id = "practice.restructure"
 label = "Restructure Without Changing Behaviour"
 principle = "Second-System Effect"
 applies_to = { task = ["implement", "plan"] }
-when = "The request restructures or rewrites working code: a refactor, rename, extract, split or move, a conversion such as callbacks to async, or a port to another framework or language."
+when = "The request restructures working code without meaning to change what it does: a refactor, internal rename, extract, split or move, a conversion such as callbacks to async, or a port to another framework or language."
 family = "cleanup"
 text = """\
 Keep behaviour the same unless the request says otherwise: make sure tests \
@@ -204,7 +204,7 @@ id = "practice.hyrum"
 label = "Compatibility"
 principle = "Hyrum's Law"
 applies_to = { task = ["implement", "plan", "review"] }
-when = "The request changes or removes something others already use: a public function or endpoint, a CLI command or flag, a config key, a file or data format, an event, or a default."
+when = "The request changes, removes or renames something existing that other code, people or tools use: a public function, endpoint, CLI command or flag, config key, file or data format, event, or a default."
 family = "reuse"
 text = """\
 Treat current behaviour as depended on: find its callers and users first, \
@@ -341,7 +341,7 @@ id = "practice.untrusted_input"
 label = "Untrusted Input"
 principle = "Postel's Law, revised (RFC 9413)"
 applies_to = { task = ["implement", "review"] }
-when = "The change handles data from outside the program (requests, uploads, files, webhooks, CLI arguments, user input) or touches login, permissions, tokens or secrets."
+when = "The change handles data from outside the program (request bodies, uploads, files from users or third parties, webhooks, CLI arguments, user input), or changes code that handles login, permissions, tokens or secrets."
 family = "domain"
 text = """\
 Validate outside data strictly and reject what the contract forbids with a \

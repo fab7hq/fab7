@@ -17,7 +17,7 @@ id = "practice.no_lookahead"
 label = "No Lookahead"
 principle = "Point-in-Time Discipline"
 applies_to = { task = ["research", "implement", "diagnose", "review"] }
-when = "The work builds or checks the features, signals or data joins a backtest or strategy reads: shifts, rolling windows, resampling, merges of other timeframes or sources."
+when = "The work builds or checks what a backtest or strategy knows at each moment: features, signals, shifts, rolling windows, joins of other timeframes or sources, or when signals and fills happen."
 family = "domain"
 text = """\
 Let each decision use only data available at decision time, and fill no \
@@ -49,7 +49,7 @@ id = "practice.out_of_sample"
 label = "Out-of-Sample"
 principle = "Locked Out-of-Sample"
 applies_to = { task = ["research", "plan", "diagnose", "review"] }
-when = "The work decides whether a strategy works: judging a backtest result, a walk-forward run, or a test on held-out or recent data."
+when = "The work judges whether a finished strategy works on data it was not built or tuned on: a walk-forward run, a test on held-out or later data, or the call to trade it."
 family = "domain"
 text = """\
 Fit on earlier data and test on later data, rolling forward, with a gap \
@@ -63,7 +63,7 @@ id = "practice.overfitting"
 label = "Overfitting"
 principle = "Selection Bias"
 applies_to = { task = ["research", "plan", "review"] }
-when = "The work tunes or searches strategy parameters or variants: hyperopt, grid search, parameter sweeps, picking the best of many backtests."
+when = "The work searches or tunes strategy parameters or variants: hyperopt, grid search, parameter sweeps, or picking the best of many backtests."
 family = "domain"
 text = """\
 Keep every trial, not only the winner, and judge the best result against \
@@ -79,7 +79,7 @@ id = "practice.survivorship"
 label = "Survivorship"
 principle = "Survivorship Bias"
 applies_to = { task = ["research", "implement", "review"] }
-when = "The work picks which symbols or pairs a backtest trades: a universe, an index, a pair list or a screener over past dates."
+when = "The work picks which symbols or pairs a backtest trades over past dates: a universe, index members, a pair list or a screener."
 family = "domain"
 text = """\
 Build the universe from point-in-time membership as of each historical date, \
@@ -91,7 +91,7 @@ pair list built from today's volume or listings, over a past period."""
 id = "practice.corporate_actions"
 label = "Corporate Actions"
 applies_to = { task = ["research", "implement", "diagnose", "review"] }
-when = "The work uses stock prices or positions affected by splits, dividends, mergers or ticker changes."
+when = "The work reads past stock prices, volumes or positions across splits, dividends, mergers or ticker changes."
 family = "domain"
 text = """\
 Keep adjusted research series distinct from executable prices and from \
@@ -104,7 +104,7 @@ sudden outsized move as a suspected unhandled action until checked."""
 id = "practice.session_time"
 label = "Sessions and Time"
 applies_to = { task = ["research", "implement", "diagnose", "review"] }
-when = "The work handles timestamps, time zones, trading hours, market calendars, holidays or bar boundaries."
+when = "The work turns on time handling, where a wrong boundary changes the result: resampling into bars, session or daily boundaries, trading hours, market calendars, holidays or time zones."
 family = "domain"
 text = """\
 Store timestamps with an explicit timezone and align them to the venue's \
@@ -164,7 +164,7 @@ risk-reducing orders remain allowed after a breach."""
 id = "practice.idempotent_orders"
 label = "Idempotent Orders"
 applies_to = { task = ["implement", "review"] }
-when = "The work places, retries or resends orders, or recovers after a timeout, error or reconnect."
+when = "The work changes how orders are submitted, retried or resent, or how open orders are recovered after a timeout, error, restart or reconnect."
 family = "domain"
 text = """\
 Persist one identifier per logical order intent before submitting and reuse \
@@ -306,7 +306,7 @@ reconstruction, not a promise to replay every computation bit for bit."""
 id = "practice.venue_api"
 label = "Venue API"
 applies_to = { task = ["implement", "diagnose", "review"] }
-when = "The work calls a broker or exchange API to place orders or read data: a new venue, ccxt, order types, symbol mapping, rate limits, error codes."
+when = "The work adds or changes code that calls a broker or exchange API: a new venue or SDK, order types, symbol mapping, rate limits, error codes, request signing, or fetching data from the venue."
 family = "domain"
 text = """\
 Load each market's rules from the venue and round price to its tick size \
@@ -325,7 +325,7 @@ precision."""
 id = "practice.api_keys"
 label = "API Keys"
 applies_to = { task = ["implement", "operate", "review"] }
-when = "The work creates, stores or uses broker or exchange API keys, or switches a bot between paper and live accounts."
+when = "The work creates, stores, rotates or loads broker or exchange API keys, or switches a bot between paper and live accounts."
 family = "domain"
 text = """\
 Give a bot's key trade and read rights only, never withdrawal, and bind it \
