@@ -74,6 +74,20 @@ Leave the code you touch better than you found it; for problems outside what \
 the requirement touches, record them instead of fixing them."""
 
 [[entries]]
+id = "practice.read_set"
+label = "What gets read"
+principle = "Keep the change readable"
+applies_to = { task = ["implement", "operate"] }
+when = "The work creates files that are not source: build output, logs, renders, downloads, caches, generated code, or data it commits."
+family = "cleanup"
+text = """\
+Keep what reviewers read to the work itself. Output this work creates and does \
+not commit (builds, logs, renders, caches, downloads) goes in .gitignore. Data \
+or generated files it commits are marked in .gitattributes as \
+linguist-generated=true, so they are counted, not read. Never ignore or mark \
+source a person writes."""
+
+[[entries]]
 id = "practice.pesticide"
 label = "Pesticide Paradox"
 principle = "Pesticide Paradox"
