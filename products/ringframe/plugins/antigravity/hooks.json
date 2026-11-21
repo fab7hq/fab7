@@ -1,5 +1,11 @@
 {
   "rf-state": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "./hooks/weft-signal --reply '{}' antigravity SessionStart"
+      }
+    ],
     "PreInvocation": [
       {
         "type": "command",

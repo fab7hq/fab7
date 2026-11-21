@@ -9,7 +9,7 @@
       "name": "rf",
       "source": "./products/ringframe/plugins/grok",
       "description": "RingFrame's hooks for Grok Build: they report what the agent is doing",
-      "version": "0.3.0"
+      "version": "0.4.0"
     }
   ]
 }

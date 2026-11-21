@@ -4,10 +4,14 @@
 # RingFrame.
 # The release version is this repository's tag, not a field here.
 #
-# `/2` is the Rust era. A 0.0.5 core reads `/1` and refuses this bundle by
-# name, which is how the eras are kept apart. That is
-# deliberate and one-way: a 0.0.5 user cannot sync again, not even for a
-# wording fix, because sync takes the highest tag and has no pin.
+# A RingFrame installs the newest release whose
+# schema it reads and whose `[requires] ringframe` is not newer than itself,
+# and passes the others over. `/2` is the Rust era: a 0.0.5 core reads `/1`
+# and refuses this bundle by name.
 schema = "ringframe.bundle/2"
 product = "ringframe"
 config_home = "rf"
+
+# The oldest RingFrame that runs with this release.
+[requires]
+ringframe = "0.8.0"

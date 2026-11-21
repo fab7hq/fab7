@@ -1,4 +1,13 @@
 {
   "name": "rf",
-  "version": "0.3.0"
+  "displayName": "RingFrame",
+  "version": "0.4.0",
+  "description": "Reports what Antigravity is doing (working, waiting on you, turn ended) and each prompt you send, for RingFrame's Ask, Eval and Seal.",
+  "author": {
+    "name": "Fab7",
+    "url": "https://getfab7.com"
+  },
+  "homepage": "https://getfab7.com",
+  "repository": "https://github.com/fab7hq/fab7",
+  "license": "Apache-2.0"
 }

@@ -1,8 +1,7 @@
 # Weft harness file: Antigravity. What Weft needs to start this harness, pick a
 # session back up and set its plugin up, and nothing RingFrame reads: RingFrame's
-# own facts about it are in its profile. Shipped by fab7; `install.sh`, or
-# a new Weft's first start, copies it into ~/.fab7/weft/harnesses/, replaced on
-# every update.
+# own facts about it are in its profile. Shipped in fab7's releases: Weft installs the
+# newest release it runs with, whole, into ~/.fab7/weft/harnesses/.
 # Never edit the copy.
 title = "Antigravity"
 program = "agy"
@@ -56,14 +55,20 @@ workspace = "workspacePaths"
 # What it sends no hook for, each a move Sense may make on its pane once the
 # screen shows it (weft-rf-next ADR-0005; sense-d 0.1.1 reads its screens at
 # 0.975): Esc, which interrupts with no Stop; its permission prompt. Before its
-# first hook, Sense's reading is its state, as for every harness.
+# first hook (SessionStart, once a session is up), Sense's reading is its state, as
+# for every harness.
 gaps = ["interrupt", "permission"]
-# No hook carries the prompt; the transcript the payload names holds it, and
-# when PreInvocation follows a typed prompt its last line is that prompt
+# The prompt: hooks carry the person's message as `lastUserInput` (Antigravity
+# 2.28, 2026-10-27); an older one has it only in the transcript the payload
+# names, whose last line is that prompt when PreInvocation follows a typed one
 # (agy 1.3.2).
-prompt = { file = "transcriptPath", last = { type = "USER_INPUT" }, field = "content", between = ["<USER_REQUEST>\n", "\n</USER_REQUEST>"] }
+prompt = [
+  "lastUserInput",
+  { file = "transcriptPath", last = { type = "USER_INPUT" }, field = "content", between = ["<USER_REQUEST>\n", "\n</USER_REQUEST>"] },
+]
 reply = "{}"
 on = [
+  { hook = "SessionStart",  state = "ready" },
   { hook = "PreInvocation", state = "working", forward = "prompt" },
   { hook = "PreToolUse",    state = "waiting", reply = '{"decision":"allow"}' },
   { hook = "PostToolUse",   state = "working" },
